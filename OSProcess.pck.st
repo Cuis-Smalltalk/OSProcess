@@ -1,6 +1,8 @@
 'From Cuis 4.2 of 25 July 2013 [latest update: #1898] on 29 December 2013 at 2:33:04.317581 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
 !provides: 'OSProcess' 1 0!
+!requires: 'SqueakCompatibility' 1 4 nil!
+!requires: 'Network-Kernel' 1 1 nil!
 !classDefinition: #AioEventHandler category: #'OSProcess-AIO'!
 Model subclass: #AioEventHandler
 	instanceVariableNames: 'semaphore semaIndex handlerProc descriptor'
