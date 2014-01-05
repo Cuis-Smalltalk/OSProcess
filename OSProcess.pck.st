@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #1898] on 29 December 2013 at 2:33:04.317581 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #1910] on 5 January 2014 at 12:08:22.611031 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 0!
+!provides: 'OSProcess' 1 1!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 !classDefinition: #AioEventHandler category: #'OSProcess-AIO'!
@@ -5432,7 +5432,7 @@ isRiscOS
 
 	^ self platformName = 'RiscOS'! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 12/14/2013 09:12'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:43'!
 isUnix
 	"True if the platform is Unix (including Linux, Mac OS X, or other unix-like OS).
 	Note: Keep this method in sync with UnixOSProcessPlugin>>isResponsibleForThisPlatform."
@@ -5441,7 +5441,7 @@ isUnix
 
 	| numericOsVersion |
 
-	^ ({ 'unix' . 'linux' . 'linux-gnu' } includes: self platformName) or:
+	^ (self platformName = 'unix') or:
 		[numericOsVersion := self osVersion asInteger ifNil: [0].
 		(self platformName = 'Mac OS') and: [numericOsVersion >= 1000]]
 ! !
@@ -5529,14 +5529,18 @@ pathSeparator
 		ifFalse: [(Smalltalk at: #FileDirectory) slash]
 ! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 9/4/2013 08:35'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/2/2014 20:54'!
 platformName 
 	"After Squeak version 3.6, #platformName was moved to SmalltalkImage Some
 	versions of Pharo move this to OSPlatform and issue deprecation warnings
-	about the other usages."
+	about the other usages. The original idiom (Squeak 3.6 and earlier) is the sensible
+	default, but here we attempt to support other implementations if the sensible
+	default is not available."
 
 	"OSProcess platformName"
 
+	(Smalltalk respondsTo: #platformName)
+		ifTrue: [^ Smalltalk platformName].
 	self isPharo3AndLater
 		ifTrue: [ ^ (Smalltalk perform: #os) name ].
 	^ (((Smalltalk hasClassNamed: #OSPlatform)
@@ -5741,12 +5745,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 12/29/2013 13:27'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/5/2014 11:34'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.5.11'! !
+	^'4.5.10'! !
 
 !OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 9/5/2013 11:12'!
 vmVersion 
