@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3250] on 16 January 2018 at 12:03:50 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3250] on 16 January 2018 at 12:41:55 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 3!
+!provides: 'OSProcess' 1 4!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -10089,68 +10089,6 @@ trace: debugMessageString
 			on: Error
 			do: []! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 20:51:19'!
-defaultPathString
-
-	^ self useFileMan
-		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #currentDirectory) printString]
-		ifFalse: [self useFileSystem
-			ifTrue: [(((Smalltalk at: #Path) perform: #workingDirectory) perform: #asFileReference) pathString]
-			ifFalse: [(Smalltalk at: #FileDirectory) default pathName]]
-! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 20:55:54'!
-deleteFileNamed: fileName
-	"Delete the file with the given name."
-	
-	self useFileMan
-		ifTrue: [((Smalltalk at: #FileEntry) pathName: fileName) delete]
-		ifFalse: [self useFileSystem
-			ifTrue: [ | file sel |
-				file := fileName perform: #asFileReference.
-				(sel := {#ensureDelete . #ensureDeleted . #delete}
-					detect: [ :e | file respondsTo: e ]
-					ifNone: [ self error: 'do not know how to ensureDelete' ]) notNil
-						ifTrue: [ file perform: sel ].
-				(file respondsTo: #ensureDelete)
-					ifTrue: [ file perform: #ensureDelete ]
-					ifFalse: [ file perform: #ensureDeleted ] ]
-			ifFalse:
-				[ (Smalltalk at: #FileDirectory) default deleteFileNamed: fileName ] ]! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 10:08:38'!
-directoryExists: path
-	"Answer true if a directory of the given name exists. The given name may
-	be either a full path name or a local directory within this directory."
-
-	^ self useFileMan
-		ifTrue: [((Smalltalk at: #DirectoryEntry) pathName: path) exists]
-		ifFalse: [self useFileSystem
-			ifTrue: [ (path perform: #asFileReference) exists ]
-			ifFalse: [ (Smalltalk at: #FileDirectory) default directoryExists: path ]]
-! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 09:06:18'!
-fileExists: path
-	"Answer true if a file of the given name exists. The given name may be
-	either a full path name or a local file within this directory."
-
-	^ self useFileMan
-		ifTrue: [((Smalltalk at: #FileEntry) pathName: path) exists]
-		ifFalse: [self useFileSystem
-			ifTrue: [ (path perform: #asFileReference) exists ]
-			ifFalse: [ (Smalltalk at: #FileDirectory) default fileExists: path ]]
-! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 22:58:07'!
-fileNamed: path
-	^ self useFileMan
-		ifTrue: [ | entry |
-			entry := (FileEntry pathName: path) assureExistence.
-			entry fileAccessor privateWriteableFile: entry]
-		ifFalse: [ FileStream fileNamed: path ]
-! !
-
 !OSProcess class methodsFor: 'version dependent' stamp: 'dtl 3/5/2005 11:32'!
 getSystemAttribute: attributeID 
 	"After Squeak version 3.6, #getSystemAttribute was moved to SmalltalkImage "
@@ -10190,22 +10128,6 @@ listLoadedModules
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk listLoadedModules]) current listLoadedModules! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 22:58:19'!
-newFileNamed: path
-	^ self useFileMan
-		ifTrue: [ (FileEntry pathName: path) writeStream ]
-		ifFalse: [ FileStream fileNamed: path ]
-! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 22:58:29'!
-oldFileNamed: path
-	^ self useFileMan
-		ifTrue: [ | entry |
-			entry := FileEntry pathName: path.
-			entry fileAccessor privateWriteableFile: entry]
-		ifFalse: [ FileStream fileNamed: path ]
-! !
-
 !OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 9/5/2013 11:13'!
 osVersion
 	"After Squeak version 3.6, #osVersion was moved to SmalltalkImage. Some
@@ -10222,16 +10144,6 @@ osVersion
 		ifTrue: [Smalltalk at: #OSPlatform]
 		ifFalse: [((Smalltalk classNamed: 'SmalltalkImage')
 				ifNil: [^ Smalltalk osVersion]) current]) osVersion! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 09:04:06'!
-pathSeparator
-
-	^ self useFileMan
-		ifTrue: [(Smalltalk at: #FileIOAccessor) default slash]
-		ifFalse: [self useFileSystem
-			ifTrue: [((Smalltalk at: #DiskStore) current perform: #delimiter) asString]
-			ifFalse: [(Smalltalk at: #FileDirectory) slash]]
-! !
 
 !OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/2/2014 20:54'!
 platformName 
@@ -10546,6 +10458,103 @@ versionString
 	"OSProcess versionString"
 
 	^'4.6.10'! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
+defaultPathString
+
+	^ self useFileMan
+		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #currentDirectory) printString]
+		ifFalse: [self useFileSystem
+			ifTrue: [(((Smalltalk at: #Path) perform: #workingDirectory) perform: #asFileReference) pathString]
+			ifFalse: [(Smalltalk at: #FileDirectory) default pathName]]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:55:54'!
+deleteFileNamed: fileName
+	"Delete the file with the given name."
+	
+	self useFileMan
+		ifTrue: [((Smalltalk at: #FileEntry) pathName: fileName) delete]
+		ifFalse: [self useFileSystem
+			ifTrue: [ | file sel |
+				file := fileName perform: #asFileReference.
+				(sel := {#ensureDelete . #ensureDeleted . #delete}
+					detect: [ :e | file respondsTo: e ]
+					ifNone: [ self error: 'do not know how to ensureDelete' ]) notNil
+						ifTrue: [ file perform: sel ].
+				(file respondsTo: #ensureDelete)
+					ifTrue: [ file perform: #ensureDelete ]
+					ifFalse: [ file perform: #ensureDeleted ] ]
+			ifFalse:
+				[ (Smalltalk at: #FileDirectory) default deleteFileNamed: fileName ] ]! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 10:08:38'!
+directoryExists: path
+	"Answer true if a directory of the given name exists. The given name may
+	be either a full path name or a local directory within this directory."
+
+	^ self useFileMan
+		ifTrue: [((Smalltalk at: #DirectoryEntry) pathName: path) exists]
+		ifFalse: [self useFileSystem
+			ifTrue: [ (path perform: #asFileReference) exists ]
+			ifFalse: [ (Smalltalk at: #FileDirectory) default directoryExists: path ]]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 09:06:18'!
+fileExists: path
+	"Answer true if a file of the given name exists. The given name may be
+	either a full path name or a local file within this directory."
+
+	^ self useFileMan
+		ifTrue: [((Smalltalk at: #FileEntry) pathName: path) exists]
+		ifFalse: [self useFileSystem
+			ifTrue: [ (path perform: #asFileReference) exists ]
+			ifFalse: [ (Smalltalk at: #FileDirectory) default fileExists: path ]]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:27'!
+fileNamed: path
+	^ self useFileMan
+		ifTrue: [ | entry |
+			entry := ((Smalltalk at: #FileEntry) pathName: path) assureExistence.
+			entry fileAccessor privateWriteableFile: entry]
+		ifFalse: [ FileStream fileNamed: path ]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:27'!
+newFileNamed: path
+	^ self useFileMan
+		ifTrue: [ ((Smalltalk at: #FileEntry) pathName: path) writeStream ]
+		ifFalse: [ FileStream fileNamed: path ]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:27'!
+oldFileNamed: path
+	^ self useFileMan
+		ifTrue: [ | entry |
+			entry := (Smalltalk at: #FileEntry) pathName: path.
+			entry fileAccessor privateWriteableFile: entry]
+		ifFalse: [ FileStream fileNamed: path ]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 09:04:06'!
+pathSeparator
+
+	^ self useFileMan
+		ifTrue: [(Smalltalk at: #FileIOAccessor) default slash]
+		ifFalse: [self useFileSystem
+			ifTrue: [((Smalltalk at: #DiskStore) current perform: #delimiter) asString]
+			ifFalse: [(Smalltalk at: #FileDirectory) slash]]
+! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:30'!
+readOnlyFileNamed: path
+	^ self useFileMan
+		ifTrue: [ | entry |
+			entry := (Smalltalk at: #FileEntry) pathName: path.
+			entry fileAccessor privateReadOnlyFile: entry]
+		ifFalse: [ FileStream fileNamed: path ]
+! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
 accessor
@@ -13174,14 +13183,14 @@ backgroundProcessInHeadlessSqueak
 	(Delay forSeconds: 5) wait] repeat]
 		forkAt: Processor userBackgroundPriority! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:17'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/16/2018 00:32'!
 catAFile
 	"Copy contents of a file to standard output. This demonstrates reassigning stdin to an open FileStream."
 
 	"UnixProcess catAFile"
 
 	| in proc |
-	in := FileStream readOnlyFileNamed: '/etc/hosts'.
+	in := OSProcess readOnlyFileNamed: '/etc/hosts'.
 	proc := self forkJob: '/bin/cat'
 			arguments: nil
 			environment: nil
@@ -13190,7 +13199,7 @@ catAFile
 	proc ifNil: [self noAccessorAvailable].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/15/2018 22:09:08'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/16/2018 00:32'!
 catFromFileToFiles
 	"Copy contents of a file to another file, with any error messages going 
 	to a third file."
@@ -13198,7 +13207,7 @@ catFromFileToFiles
 	"UnixProcess catFromFileToFiles"
 
 	| in out err proc |
-	in := FileStream readOnlyFileNamed: '/etc/hosts'.
+	in := OSProcess readOnlyFileNamed: '/etc/hosts'.
 	out := OSProcess newFileNamed: '/tmp/deleteMe.out'.
 	err := OSProcess newFileNamed: '/tmp/deleteMe.err'.
 	proc := UnixProcess
