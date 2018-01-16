@@ -1,8 +1,8 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3250] on 14 January 2018 at 7:49:06 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3250] on 16 January 2018 at 12:03:50 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 2!
-!requires: 'Network-Kernel' 1 1 nil!
+!provides: 'OSProcess' 1 3!
 !requires: 'SqueakCompatibility' 1 4 nil!
+!requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
 SystemOrganization addCategory: #'OSProcess-Mac'!
 SystemOrganization addCategory: #'OSProcess-OS2'!
@@ -716,7 +716,7 @@ sessionIdentifier
 	^ sessionIdentifier ifNil: [sessionIdentifier := self getSessionIdentifier]
 ! !
 
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 8/6/2003 21:39'!
+!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/15/2018 10:12:22'!
 getSessionIdentifier
 	"Call a primitive to obtain the unique identifier for this Squeak session. If the
 	primitive fails, try to deduce the session identifier from an instance of
@@ -729,34 +729,7 @@ getSessionIdentifier
 	| session |
 	session := self primGetSession.
 	session ifNil: [session :=  self getSessionIdentifierFromSourcesFile].
-	session ifNil: [session :=  self getSessionIdentifierFromFileInSqueakDirectory].
 	^ session
-! !
-
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/23/2013 21:30'!
-getSessionIdentifierFromFileInSqueakDirectory
-	"Deduce the session identifier using method of last resort.
-	This is an unreliable method, because it assumes knowledge of the internal structure
-	of the SQFile data structure.
-
-	Deprecated:
-	As of approximately Squeak 3.8 and beyond, the session id has been moved to the
-	first slot of the data structure. This method will not work for a Squeak VM beyond
-	that point, and will not work for any 64 bit VM. However, an reliable means of
-	obtaining sessionID is now available (#getSessionIdentifier), so this method is retained
-	only for backwards compatibility to allow OSPP to be built on an older VMMaker."
-
-	"OSProcess accessor getSessionIdentifierFromFileInSqueakDirectory"
-
-	| id s |
-	(OSProcess directoryEntryNames: OSProcess defaultPathString) do:
-		[:n | (s := FileStream readOnlyFileNamed: n) ifNotNil:
-			[(Smalltalk hasClassNamed: #IOHandle)
-				ifTrue: [id := s ioHandle getHandle copyFrom: 5 to: 8]
-				ifFalse: [(id := s fileID) ifNotNil: [id copyFrom: 5 to: 8]].
-			s close.
-			^ id]].
-	^ nil
 ! !
 
 !OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 8/7/2005 22:02'!
@@ -3589,10 +3562,11 @@ primTerminateThread: aThreadHandle
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 3/2/2015 20:03'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'ThierryGoubier 7/27/2017 22:39'!
 restartChildWatcherProcess
-
-	grimReaper ifNotNilDo: [ :p | p terminate. grimReaper := nil ].
+	grimReaper notNil
+		ifTrue: [ grimReaper terminate.
+			grimReaper := nil ].
 	self grimReaperProcess! !
 
 !WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 1/13/2007 09:48'!
@@ -5965,15 +5939,15 @@ testUnlockPreviouslyLockedFileRegion
 
 	self subclassResponsibility! !
 
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 12/17/2016 17:55'!
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 1/15/2018 21:55:39'!
 setUp
 
 	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
 		ifTrue: [self perform: #timeout: with: 30].
 	delay := Delay forMilliseconds: 150.
 	accessor := ThisOSProcess accessor.
-	FileDirectory default deleteFileNamed: 'junkfile'.
-	fileStream := FileStream fileNamed: 'junkfile'.
+	OSProcess deleteFileNamed: 'junkfile'.
+	fileStream := OSProcess fileNamed: 'junkfile'.
 	1000 timesRepeat: (fileStream nextPutAll: 'hello world ').
 ! !
 
@@ -6519,7 +6493,7 @@ testWin32LockEmulation02
 	self assert: (result interval = (100 to: 199))
 ! !
 
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 12:57'!
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:55:55'!
 testWin32LockEmulation03
 	"Make sure the cache does what is expected, and that it can be disabled.
 	Expect the cache to protect the file even if we open a second stream"
@@ -6531,7 +6505,7 @@ testWin32LockEmulation03
 	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	stream2 := FileStream fileNamed: 'junkfile'.
+	stream2 := OSProcess fileNamed: 'junkfile'.
 	[result := accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
 	self assert: result isNil]
 		ensure: [stream2 close].
@@ -6540,7 +6514,7 @@ testWin32LockEmulation03
 	self assert: (result interval = (100 to: 199))
 ! !
 
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 12:57'!
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:56:22'!
 testWin32LockEmulation04
 	"Make sure the cache does what is expected, and that it can be disabled.
 	Expect the cache to allow a lock after the stream has been closed (since the OS will have freed its lock)"
@@ -6549,7 +6523,7 @@ testWin32LockEmulation04
 
 	| result stream2 |
 	accessor class emulateWin32FileLocking: true.
-	stream2 := FileStream fileNamed: 'junkfile'.
+	stream2 := OSProcess fileNamed: 'junkfile'.
 	[result := accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))]
@@ -7096,7 +7070,7 @@ testEnableHandleAndDisable
 			[Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/23/2013 19:40'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:56:54'!
 testFileReadableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
@@ -7104,7 +7078,7 @@ testFileReadableEvent
 
 	eventHandler := AioEventHandler new.
 	OSProcess deleteFileNamed: fileName.
-	[anOpenFile := FileStream fileNamed: fileName.
+	[anOpenFile := OSProcess fileNamed: fileName.
 	fileHandle := eventHandler handleForFile: anOpenFile.
 	sema := Semaphore new.
 	semaIndex := Smalltalk registerExternalObject: sema.
@@ -7177,7 +7151,7 @@ testFileReadableEvent
 			Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/23/2013 19:41'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:57:17'!
 testFileWritableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
@@ -7185,7 +7159,7 @@ testFileWritableEvent
 
 	eventHandler := AioEventHandler new.
 	OSProcess deleteFileNamed: fileName.
-	[anOpenFile := FileStream fileNamed: fileName.
+	[anOpenFile := OSProcess fileNamed: fileName.
 	fileHandle := eventHandler handleForFile: anOpenFile.
 	sema := Semaphore new.
 	semaIndex := Smalltalk registerExternalObject: sema.
@@ -8177,7 +8151,7 @@ testCanAccessSystem
 
 	self assert: accessor canAccessSystem! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:38'!
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 22:09:44'!
 testDupTo
 	"Perform a dup2() call to assign IO to a new file stream"
 
@@ -8186,8 +8160,8 @@ testDupTo
 	| f1 f2 fd1 fd2 result contents1 contents2 |
 	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
 	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
-	f1 := FileStream newFileNamed: '/tmp/delete-1.me'.
-	f2 := FileStream newFileNamed: '/tmp/delete-2.me'.
+	f1 := OSProcess newFileNamed: '/tmp/delete-1.me'.
+	f2 := OSProcess newFileNamed: '/tmp/delete-2.me'.
 	fd1 := OSProcess accessor primUnixFileNumber: f1 fileID.
 	fd2 := OSProcess accessor primUnixFileNumber: f2 fileID.
 	result := OSProcess accessor primDup: fd1 to: fd2.
@@ -8205,9 +8179,9 @@ testDupTo
 	f1 close.
 	f2 close.
 	"check the contents of the actual files"
-	contents1 := (FileStream fileNamed: '/tmp/delete-1.me') contentsOfEntireFile.
+	contents1 := (OSProcess fileNamed: '/tmp/delete-1.me') contentsOfEntireFile.
 	self assert: ('write something*' match: contents1).
-	contents2 := (FileStream fileNamed: '/tmp/delete-2.me') contentsOfEntireFile.
+	contents2 := (OSProcess fileNamed: '/tmp/delete-2.me') contentsOfEntireFile.
 	self assert: contents2 isEmpty.
 	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
 	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
@@ -8361,7 +8335,7 @@ testMakePipeHandles
 	self assert: p writer closed not.
 	p close! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:40'!
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 22:10:05'!
 testRedirectStdOutTo
 	"Perform a dup2() call on the standard output descriptor to assign it
 	to a new file stream"
@@ -8372,14 +8346,14 @@ testRedirectStdOutTo
 	out := OSProcess thisOSProcess stdOut.
 	"save file number to allow cleanup at end of test"
 	OSProcess deleteFileNamed: '/tmp/delete.2.me'.	
-	saveFs := FileStream newFileNamed: '/tmp/delete.2.me'.
+	saveFs := OSProcess newFileNamed: '/tmp/delete.2.me'.
 	outFd := OSProcess accessor primUnixFileNumber: out fileID.
 	saveFd := OSProcess accessor primUnixFileNumber: saveFs fileID.
 	OSProcess accessor primDup: outFd to: saveFd.
 	"Original stdout file descriptor is saved as safeFd, to be restored at end of test"
 
 	OSProcess deleteFileNamed: '/tmp/delete.me'.	
-	aFileStream := FileStream newFileNamed: '/tmp/delete.me'.
+	aFileStream := OSProcess newFileNamed: '/tmp/delete.me'.
 	"nb - #contentsOfEntireFile closes the file, do not use"
 	aFileStream reset.
 	self assert: aFileStream upToEnd isEmpty.
@@ -8468,7 +8442,7 @@ testSignalNumbers
 	
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 9/10/2011 09:26'!
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:59:06'!
 testUnixFileNumber
 	"For purposes of this test, assume that stdin and stderr have not been
 	directed."
@@ -8484,7 +8458,7 @@ testUnixFileNumber
 	inHandle := in fileID.
 	inFileNo := OSProcess accessor unixFileNumber: inHandle.
 	self assert: inFileNo == 0.
-	aFileStream := FileStream fileNamed: '/tmp/delete.me'.
+	aFileStream := OSProcess fileNamed: '/tmp/delete.me'.
 	fHandle := aFileStream fileID.
 	fFileNo := OSProcess accessor unixFileNumber: fHandle.
 	self assert: fFileNo notNil.
@@ -8758,13 +8732,13 @@ testRealpath
 	self should: [p isNil]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 11:13'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:57:58'!
 testIsLockableFile
 
 	"(UnixProcessAccessorTestCase selector: #testIsLockableFile) debug"
 
 	| fs result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 
 	result := OSProcess accessor isLockableFile: fs.
@@ -8785,13 +8759,13 @@ testIsLockableFile
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:58'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:08'!
 testLockFile
 
 	"(UnixProcessAccessorTestCase selector: #testLockFile) debug"
 
 	| fs result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	result := OSProcess accessor lockFile: fs.
 	self should: (result isKindOf: OSFileLock).
@@ -8801,13 +8775,13 @@ testLockFile
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:54'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:17'!
 testOSFileLockLock
 
 	"(UnixProcessAccessorTestCase selector: #testOSFileLockLock) debug"
 
 	| fs fileLock result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	fileLock := OSFileLock onFile: fs exclusive: true.
 	result := fileLock lock.
@@ -8820,13 +8794,13 @@ testOSFileLockLock
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:44'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:24'!
 testOSFileLockTest
 
 	"(UnixProcessAccessorTestCase selector: #testOSFileLockTest) debug"
 
 	| fs fileLock result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	fileLock := OSFileLock onFile: fs exclusive: true.
 	result := fileLock test.
@@ -8845,13 +8819,13 @@ testOSFileLockTest
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:41'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:33'!
 testOSFileLockUnlock
 
 	"(UnixProcessAccessorTestCase selector: #testOSFileLockUnlock) debug"
 
 	| fs fileLock result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	fileLock := OSFileLock onFile: fs exclusive: true.
 	result := fileLock unlock.
@@ -8866,13 +8840,13 @@ testOSFileLockUnlock
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:54'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:41'!
 testOSFileRegionLockLock
 
 	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockLock) debug"
 
 	| fs fileLock result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	fileLock := OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
 	result := fileLock lock.
@@ -8885,13 +8859,13 @@ testOSFileRegionLockLock
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:46'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:49'!
 testOSFileRegionLockTest
 
 	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockTest) debug"
 
 	| fs fileLock result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	fileLock := OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
 	result := fileLock test.
@@ -8910,13 +8884,13 @@ testOSFileRegionLockTest
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 10:46'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:57'!
 testOSFileRegionLockUnlock
 
 	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockUnlock) debug"
 
 	| fs fileLock result |
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 	fileLock := OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
 	result := fileLock unlock.
@@ -8931,7 +8905,7 @@ testOSFileRegionLockUnlock
 	] ensure: [fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 12:13'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:59:17'!
 testUnlockFileUnixCompatible
 
 	"(UnixProcessAccessorTestCase selector: #testUnlockFileUnixCompatible) debug"
@@ -8939,7 +8913,7 @@ testUnlockFileUnixCompatible
 	| mode fs result |
 	mode := OSProcess accessor emulateWin32FileLocking. "remember setting"
 
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[OSProcessAccessor emulateWin32FileLocking: false. "unix mode"
 	fs nextPutAll: 'ABCDEFG'.
 	result := OSProcess accessor unlockFile: fs.
@@ -8959,7 +8933,7 @@ testUnlockFileUnixCompatible
 		fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 5/7/2006 12:11'!
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:59:24'!
 testUnlockFileWin32Compatible
 
 	"(UnixProcessAccessorTestCase selector: #testUnlockFileWin32Compatible) debug"
@@ -8967,7 +8941,7 @@ testUnlockFileWin32Compatible
 	| mode fs result |
 	mode := OSProcess accessor emulateWin32FileLocking. "remember setting"
 
-	fs := FileStream fileNamed: 'junkfile'.
+	fs := OSProcess fileNamed: 'junkfile'.
 	[OSProcessAccessor emulateWin32FileLocking: true. "win32 mode"
 	fs nextPutAll: 'ABCDEFG'.
 	result := OSProcess accessor unlockFile: fs.
@@ -9044,10 +9018,10 @@ regionSharedLock
 fileStream
 	^ fileStream! !
 
-!UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 12/17/2016 16:15'!
+!UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 1/15/2018 22:18:35'!
 setUp
-	FileDirectory default deleteFileNamed: 'junkfile'.
-	fileStream := FileStream fileNamed: 'junkfile'.! !
+	OSProcess deleteFileNamed: 'junkfile'.
+	fileStream := OSProcess fileNamed: 'junkfile'.! !
 
 !UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 1/23/2013 19:42'!
 tearDown
@@ -9233,7 +9207,7 @@ expectedFailures
 					testHeadlessChild
 					testSpawnTenHeadlessChildren)]! !
 
-!UnixProcessTestCase methodsFor: 'private' stamp: 'dtl 1/23/2013 21:30'!
+!UnixProcessTestCase methodsFor: 'private' stamp: 'dtl 1/15/2018 20:13:28'!
 numberOfOpenFiles
 	"Answer the number of files currently open for this OS process. This works
 	only on a system with a /proc filesystem and file descriptors located in a
@@ -9243,9 +9217,12 @@ numberOfOpenFiles
 
 	| path |
 	path := '/proc/' , OSProcess thisOSProcess pid printString, '/fd'.
-	^ (OSProcess directoryExists: path)
-		ifTrue: [(OSProcess directoryEntryNames: path) size]
-		ifFalse: [0]
+	(OSProcess directoryExists: path) ifFalse: [ ^ 0].
+	^ OSProcess useFileMan
+		ifTrue: [((Smalltalk at: #DirectoryEntry) pathName: path) children size]
+		ifFalse: [OSProcess useFileSystem
+			ifTrue: [ (path perform: #asFileReference) children size ]
+			ifFalse: [ ((Smalltalk at: #FileDirectory) on: path) entries size ]]
 ! !
 
 !UnixProcessTestCase methodsFor: 'running' stamp: 'dtl 3/10/2002 10:52'!
@@ -9310,7 +9287,7 @@ testCatAFile
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 1/23/2013 21:36'!
+!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 1/15/2018 22:14:01'!
 testCatFromFileToFiles
 
 	"(UnixProcessTestCase selector: #testCatFromFileToFiles) run"
@@ -9329,10 +9306,10 @@ testCatFromFileToFiles
 	self should: [p initialStdIn closed].
 	self should: [p initialStdOut closed].
 	self should: [p initialStdErr closed].
-	f := FileStream oldFileNamed: '/tmp/deleteMe.out'.
+	f := OSProcess oldFileNamed: '/tmp/deleteMe.out'.
 	self shouldnt: [f upToEnd isEmpty].
 	f close.
-	f := FileStream oldFileNamed: '/tmp/deleteMe.err'.
+	f := OSProcess oldFileNamed: '/tmp/deleteMe.err'.
 	self should: [f upToEnd isEmpty].
 	f close.
 	self assert: self numberOfOpenFiles == openFileCount
@@ -9392,7 +9369,7 @@ testPipeLine
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 1/23/2013 21:36'!
+!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 1/15/2018 22:14:16'!
 testRunCommand
 
 	"(UnixProcessTestCase selector: #testRunCommand) run"
@@ -9413,10 +9390,10 @@ testRunCommand
 	"but the output and error streams should have been closed."
 	self should: [p initialStdOut closed].
 	self should: [p initialStdErr closed].
-	f := FileStream oldFileNamed: '/tmp/deleteMe.out'.
+	f := OSProcess oldFileNamed: '/tmp/deleteMe.out'.
 	self shouldnt: [f upToEnd isEmpty].
 	f close.
-	f := FileStream oldFileNamed: '/tmp/deleteMe.err'.
+	f := OSProcess oldFileNamed: '/tmp/deleteMe.err'.
 	self shouldnt: [f upToEnd isEmpty].
 	f close.
 	self assert: self numberOfOpenFiles == openFileCount
@@ -9927,7 +9904,7 @@ accessor
 	^ self thisOSProcess processAccessor
 ! !
 
-!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 6/17/2015 19:31'!
+!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 1/15/2018 22:08:41'!
 allTestResults
 	"Run all available sUnit tests and save the results in a file named
 	'OSProcessTestResults-<platform>.txt'. Display results on the Transcript as
@@ -9945,7 +9922,7 @@ allTestResults
 	resultsFileName := 'OSProcessTestResults-' , OSProcess platformName , '-' ,
 		(wordSize * 8) asString , 'bitImage-' ,
 		(OSProcess accessor sizeOfPointer * 8) asString , 'bitHw.txt'.
-	[fs := FileStream newFileNamed: resultsFileName.
+	[fs := self newFileNamed: resultsFileName.
 	problems := false.
 	writeStream := WriteStream on: String new.
 	writeStream nextPutAll: self authorInitials , ' running OSProcess unit tests ' , DateAndTime now asString; cr.
@@ -10112,57 +10089,66 @@ trace: debugMessageString
 			on: Error
 			do: []! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/27/2013 21:48'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
 
-	^ self useFileSystem
-		ifTrue: [(((Smalltalk at: #Path) perform: #workingDirectory) perform: #asFileReference) pathString]
-		ifFalse: [(Smalltalk at: #FileDirectory) default pathName]
+	^ self useFileMan
+		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #currentDirectory) printString]
+		ifFalse: [self useFileSystem
+			ifTrue: [(((Smalltalk at: #Path) perform: #workingDirectory) perform: #asFileReference) pathString]
+			ifFalse: [(Smalltalk at: #FileDirectory) default pathName]]
 ! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 7/27/2017 22:37'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 20:55:54'!
 deleteFileNamed: fileName
 	"Delete the file with the given name."
+	
+	self useFileMan
+		ifTrue: [((Smalltalk at: #FileEntry) pathName: fileName) delete]
+		ifFalse: [self useFileSystem
+			ifTrue: [ | file sel |
+				file := fileName perform: #asFileReference.
+				(sel := {#ensureDelete . #ensureDeleted . #delete}
+					detect: [ :e | file respondsTo: e ]
+					ifNone: [ self error: 'do not know how to ensureDelete' ]) notNil
+						ifTrue: [ file perform: sel ].
+				(file respondsTo: #ensureDelete)
+					ifTrue: [ file perform: #ensureDelete ]
+					ifFalse: [ file perform: #ensureDeleted ] ]
+			ifFalse:
+				[ (Smalltalk at: #FileDirectory) default deleteFileNamed: fileName ] ]! !
 
-	self useFileSystem
-		ifTrue: [ | file sel |
-			file := fileName perform: #asFileReference.
-			(sel := {#ensureDelete . #ensureDeleted . #delete}
-				detect: [ :e | file respondsTo: e ]
-				ifNone: [ self error: 'do not know how to ensureDelete' ]) notNil
-				ifTrue: [ file perform: sel ].
-			(file respondsTo: #ensureDelete)
-				ifTrue: [ file perform: #ensureDelete ]
-				ifFalse: [ file perform: #ensureDeleted ] ]
-		ifFalse:
-			[ (Smalltalk at: #FileDirectory) default deleteFileNamed: fileName ]! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/27/2013 21:49'!
-directoryEntryNames: path
-
-	^ self useFileSystem
-		ifTrue: [ (path perform: #asFileReference) children collect: [:e | e perform: #basename] ]
-		ifFalse: [ ((Smalltalk at: #FileDirectory) on: path) entries collect: [:e | e name] ]
-! !
-
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/27/2013 21:49'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 10:08:38'!
 directoryExists: path
 	"Answer true if a directory of the given name exists. The given name may
 	be either a full path name or a local directory within this directory."
 
-	^ self useFileSystem
-		ifTrue: [ (path perform: #asFileReference) exists ]
-		ifFalse: [ (Smalltalk at: #FileDirectory) default directoryExists: path ]
+	^ self useFileMan
+		ifTrue: [((Smalltalk at: #DirectoryEntry) pathName: path) exists]
+		ifFalse: [self useFileSystem
+			ifTrue: [ (path perform: #asFileReference) exists ]
+			ifFalse: [ (Smalltalk at: #FileDirectory) default directoryExists: path ]]
 ! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/27/2013 21:49'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 09:06:18'!
 fileExists: path
 	"Answer true if a file of the given name exists. The given name may be
 	either a full path name or a local file within this directory."
 
-	^ self useFileSystem
-		ifTrue: [ (path perform: #asFileReference) exists ]
-		ifFalse: [ (Smalltalk at: #FileDirectory) default fileExists: path ]
+	^ self useFileMan
+		ifTrue: [((Smalltalk at: #FileEntry) pathName: path) exists]
+		ifFalse: [self useFileSystem
+			ifTrue: [ (path perform: #asFileReference) exists ]
+			ifFalse: [ (Smalltalk at: #FileDirectory) default fileExists: path ]]
+! !
+
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 22:58:07'!
+fileNamed: path
+	^ self useFileMan
+		ifTrue: [ | entry |
+			entry := (FileEntry pathName: path) assureExistence.
+			entry fileAccessor privateWriteableFile: entry]
+		ifFalse: [ FileStream fileNamed: path ]
 ! !
 
 !OSProcess class methodsFor: 'version dependent' stamp: 'dtl 3/5/2005 11:32'!
@@ -10204,6 +10190,22 @@ listLoadedModules
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk listLoadedModules]) current listLoadedModules! !
 
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 22:58:19'!
+newFileNamed: path
+	^ self useFileMan
+		ifTrue: [ (FileEntry pathName: path) writeStream ]
+		ifFalse: [ FileStream fileNamed: path ]
+! !
+
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 22:58:29'!
+oldFileNamed: path
+	^ self useFileMan
+		ifTrue: [ | entry |
+			entry := FileEntry pathName: path.
+			entry fileAccessor privateWriteableFile: entry]
+		ifFalse: [ FileStream fileNamed: path ]
+! !
+
 !OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 9/5/2013 11:13'!
 osVersion
 	"After Squeak version 3.6, #osVersion was moved to SmalltalkImage. Some
@@ -10221,12 +10223,14 @@ osVersion
 		ifFalse: [((Smalltalk classNamed: 'SmalltalkImage')
 				ifNil: [^ Smalltalk osVersion]) current]) osVersion! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'SeanDeNigris 2/13/2013 09:46'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 09:04:06'!
 pathSeparator
 
-	^ self useFileSystem
-		ifTrue: [((Smalltalk at: #DiskStore) current perform: #delimiter) asString]
-		ifFalse: [(Smalltalk at: #FileDirectory) slash]
+	^ self useFileMan
+		ifTrue: [(Smalltalk at: #FileIOAccessor) default slash]
+		ifFalse: [self useFileSystem
+			ifTrue: [((Smalltalk at: #DiskStore) current perform: #delimiter) asString]
+			ifFalse: [(Smalltalk at: #FileDirectory) slash]]
 ! !
 
 !OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/2/2014 20:54'!
@@ -10267,6 +10271,13 @@ snapshot: save andQuit: quit
 
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk snapshot: save andQuit: quit embedded: false]) current snapshot: save andQuit: quit! !
+
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 08:33:37'!
+useFileMan
+	"If true use FileMan for directory and file access. See senders for methods with file
+	system dependencies."
+
+	^ Smalltalk hasClassNamed: #FileIOAccessor! !
 
 !OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/27/2013 21:48'!
 useFileSystem
@@ -10529,12 +10540,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'ThierryGoubier 7/27/2017 22:53'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/15/2018 23:34'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.6.9'! !
+	^'4.6.10'! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
 accessor
@@ -11309,7 +11320,7 @@ update: aParameter
 	super update: aParameter
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'evaluating' stamp: 'dtl 1/11/2015 13:43'!
+!ExternalWindowsOSProcess methodsFor: 'evaluating' stamp: 'ThierryGoubier 7/27/2017 22:38'!
 value
 	"Start the external process"
 
@@ -11318,7 +11329,7 @@ value
 		[procInfo := OSProcess accessor primCommand: self commandLine.
 		procInfo isNil
 			ifTrue:
-				[self initialStdErr ifNotNilDo: [ :err |
+				[ | err | (err := self initialStdErr) notNil ifTrue: [
 					err nextPutAll: 'cannot execute ', self commandLine; cr ].
 				self exitStatus: #cannotExecuteCommandLine.
 				"FIXME: Close the OSPipes now, otherwise the image will block on a read"
@@ -13179,7 +13190,7 @@ catAFile
 	proc ifNil: [self noAccessorAvailable].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:28'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/15/2018 22:09:08'!
 catFromFileToFiles
 	"Copy contents of a file to another file, with any error messages going 
 	to a third file."
@@ -13188,8 +13199,8 @@ catFromFileToFiles
 
 	| in out err proc |
 	in := FileStream readOnlyFileNamed: '/etc/hosts'.
-	out := FileStream newFileNamed: '/tmp/deleteMe.out'.
-	err := FileStream newFileNamed: '/tmp/deleteMe.err'.
+	out := OSProcess newFileNamed: '/tmp/deleteMe.out'.
+	err := OSProcess newFileNamed: '/tmp/deleteMe.err'.
 	proc := UnixProcess
 				forkJob: '/bin/cat'
 				arguments: nil
@@ -13498,7 +13509,7 @@ testPipeLine
 	^ result
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:46'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/15/2018 22:09:27'!
 testRunCommand
 	"Run the command 'ls -l /etc /etc/noSuchFile'. The output of the 
 	command will be in the file '/tmp/deleteMe.out', and the error output
@@ -13507,8 +13518,8 @@ testRunCommand
 	"UnixProcess testRunCommand"
 
 	| out err desc args proc |
-	out := FileStream newFileNamed: '/tmp/deleteMe.out'.
-	err := FileStream newFileNamed: '/tmp/deleteMe.err'.
+	out := OSProcess newFileNamed: '/tmp/deleteMe.out'.
+	err := OSProcess newFileNamed: '/tmp/deleteMe.err'.
 	desc := Array
 				with: nil
 				with: out
