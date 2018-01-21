@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3250] on 16 January 2018 at 12:41:55 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3254] on 20 January 2018 at 10:23:28 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 4!
+!provides: 'OSProcess' 1 6!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -676,12 +676,12 @@ registeredLocksForFile: aFileStream
 	^ self fileLockRegistry select: [:ea | ea fileStream = aFileStream]
 ! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'jf 2/26/2004 18:06'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 1/20/2018 19:20:59'!
 removeInactiveLocks
 	"Go through the lock cache and remove any that have been left
 	behind after their streams were closed."
 
-	^ self fileLockRegistry copy do: [:ea | ea isActive ifFalse: [self fileLockCache remove: ea]]! !
+	^ self fileLockRegistry copy do: [:ea | ea isActive ifFalse: [self fileLockRegistry remove: ea]]! !
 
 !OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:07'!
 unregister: fileRegionLock
@@ -732,7 +732,7 @@ getSessionIdentifier
 	^ session
 ! !
 
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 8/7/2005 22:02'!
+!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/20/2018 19:21:57'!
 getSessionIdentifierFromSourcesFile
 	"Deduce the session identifier from an existing open FileStream on the sources file.
 	This is an unreliable method, because it assumes knowledge of the internal structure
@@ -751,7 +751,7 @@ getSessionIdentifierFromSourcesFile
 	s := SourceFiles first.
 	s ifNil: [^ nil].
 	^ (Smalltalk hasClassNamed: #IOHandle)
-		ifTrue: [s ioHandle getHandle copyFrom: 5 to: 8]
+		ifTrue: [(s ioHandle perform: #getHandle) copyFrom: 5 to: 8]
 		ifFalse: [(id := s fileID) ifNotNil: [id copyFrom: 5 to: 8]]
 ! !
 
@@ -785,13 +785,13 @@ getStdOutHandle
 	^ self subclassResponsibility
 ! !
 
-!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 3/1/2002 15:19'!
+!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:22:28'!
 handleFromAccessor: aByteArrayOrIOAccessor
 
 	UseIOHandle
 		ifTrue: [aByteArrayOrIOAccessor isNil
 			ifTrue: [^ nil]
-			ifFalse: [^ aByteArrayOrIOAccessor asSQFileStruct]]
+			ifFalse: [^ aByteArrayOrIOAccessor perform: #asSQFileStruct]]
 		ifFalse: [^ aByteArrayOrIOAccessor]! !
 
 !OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 1/3/2004 21:21'!
@@ -802,13 +802,13 @@ handleFromFileStream: aFileStream
 		ifFalse: [aFileStream fileID]
 ! !
 
-!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 7/12/2003 12:17'!
+!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:18:06'!
 ioAccessorFromSQFile: aByteArray
 	"Answer an object which represents an IO channel. If IOHandle is present in
 	this image, use it; otherwise just answer aByteArray."
 
 	UseIOHandle
-		ifTrue: [^ (Smalltalk at: #IOHandle) newFromSqFileStruct: aByteArray]
+		ifTrue: [^ (Smalltalk at: #IOHandle) perform: #newFromSqFileStruct: with: aByteArray]
 		ifFalse: [^ aByteArray]! !
 
 !OSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 2/27/2015 19:51'!
@@ -4772,7 +4772,7 @@ keepOpen
 	autoClose := false
 ! !
 
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 9/3/2010 17:00'!
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 1/20/2018 19:19:25'!
 close
 	"Close this file."
 
@@ -4781,7 +4781,7 @@ close
 		[UseIOHandle
 			ifTrue:
 				[h close.
-				self ioHandle: nil]
+				self perform: #ioHandle: with: nil]
 			ifFalse:
 				[self primCloseNoError: h.
 				self unregister.
@@ -4879,13 +4879,13 @@ isPipe
 	^ false
 ! !
 
-!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 11/30/2002 09:22'!
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 1/20/2018 19:19:07'!
 name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
 	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
 
 	name := aSymbolOrString.
 	UseIOHandle
-		ifTrue: [self ioHandle: anIOHandle]
+		ifTrue: [self perform: #ioHandle: with: anIOHandle]
 		ifFalse: [fileID := anIOHandle].
 	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
 	self ascii.
@@ -9965,14 +9965,14 @@ allTestResults
 	Transcript show: 'tests results have been saved in a file named ''' , resultsFileName , ''''; cr.
 	^ results! !
 
-!OSProcess class methodsFor: 'sUnit' stamp: 'ThierryGoubier 10/11/2013 11:16'!
+!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 1/20/2018 19:25:27'!
 authorInitials
 	"Get the author initials from the system."
 
 	((Smalltalk respondsTo: #metacelloPlatformAttributes)
 		and: [ 
-			(Smalltalk metacelloPlatformAttributes includes: #'pharo3.x')
-				or: [ Smalltalk metacelloPlatformAttributes includes: #'pharo2.x' ] ])
+			((Smalltalk perform: #metacelloPlatformAttributes) includes: #'pharo3.x')
+				or: [ (Smalltalk perform: #metacelloPlatformAttributes) includes: #'pharo2.x' ] ])
 		ifTrue: [ ^ (Smalltalk at: #Author) fullName select: [ :c | c isUppercase ] ].
 	^ (Smalltalk at: #Utilities) authorInitials! !
 
@@ -10096,18 +10096,18 @@ getSystemAttribute: attributeID
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk getSystemAttribute: attributeID]) current getSystemAttribute: attributeID! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 9/4/2013 08:35'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/20/2018 19:26:21'!
 isPharo3AndLater
 	"True if this image is a pharo of major version 3 or greater"
 
 	Smalltalk
 		at: #SystemVersion
 		ifPresent: [:cls | ((cls canUnderstand: #type) and: [ cls canUnderstand: #major ])
-			ifTrue: [^ cls current type = 'Pharo' and: [ cls current major >= 3 ]]].
+			ifTrue: [^ (cls current perform: #type) = 'Pharo' and: [ (cls current perform: #major) >= 3 ]]].
 	^false
 ! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 2/18/2016 21:14'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/20/2018 19:27:17'!
 isPharo5Update50558AndLater
 	"True if this image is a pharo of major version 5 at upldate 50558 or greater"
 	
@@ -10116,7 +10116,7 @@ isPharo5Update50558AndLater
 	Smalltalk
 		at: #SystemVersion
 		ifPresent: [:cls | ((cls canUnderstand: #type) and: [ cls canUnderstand: #major ])
-			ifTrue: [ ^ (cls current type = 'Pharo' and: [ cls current major >= 5 ])
+			ifTrue: [ ^ ((cls current perform: #type) = 'Pharo' and: [ (cls current perform: #major) >= 5 ])
 						and: [ cls current  highestUpdate >= 50558]]].
 	^false
 ! !
@@ -10177,12 +10177,23 @@ platformSubtype
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk platformSubtype]) current platformSubtype! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 12/15/2013 14:53'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/20/2018 20:08:52'!
 snapshot: save andQuit: quit
-	"After Squeak version 3.6, #snapshot:andQuit: was moved to SmalltalkImage "
-
+	"After Squeak version 3.6, #snapshot:andQuit: was moved to SmalltalkImage. Cuis has a
+	different but distinct method signature so check for that first."
+	
+	"self snapshot: false andQuit: true"
+	
+	(Smalltalk respondsTo: #snapshot:andQuit:embedded:clearAllClassState:)
+		ifTrue: [ "Cuis image"
+			^ Smalltalk
+				perform: #snapshot:andQuit:embedded:clearAllClassState:
+				withArguments: { save . quit . false . false } ].
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
-		ifNil: [^ Smalltalk snapshot: save andQuit: quit embedded: false]) current snapshot: save andQuit: quit! !
+		ifNil: [^ Smalltalk
+				perform: #snapshot:andQuit:embedded:
+				withArguments: { save . quit . false } ])
+			current snapshot: save andQuit: quit! !
 
 !OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 08:33:37'!
 useFileMan
@@ -10452,12 +10463,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/15/2018 23:34'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/20/2018 21:15:51'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.6.10'! !
+	^'4.6.11'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -10547,14 +10558,27 @@ pathSeparator
 			ifFalse: [(Smalltalk at: #FileDirectory) slash]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:30'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/20/2018 21:48'!
 readOnlyFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
 			entry := (Smalltalk at: #FileEntry) pathName: path.
 			entry fileAccessor privateReadOnlyFile: entry]
-		ifFalse: [ FileStream fileNamed: path ]
+		ifFalse: [ FileStream readOnlyFileNamed: path ]
 ! !
+
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/20/2018 20:23:42'!
+saveChangesInFileNamed: aString
+
+	self useFileMan
+		ifTrue: [ | newChangesName |
+			Smalltalk currentChangesName ifNotNil: [ :oldChangesName |
+			Smalltalk closeSourceFiles. "so copying the changes file will always work"
+			newChangesName _ self fullNameForChangesNamed: aString.
+			(Smalltalk at: #FileIOAccessor) default
+				copy: (oldChangesName perform: #asFileEntry) to: (newChangesName perform: #asFileEntry) ] ]
+		ifFalse:
+			[Smalltalk saveChangesInFileNamed: aString ]! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
 accessor
@@ -11449,14 +11473,14 @@ childPids
 	^ childProcessList collect: [ :p | p pid ]
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 20:12'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 1/20/2018 19:59:40'!
 discardExitedChildren
-	"Remove entries for completed child processed from dictionary."
+	"Remove entries for completed child processed from dictionary.
+	nb Cuis does not have #select:thenDo:"
 
 	self updateAllMyChildren.
-	childProcessList
-		select: [ :p | p isComplete ]
-		thenDo: [ :e | self unregisterChildProcess: e ].
+	(childProcessList select: [ :p | p isComplete ])
+		do: [ :e | self unregisterChildProcess: e ].
 	^ childProcessList
 ! !
 
@@ -11693,21 +11717,21 @@ getCwd
 
 	self subclassResponsibility! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 9/25/2005 16:23'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:59:54'!
 handleFromAccessor: aByteArrayOrIOAccessor
 
 	UseIOHandle
 		ifTrue: [aByteArrayOrIOAccessor isNil
 			ifTrue: [^ nil]
-			ifFalse: [^ aByteArrayOrIOAccessor asSQFileStruct]]
+			ifFalse: [^ aByteArrayOrIOAccessor perform: #asSQFileStruct]]
 		ifFalse: [^ aByteArrayOrIOAccessor]
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 9/25/2005 16:22'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:57:15'!
 handleFromFileStream: aFileStream
 
 	UseIOHandle
-		ifTrue: [^ aFileStream ioHandle asSQFileStruct]
+		ifTrue: [^ aFileStream ioHandle perform: #asSQFileStruct]
 		ifFalse: [^ aFileStream fileID]
 ! !
 
@@ -12428,7 +12452,7 @@ command: aCommandString
 			^ proc]
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 7/12/2003 11:51'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 1/20/2018 20:00:54'!
 command: aCommandString input: aStreamOrString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library,
 	except that aCommandString runs asynchronously in a child process."
@@ -12447,7 +12471,7 @@ command: aCommandString input: aStreamOrString
 			[proc := (Smalltalk at: #PipeableOSProcess) command: aCommandString.
 			proc ifNil: [^ nil].
 			proc nextPutAll: aStreamOrString contents.
-			proc pipeToInput close.
+			(proc perform: #pipeToInput) close.
 			^ proc]
 		ifFalse:
 			[self notify: 'the #command:input: method requires CommandShell, using #command: instead'.
@@ -12475,7 +12499,7 @@ waitForCommand: aCommandString
 	^ proc
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 7/12/2003 12:06'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 1/20/2018 20:03:54'!
 waitForCommandOutput: aCommandString 
 	"Run a command in a shell process. Similar to the system(3) call in the 
 	standard C library. The active Smalltalk process waits for completion of
@@ -12488,13 +12512,13 @@ waitForCommandOutput: aCommandString
 
 	(Smalltalk hasClassNamed: #PipeableOSProcess)
 		ifTrue:
-			[^ ((Smalltalk at: #PipeableOSProcess) command: aCommandString) output]
+			[^ ((Smalltalk at: #PipeableOSProcess) command: aCommandString) perform: #output]
 		ifFalse:
 			[self notify: 'the #waitForCommandOutput: method requires CommandShell'.
 			^ '']
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 7/12/2003 12:08'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 1/20/2018 20:03:32'!
 waitForCommandOutputArray: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library.
 	The active Smalltalk process waits for completion of the external command process."
@@ -12506,9 +12530,9 @@ waitForCommandOutputArray: aCommandString
 		ifTrue:
 			[proc := (Smalltalk at: #PipeableOSProcess) command: aCommandString.
 			^ Array
-				with: proc output
-				with: proc errorUpToEnd
-				with: proc processProxy exitStatus]
+				with: (proc perform: #output)
+				with: (proc perform: #errorUpToEnd)
+				with: (proc perform: #processProxy) exitStatus]
 		ifFalse:
 			[self notify: 'the #waitForCommandOutputArray: method requires CommandShell'.
 			^ Array with: '' with: '' with: nil]
@@ -13906,7 +13930,7 @@ saveImageInBackground
 	^ self saveImageInBackground: self uniqueNameForSavedImage nice: false
 ! !
 
-!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 1/8/2008 22:39'!
+!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 1/20/2018 20:24:18'!
 saveImageInBackground: savedImageName nice: niceFlag
 	"When Squeak is used as a server it is sometimes desirable to periodically
 	save image snapshots. This method forks a headless Squeak to perform a
@@ -13929,7 +13953,7 @@ saveImageInBackground: savedImageName nice: niceFlag
 		(SourceFiles at: 2) ifNotNil:
 			["ensure that copying the changes file will always work"
 			st closeSourceFiles.
-			st saveChangesInFileNamed: (st fullNameForChangesNamed: savedImageName)].
+			OSProcess saveChangesInFileNamed: (st fullNameForChangesNamed: savedImageName)].
 		st changeImageNameTo: savedImageName,'.image';
 			closeSourceFiles;
 			openSourceFiles;  "so SNAPSHOT appears in new changes file"
