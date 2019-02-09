@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3589] on 8 February 2019 at 10:19:17 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3589] on 8 February 2019 at 11:08:07 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 7!
+!provides: 'OSProcess' 1 8!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -9409,7 +9409,7 @@ expectedFailures
 					testHeadlessChild
 					testSpawnTenHeadlessChildren)]! !
 
-!UnixProcessTestCase methodsFor: 'private' stamp: 'dtl 1/15/2018 20:13:28'!
+!UnixProcessTestCase methodsFor: 'private' stamp: 'dtl 2/8/2019 23:03'!
 numberOfOpenFiles
 	"Answer the number of files currently open for this OS process. This works
 	only on a system with a /proc filesystem and file descriptors located in a
@@ -9421,7 +9421,7 @@ numberOfOpenFiles
 	path := '/proc/' , OSProcess thisOSProcess pid printString, '/fd'.
 	(OSProcess directoryExists: path) ifFalse: [ ^ 0].
 	^ OSProcess useFileMan
-		ifTrue: [((Smalltalk at: #DirectoryEntry) pathName: path) children size]
+		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #withPathName: with: path) children size]
 		ifFalse: [OSProcess useFileSystem
 			ifTrue: [ (path perform: #asFileReference) children size ]
 			ifFalse: [ ((Smalltalk at: #FileDirectory) on: path) entries size ]]
@@ -10677,12 +10677,12 @@ defaultPathString
 			ifFalse: [(Smalltalk at: #FileDirectory) default pathName]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:55:54'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 deleteFileNamed: fileName
 	"Delete the file with the given name."
 	
 	self useFileMan
-		ifTrue: [((Smalltalk at: #FileEntry) pathName: fileName) delete]
+		ifTrue: [((Smalltalk at: #FileEntry) perform: #withPathName: with: fileName) delete]
 		ifFalse: [self useFileSystem
 			ifTrue: [ | file sel |
 				file := fileName perform: #asFileReference.
@@ -10696,51 +10696,51 @@ deleteFileNamed: fileName
 			ifFalse:
 				[ (Smalltalk at: #FileDirectory) default deleteFileNamed: fileName ] ]! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 10:08:38'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 directoryExists: path
 	"Answer true if a directory of the given name exists. The given name may
 	be either a full path name or a local directory within this directory."
 
 	^ self useFileMan
-		ifTrue: [((Smalltalk at: #DirectoryEntry) pathName: path) exists]
+		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #withPathName: with: path) exists]
 		ifFalse: [self useFileSystem
 			ifTrue: [ (path perform: #asFileReference) exists ]
 			ifFalse: [ (Smalltalk at: #FileDirectory) default directoryExists: path ]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 09:06:18'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 fileExists: path
 	"Answer true if a file of the given name exists. The given name may be
 	either a full path name or a local file within this directory."
 
 	^ self useFileMan
-		ifTrue: [((Smalltalk at: #FileEntry) pathName: path) exists]
+		ifTrue: [((Smalltalk at: #FileEntry) perform: #withPathName: with: path) exists]
 		ifFalse: [self useFileSystem
 			ifTrue: [ (path perform: #asFileReference) exists ]
 			ifFalse: [ (Smalltalk at: #FileDirectory) default fileExists: path ]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:27'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 fileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
-			entry := ((Smalltalk at: #FileEntry) pathName: path) assureExistence.
+			entry := ((Smalltalk at: #FileEntry) perform: #withPathName: with: path) assureExistence.
 			entry fileAccessor privateWriteableFile: entry]
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:27'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 newFileNamed: path
 	^ self useFileMan
-		ifTrue: [ ((Smalltalk at: #FileEntry) pathName: path) writeStream ]
+		ifTrue: [ ((Smalltalk at: #FileEntry) perform: #withPathName: with: path) writeStream ]
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/16/2018 00:27'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 oldFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
-			entry := (Smalltalk at: #FileEntry) pathName: path.
+			entry := (Smalltalk at: #FileEntry) perform: #withPathName: with: path.
 			entry fileAccessor privateWriteableFile: entry]
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
@@ -10755,11 +10755,11 @@ pathSeparator
 			ifFalse: [(Smalltalk at: #FileDirectory) slash]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/20/2018 21:48'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
 readOnlyFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
-			entry := (Smalltalk at: #FileEntry) pathName: path.
+			entry := (Smalltalk at: #FileEntry) perform: #withPathName: with: path.
 			entry fileAccessor privateReadOnlyFile: entry]
 		ifFalse: [ FileStream readOnlyFileNamed: path ]
 ! !
