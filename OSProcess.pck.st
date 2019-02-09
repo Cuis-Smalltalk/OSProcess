@@ -1,8 +1,8 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3254] on 20 January 2018 at 10:23:28 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3589] on 8 February 2019 at 10:19:17 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 6!
-!requires: 'SqueakCompatibility' 1 4 nil!
+!provides: 'OSProcess' 1 7!
 !requires: 'Network-Kernel' 1 1 nil!
+!requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
 SystemOrganization addCategory: #'OSProcess-Mac'!
 SystemOrganization addCategory: #'OSProcess-OS2'!
@@ -570,6 +570,178 @@ should be closed when the thread exits.!
 
 !AioEventHandlerExample commentStamp: 'dtl 7/5/2003 18:38' prior: 0!
 Demonstrate asynchronous read handers for file streams, OS pipes, standard input, and sockets. See class category "examples". Some examples require OSProcess.!
+
+!UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 9/10/2000 10:16'!
+printOn: aStream
+	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
+	treats $U as a vowel."
+
+	aStream
+		nextPutAll: 'a ';
+		nextPutAll: self class name;
+		nextPutAll: ' on pid ';
+		nextPutAll: self primGetPid printString
+! !
+
+!AioEventHandler class methodsFor: 'system startup' stamp: 'dtl 11/25/2006 10:04'!
+startUp: resuming
+	"Clear the value of AioPluginPresent. The value will be set once when
+	#aioPluginPresent is first sent, and will remain set to that value for the
+	duration of this Squeak session.
+	This method is called by ThisOSProcess>>startUp. AioEventHandler does
+	not need to be registered in the system startup list."
+
+	resuming ifTrue: [AioPluginPresent := nil]
+! !
+
+!ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
+printOn: aStream
+	"The implementation of Stream>>printOn: has bad side effects when used
+	for OSPipe. This implementation is copied from Object."
+
+	| title |
+	title := self class name.
+	aStream
+		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
+		nextPutAll: title! !
+
+!OSProcess methodsFor: 'printing' stamp: 'dtl 10/17/1999 21:12'!
+printOn: aStream
+
+	super printOn: aStream. aStream nextPutAll: ' with pid '. self pid printOn: aStream! !
+
+!ExternalOSProcess methodsFor: 'printing' stamp: 'dtl 3/18/2000 14:07'!
+printOn: aStream
+
+	super printOn: aStream.
+	self isComplete ifTrue: [ aStream nextPutAll: ' (', self runState, ' with status ', self exitStatus printString, ')' ]
+		ifFalse: [ aStream nextPutAll: ' (', self runState asString, ')' ]! !
+
+!ExternalUnixOSProcess methodsFor: 'printing' stamp: 'dtl 8/23/2012 22:45'!
+printOn: aStream
+
+	self programName isNil
+		ifTrue:
+			[^ super printOn: aStream]
+		ifFalse:
+			[aStream
+				nextPutAll: 'an ';
+				nextPutAll: self class name, ' with pid ';
+				nextPutAll: self pid printString;
+				nextPutAll: ' on ';
+				nextPutAll: programName;
+				nextPutAll: ' (';
+				nextPutAll: self runState asString.
+			self isComplete
+				ifTrue: [aStream nextPutAll: ', ';
+					nextPutAll: (UnixProcessExitStatus for: exitStatus) printString].
+			aStream nextPut: $)].
+! !
+
+!ExternalWindowsOSProcess methodsFor: 'printing' stamp: 'dtl 2/26/2002 10:42'!
+printOn: aStream
+
+	self commandLine isNil
+		ifTrue:
+			[^ super printOn: aStream]
+		ifFalse:
+			[aStream
+				nextPutAll: 'a ';
+				nextPutAll: self class name, ' with pid ';
+				nextPutAll: self pid printString.
+			(self isComplete and: [handle isNil])
+				ifTrue:
+					[aStream nextPutAll: ' (handle closed)']
+				ifFalse:
+					[aStream nextPutAll: ' handle ';
+						nextPutAll: (handle isNil
+							ifTrue: [handle printString]
+							ifFalse: [handle asArray printString])].
+			aStream
+				nextPutAll: ' on ''';
+				nextPutAll: commandLine;
+				nextPutAll: ''' (';
+				nextPutAll: self runState asString;
+				nextPut: $)]
+
+! !
+
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'ThierryGoubier 7/27/2017 22:32'!
+shutDown: quitting
+	"Break dependency on my OSProcessAccessor. This is done explicitly at
+	shutDown time in order to prevent possible problems when an image is
+	restarted on another platform type, in which case a new ThisOSProcess
+	instance is created and the old instance could still have an unwanted
+	dependency on an OSProcessAccessor."
+
+	quitting
+		ifTrue: [ | osp |
+			(osp := OSProcess thisOSProcess) notNil
+				ifTrue: [ | acc |
+					(acc := osp processAccessor) notNil
+						ifTrue: [ acc breakDependents ] ] ]! !
+
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
+startUp: resuming
+	"Initialize my singleton instance, and the singleton instance of my
+	OSProcessAccessor. On Unix, set the signal handler in my process
+	accessor to respond to externally generated sigchld signals. This
+	must be done after each image restart in order to call a primitive
+	which informs the VM of the identity of the semaphore to signal.
+	When not running on a Unix system, the primitive fails and the
+	method has no effect. Notify dependents of the singleton instance
+	if the image has restarted in a different OS process (this is not the
+	case when #startUp is called after a simple image save). The
+	notification is done in the initialization of my OSProcessAccessor."
+
+	| aio |
+	(aio := Smalltalk at: #AioEventHandler)
+		ifNotNil: [ aio startUp: resuming ].
+	resuming ifTrue: [ self initializeThisOSProcess ]! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
+environment
+
+	^ environment
+! !
+
+!UnixProcess methodsFor: 'printing' stamp: 'dtl 7/7/2010 07:37'!
+printOn: aStream
+	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
+	treats $U as a vowel."
+
+	self ppid.		"Force update of ppid, in case parent may have exited."
+	aStream nextPutAll: 'a ';
+			nextPutAll: self class name;
+			nextPutAll: ' with pid ';
+			nextPutAll: self pid printString
+! !
+
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 22:02'!
+environment
+
+	^ environment
+! !
+
+!UnixProcessExitStatus methodsFor: 'printing' stamp: 'dtl 8/22/2012 23:18'!
+printOn: aStream
+
+	self isExited
+		ifTrue: [aStream nextPutAll: 'normal termination with status ';
+				 nextPutAll: self statusIfExited asString].
+	self isSignaled
+		ifTrue: [aStream nextPutAll: 'exit due to signal ';
+				nextPutAll: self statusIfSignaled asString].
+	self isStopped
+		ifTrue: [aStream nextPutAll: 'stopped due to signal ';
+				nextPutAll: self statusIfStopped].! !
+
+!WindowsThread methodsFor: 'printing' stamp: 'dtl 2/27/2002 12:02'!
+printOn: aStream
+
+	super printOn: aStream.
+	aStream nextPutAll: ' (', self threadID printString, ', ', self runState, ')'
+! !
 
 !OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
 aioModuleName
@@ -1177,6 +1349,17 @@ environmentAt: aSymbolOrString put: aString
 			[^ self environmentPut: (aSymbolOrString asString, '=', aString)]
 ! !
 
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 11:21'!
+primArgumentAsBytesAt: index
+	"Answer the argument string in the argument OS process argument list at position index.
+	In Unix, the first element of the list is the program name, and any additional elements
+	of the list are optional command line arguments passed to the program. This convention
+	may be simulated by the C runtime libraries on other operating systems, but argument
+	list handling should be assumed to be operating system dependent."
+
+	<primitive: 'primitiveArgumentAtAsBytes' module: 'UnixOSProcessPlugin'>
+	self primitiveFailed! !
+
 !UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:19'!
 primArgumentAt: index
 	"Answer the argument string in the argument OS process argument list at position index.
@@ -1187,6 +1370,15 @@ primArgumentAt: index
 
 	<primitive: 'primitiveArgumentAt' module: 'UnixOSProcessPlugin'>
 	^ nil! !
+
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 12:26'!
+primEnvironmentAsBytesAt: index
+	"Answer the environment string at index position in the OS process environment list.
+	This returns a 'KEY=value' string, which the caller is expected to parse into #KEY
+	and 'value' to be stored an environment dictionary."
+
+	<primitive: 'primitiveEnvironmentAtAsBytes' module: 'UnixOSProcessPlugin'>
+	self primitiveFailed! !
 
 !UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:20'!
 primEnvironmentAt: index
@@ -1217,6 +1409,16 @@ primGetCurrentWorkingDirectory
 
 	<primitive: 'primitiveGetCurrentWorkingDirectory' module: 'UnixOSProcessPlugin'>
 	^ nil
+! !
+
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 12:27'!
+primGetCurrentWorkingDirectoryAsBytes
+	"Call getcwd() to get the current working directory."
+
+	"OSProcess thisOSProcess processAccessor primGetCurrentWorkingDirectoryAsBytes"
+
+	<primitive: 'primitiveGetCurrentWorkingDirectoryAsBytes' module: 'UnixOSProcessPlugin'>
+	self primitiveFailed
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 4/30/2001 21:07'!
@@ -1531,6 +1733,14 @@ primDup: oldFileDescriptor to: newFileDescriptor
 	^ self primitiveFailed
 ! !
 
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/20/2019 12:25'!
+primEnvironmentAsBytesAtSymbol: aSymbol
+	"Answer a ByteArray with the value of an environment variable in
+	the external OS process."
+
+	<primitive: 'primitiveEnvironmentAtSymbolAsBytes' module: 'UnixOSProcessPlugin'>
+	self primitiveFailed! !
+
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
 primEnvironmentAtSymbol: aSymbol
 	"Answer the value of an environment variable in the external OS process."
@@ -1689,6 +1899,13 @@ primRealpath: pathString
 
 	<primitive: 'primitiveRealpath' module: 'UnixOSProcessPlugin'>
 	^ nil! !
+
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/20/2019 12:32'!
+primRealpathAsBytes: pathString
+	"Resolve pathString into a real path if possible, or answer nil."
+
+	<primitive: 'primitiveRealpathAsBytes' module: 'UnixOSProcessPlugin'>
+	self primitiveFailed! !
 
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
 primSQFileFlush: aSQFileStruct
@@ -1999,7 +2216,7 @@ finalize
 			self sigChldSemaphore: nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 6/2/2015 20:54'!
+!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 3/4/2018 19:36'!
 grimReaperProcess
 	"This is a process which waits for the death of a child OSProcess, and 
 	informs any dependents of the change. Use SIGCHLD events if possible,
@@ -2007,25 +2224,25 @@ grimReaperProcess
 
 	| eventWaiter processSynchronizationDelay |
 	^ self canAccessSystem
-		ifTrue:
-			[eventWaiter := (self canAccessSystem and: [self canForwardExternalSignals])
-				ifTrue: [self sigChldSemaphore "semaphore signaled by SIGCHLD" ]
-				ifFalse: [Delay forMilliseconds: 200 "simple polling loop" ].
+		ifTrue: [ eventWaiter := (self canAccessSystem
+				and: [ self canForwardExternalSignals ])
+				ifTrue: [ self sigChldSemaphore	"semaphore signaled by SIGCHLD" ]
+				ifFalse: [ Delay forMilliseconds: 200	"simple polling loop" ].
 			processSynchronizationDelay := Delay forMilliseconds: 20.
-			grimReaper ifNil:
-				[grimReaper :=
-					[[(eventWaiter respondsTo: #waitTimeoutMSecs: )
-						ifTrue: [eventWaiter waitTimeoutMSecs: 1000 "semaphore with timeout"]
-						ifFalse: [eventWaiter wait].
-					processSynchronizationDelay wait. "Avoids lost signals in heavy process switching"
-					self changed: #childProcessStatus] repeat] newProcess.
+			grimReaper
+				ifNil: [ grimReaper := [ [ (eventWaiter respondsTo: #waitTimeoutMSecs:)
+						ifTrue: [ eventWaiter waitTimeoutMSecs: 1000	"semaphore with timeout" ]
+						ifFalse: [ eventWaiter wait ].
+					processSynchronizationDelay wait.	"Avoids lost signals in heavy process switching"
+					self changed: #childProcessStatus ] repeat ] newProcess.
+					grimReaper priority: Processor userSchedulingPriority.
 					grimReaper resume.
 					"name selected to look reasonable in the process browser"
-					grimReaper name: ((ReadStream on: grimReaper hash asString) next: 5)
-							, ': the child OSProcess watcher']]
-		ifFalse:
-			[nil]
-! !
+					grimReaper
+						name:
+							((ReadStream on: grimReaper hash asString) next: 5)
+								, ': the child OSProcess watcher' ] ]
+		ifFalse: [ grimReaper priority: Processor userSchedulingPriority ]! !
 
 !UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 7/7/2010 07:46'!
 initialize
@@ -2426,29 +2643,29 @@ restoreSignal: signalNumber
 	^ sema
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 11/28/2010 12:07'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 2/28/2018 20:00'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
 
 	^ self primGetStdErrHandle
-		ifNotNilDo: [:handle | self ioAccessorFromSQFile: handle]! !
+		ifNotNil: [:handle | self ioAccessorFromSQFile: handle]! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 11/28/2010 12:07'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 2/28/2018 20:00'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
 
 	^ self primGetStdInHandle
-		ifNotNilDo: [:handle | self ioAccessorFromSQFile: handle]! !
+		ifNotNil: [:handle | self ioAccessorFromSQFile: handle]! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 11/28/2010 12:08'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 2/28/2018 20:00'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
 
 	^ self primGetStdOutHandle
-		ifNotNilDo: [:handle | self ioAccessorFromSQFile: handle]! !
+		ifNotNil: [:handle | self ioAccessorFromSQFile: handle]! !
 
 !UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 3/17/2007 23:14'!
 getThreadID
@@ -3446,18 +3663,6 @@ primSigUsr2Number
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 9/10/2000 10:16'!
-printOn: aStream
-	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
-	treats $U as a vowel."
-
-	aStream
-		nextPutAll: 'a ';
-		nextPutAll: self class name;
-		nextPutAll: ' on pid ';
-		nextPutAll: self primGetPid printString
-! !
-
 !UnixOSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:10'!
 register: fileRegionLock
 	"If an object equal to fileRegionLock exists in the registry, answer it. Otherwise, add
@@ -3711,6 +3916,16 @@ primGetCurrentWorkingDirectory
 	^ nil
 ! !
 
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 13:39'!
+primGetCurrentWorkingDirectoryAsBytes
+	"Call getcwd() to get the current working directory."
+
+	"OSProcess accessor primGetCurrentWorkingDirectoryAsBytes"
+
+	<primitive: 'primitiveGetCurrentWorkingDirectoryAsBytes' module: 'Win32OSProcessPlugin'>
+	self primitiveFailed
+! !
+
 !WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/22/2002 18:23'!
 primGetEnvironmentStrings
 	"Answer the environment block in the form of an Array of Strings. The
@@ -3718,6 +3933,15 @@ primGetEnvironmentStrings
 
 	<primitive: 'primitiveGetEnvironmentStrings' module: 'Win32OSProcessPlugin'>
 	^ nil
+! !
+
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 13:49'!
+primGetEnvironmentStringsAsBytes
+	"Answer the environment block in the form of an Array of Strings. The
+	caller is expected to parse the strings into a dictionary of keys and values."
+
+	<primitive: 'primitiveGetEnvironmentStringsAsBytes' module: 'Win32OSProcessPlugin'>
+	self primitiveFailed
 ! !
 
 !WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/27/2002 13:20'!
@@ -4679,17 +4903,6 @@ forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writ
 			exceptions: exceptionEventFlag
 			readEvents: readEventFlag
 			writeEvents: writeEventFlag
-! !
-
-!AioEventHandler class methodsFor: 'system startup' stamp: 'dtl 11/25/2006 10:04'!
-startUp: resuming
-	"Clear the value of AioPluginPresent. The value will be set once when
-	#aioPluginPresent is first sent, and will remain set to that value for the
-	duration of this Squeak session.
-	This method is called by ThisOSProcess>>startUp. AioEventHandler does
-	not need to be registered in the system startup list."
-
-	resuming ifTrue: [AioPluginPresent := nil]
 ! !
 
 !PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 11/25/2006 10:49'!
@@ -5675,17 +5888,6 @@ setNonBlocking
 	reader ifNotNil: [OSProcess accessor setNonBlocking: reader ioHandle].
 	self blocking: false
 ! !
-
-!ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
-printOn: aStream
-	"The implementation of Stream>>printOn: has bad side effects when used
-	for OSPipe. This implementation is copied from Object."
-
-	| title |
-	title := self class name.
-	aStream
-		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
-		nextPutAll: title! !
 
 !ExternalPipe methodsFor: 'updating' stamp: 'dtl 3/15/2006 07:17'!
 triggerDataReady
@@ -9892,11 +10094,6 @@ pid: processIdentifier
 	pid := processIdentifier
 ! !
 
-!OSProcess methodsFor: 'printing' stamp: 'dtl 10/17/1999 21:12'!
-printOn: aStream
-
-	super printOn: aStream. aStream nextPutAll: ' with pid '. self pid printOn: aStream! !
-
 !OSProcess class methodsFor: 'external process access' stamp: 'dtl 11/8/2000 22:04'!
 accessor
 	"Answer an OSProcessAccessor for this OS process."
@@ -10463,12 +10660,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/20/2018 21:15:51'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/21/2019 10:45'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.6.11'! !
+	^'4.6.14'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -10730,13 +10927,6 @@ succeeded
 
 	^ self isComplete! !
 
-!ExternalOSProcess methodsFor: 'printing' stamp: 'dtl 3/18/2000 14:07'!
-printOn: aStream
-
-	super printOn: aStream.
-	self isComplete ifTrue: [ aStream nextPutAll: ' (', self runState, ' with status ', self exitStatus printString, ')' ]
-		ifFalse: [ aStream nextPutAll: ' (', self runState asString, ')' ]! !
-
 !ExternalOSProcess methodsFor: 'updating' stamp: 'dtl 2/27/2002 09:45'!
 update: aParameter
 	"Notify any dependents if my run state changes. My subclasses will do additional
@@ -10926,27 +11116,6 @@ setDefaults
 	initialStdErr ifNil: [self initialStdErr: this stdErr].	
 	self pwd
 
-! !
-
-!ExternalUnixOSProcess methodsFor: 'printing' stamp: 'dtl 8/23/2012 22:45'!
-printOn: aStream
-
-	self programName isNil
-		ifTrue:
-			[^ super printOn: aStream]
-		ifFalse:
-			[aStream
-				nextPutAll: 'an ';
-				nextPutAll: self class name, ' with pid ';
-				nextPutAll: self pid printString;
-				nextPutAll: ' on ';
-				nextPutAll: programName;
-				nextPutAll: ' (';
-				nextPutAll: self runState asString.
-			self isComplete
-				ifTrue: [aStream nextPutAll: ', ';
-					nextPutAll: (UnixProcessExitStatus for: exitStatus) printString].
-			aStream nextPut: $)].
 ! !
 
 !ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:44'!
@@ -11307,34 +11476,6 @@ complete
 	(threads notNil and: [threads size > 0]) ifTrue: [threads do: [:t | t complete]].
 	self closeHandles.
 	super complete
-! !
-
-!ExternalWindowsOSProcess methodsFor: 'printing' stamp: 'dtl 2/26/2002 10:42'!
-printOn: aStream
-
-	self commandLine isNil
-		ifTrue:
-			[^ super printOn: aStream]
-		ifFalse:
-			[aStream
-				nextPutAll: 'a ';
-				nextPutAll: self class name, ' with pid ';
-				nextPutAll: self pid printString.
-			(self isComplete and: [handle isNil])
-				ifTrue:
-					[aStream nextPutAll: ' (handle closed)']
-				ifFalse:
-					[aStream nextPutAll: ' handle ';
-						nextPutAll: (handle isNil
-							ifTrue: [handle printString]
-							ifFalse: [handle asArray printString])].
-			aStream
-				nextPutAll: ' on ''';
-				nextPutAll: commandLine;
-				nextPutAll: ''' (';
-				nextPutAll: self runState asString;
-				nextPut: $)]
-
 ! !
 
 !ExternalWindowsOSProcess methodsFor: 'updating' stamp: 'dtl 2/27/2002 09:45'!
@@ -12012,39 +12153,6 @@ thisOSProcess
 
 	^ ThisInstance! !
 
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'ThierryGoubier 7/27/2017 22:32'!
-shutDown: quitting
-	"Break dependency on my OSProcessAccessor. This is done explicitly at
-	shutDown time in order to prevent possible problems when an image is
-	restarted on another platform type, in which case a new ThisOSProcess
-	instance is created and the old instance could still have an unwanted
-	dependency on an OSProcessAccessor."
-
-	quitting
-		ifTrue: [ | osp |
-			(osp := OSProcess thisOSProcess) notNil
-				ifTrue: [ | acc |
-					(acc := osp processAccessor) notNil
-						ifTrue: [ acc breakDependents ] ] ]! !
-
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
-startUp: resuming
-	"Initialize my singleton instance, and the singleton instance of my
-	OSProcessAccessor. On Unix, set the signal handler in my process
-	accessor to respond to externally generated sigchld signals. This
-	must be done after each image restart in order to call a primitive
-	which informs the VM of the identity of the semaphore to signal.
-	When not running on a Unix system, the primitive fails and the
-	method has no effect. Notify dependents of the singleton instance
-	if the image has restarted in a different OS process (this is not the
-	case when #startUp is called after a simple image save). The
-	notification is done in the initialization of my OSProcessAccessor."
-
-	| aio |
-	(aio := Smalltalk at: #AioEventHandler)
-		ifNotNil: [ aio startUp: resuming ].
-	resuming ifTrue: [ self initializeThisOSProcess ]! !
-
 !MacProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in
@@ -12323,12 +12431,6 @@ pathString
 arguments
 
 	^ arguments
-! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
-environment
-
-	^ environment
 ! !
 
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
@@ -12887,18 +12989,6 @@ killCurrentChildrenAtExit
 	"OSProcess thisOSProcess killCurrentChildrenAtExit"
 
 	self processAccessor killOnVmExit: self activeChildren withSignal: nil
-! !
-
-!UnixProcess methodsFor: 'printing' stamp: 'dtl 7/7/2010 07:37'!
-printOn: aStream
-	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
-	treats $U as a vowel."
-
-	self ppid.		"Force update of ppid, in case parent may have exited."
-	aStream nextPutAll: 'a ';
-			nextPutAll: self class name;
-			nextPutAll: ' with pid ';
-			nextPutAll: self pid printString
 ! !
 
 !UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 5/18/2009 21:07'!
@@ -14101,12 +14191,6 @@ waitForCommand: aCommandString
 	^ proc
 ! !
 
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 22:02'!
-environment
-
-	^ environment
-! !
-
 !WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:15'!
 mainThread
 	"The main thread for this OS process. The handle for this thread is a
@@ -14377,19 +14461,6 @@ isStopped
 isSuccess
 	^self exitStatus = 0! !
 
-!UnixProcessExitStatus methodsFor: 'printing' stamp: 'dtl 8/22/2012 23:18'!
-printOn: aStream
-
-	self isExited
-		ifTrue: [aStream nextPutAll: 'normal termination with status ';
-				 nextPutAll: self statusIfExited asString].
-	self isSignaled
-		ifTrue: [aStream nextPutAll: 'exit due to signal ';
-				nextPutAll: self statusIfSignaled asString].
-	self isStopped
-		ifTrue: [aStream nextPutAll: 'stopped due to signal ';
-				nextPutAll: self statusIfStopped].! !
-
 !UnixProcessExitStatus class methodsFor: 'instance creation' stamp: 'dtl 8/22/2012 21:24'!
 for: integerValue
 
@@ -14488,13 +14559,6 @@ isComplete
 isRunning
 
 	^ self runState == #running! !
-
-!WindowsThread methodsFor: 'printing' stamp: 'dtl 2/27/2002 12:02'!
-printOn: aStream
-
-	super printOn: aStream.
-	aStream nextPutAll: ' (', self threadID printString, ', ', self runState, ')'
-! !
 
 !WindowsThread class methodsFor: 'instance creation' stamp: 'dtl 2/25/2002 07:00'!
 threadID: anInteger handle: aHandleObject
