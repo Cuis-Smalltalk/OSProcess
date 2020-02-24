@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:52:10 am'!
+'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:53:41 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 10!
+!provides: 'OSProcess' 1 11!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -3217,19 +3217,16 @@ mkstemp: templateString
 		writable: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 6/3/2013 21:59'!
+!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 2/8/2020 15:18'!
 mktemp: templateString
 	"Call mktemp() to generate a unique temporary filename from a template string.
-	The last six or more characters of template must be XXXXXX and these are replaced
-	with a string that make the filename unique. The templateString must be a mutable
-	string, because the primitive will change its contents.
-	
+	No longer supported in OSProcess because mktemp() is considered a security risk.
 	Use primitiveMkstemp to avoid file creation race condition, see man 3 mktemp."
 
 	"OSProcess accessor mktemp: 'foo.XXXXXX' "
 	"OSProcess accessor mktemp: '/tmp/foo.XXXXXX' "
 
-	^ self primMktemp: templateString
+	^ self error: 'mktemp: support has been removed for security reasons, use mkstemp or mkdtemp: instead'
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:34'!
@@ -10248,6 +10245,25 @@ command: aCommandString
 	^ self thisOSProcess command: aCommandString
 ! !
 
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 2/8/2020 15:35'!
+evaluate: aCommandString
+	"Evaluate a command pipeline created from aCommandString. Answer a
+	ProxyPipeline that evaluated the command string. Use #upToEndOfFile
+	and #errorUpToEnd to read the standard output and standard error
+	respectively. Open file handles will be closed after sending #upToEndOfFile,
+	or may be closed explicitly with #closePipes for #finalize."
+
+	"OSProcess evaluate: 'ls | cat | wc' "
+	"OSProcess evaluate: 'ls -ldt * | edit' "
+	"OSProcess evaluate: 'ls NOSUCHFILE * | cat | wc' "
+	"OSProcess evaluate: 'ls | copyToOutput | wc' "
+	"OSProcess evaluate: ''"
+
+	Smalltalk at: #CommandShell
+		ifPresent: [ :cls | ^ (Smalltalk at: #ProxyPipeline) command: aCommandString shell: cls new ].
+	self notify: 'CommandShell not found'
+! !
+
 !OSProcess class methodsFor: 'external command processing' stamp: 'dtl 1/7/2001 13:06'!
 squeak
 	"Start a new instance of Squeak running in a child OS process. The new instance
@@ -10698,12 +10714,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/31/2020 00:24'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 2/8/2020 12:43'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.6.16'! !
+	^ '4.6.17'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
