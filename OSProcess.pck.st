@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:50:26 am'!
+'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:52:10 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 9!
+!provides: 'OSProcess' 1 10!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -1032,6 +1032,22 @@ primTestEndOfFileFlag: aSqFileStruct
 	^ self subclassResponsibility
 ! !
 
+!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 1/31/2020 00:14'!
+spaceFor: bytesRequired inDirectoryPath: dirPath
+	"Given a file size requirement in bytes, and a path specifying a location
+	within a file system, answer true if that file system has sufficient free
+	space to save a file of that size. The file size parameter must be a
+	SmallInteger (not LargePositiveInteger) and the directory path is a string.
+	This primitive is entended as a guard to protect against saving an image
+	file when the file system is full."
+
+	"OSProcess accessor spaceFor: 16000000 inDirectoryPath: '/home' "
+	"OSProcess accessor spaceFor: 16000000 inDirectoryPath: '/proc' "
+	"OSProcess accessor spaceFor: 16000000 inDirectoryPath: 'INVALID PATH' "
+
+	^ self primSpaceFor: bytesRequired InDirectoryPath: dirPath
+! !
+
 !OSProcessAccessor methodsFor: 'platform identification' stamp: 'dtl 8/24/2003 09:18'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
@@ -1954,6 +1970,12 @@ primSizeOfPointer
 	<primitive: 'primitiveSizeOfPointer' module: 'UnixOSProcessPlugin'>
 	^ self primitiveFailed
 ! !
+
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/31/2020 00:15'!
+primSpaceFor: byteSize InDirectoryPath: dirPath
+
+	<primitive: 'primitiveSpaceForByteSizeInDirectoryPath' module: 'UnixOSProcessPlugin'>
+	^ self primitiveFailed! !
 
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/28/2010 14:06'!
 primTestEndOfFileFlag: aSqFileStruct
@@ -4334,6 +4356,13 @@ primOSProcessPluginModuleVersionString
 	<primitive: 'primitiveVersionString' module: 'Win32OSProcessPlugin'>
 	^ nil
 ! !
+
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/31/2020 00:15'!
+primSpaceFor: byteSize InDirectoryPath: dirPath
+
+	<primitive: 'primitiveSpaceForByteSizeInDirectoryPath' module: 'Win32OSProcessPlugin'>
+	self flag: 'FIXME'. "not yet implemented in OSPP for Windows"
+	^ self primitiveFailed! !
 
 !WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/8/2007 10:54'!
 primTestEndOfFileFlag: aSqFileStruct
@@ -10669,12 +10698,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 8/31/2019 16:20'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/31/2020 00:24'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.6.15'! !
+	^'4.6.16'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
