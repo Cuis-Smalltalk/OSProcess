@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:54:48 am'!
+'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:55:43 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 12!
+!provides: 'OSProcess' 1 13!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -8044,7 +8044,7 @@ testBufferedUpToEnd
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:21'!
+!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 2/9/2020 15:34'!
 testIsAtEndOfFile
 
 	"(OSPipeTestCase selector: #testIsAtEndOfFile) debug"
@@ -8072,7 +8072,7 @@ testIsAtEndOfFile
 	p writer close.
 	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
 	self deny: p atEndOfFile. "no read yet, so flag has not been set"
-	self deny: p reader atEnd.
+	self deny: p reader atEnd description: 'Failure here is likely caused by stdio hacks in sqFileAtEnd() support code. Don''t do that.'.
 	self assert: p atEnd. "writer closed and read gives nil"
 
 	self assert: (p reader basicNext == nil). "read operation should set flag"
