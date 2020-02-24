@@ -1,8 +1,8 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3589] on 8 February 2019 at 11:08:07 pm'!
+'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:50:26 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 8!
-!requires: 'Network-Kernel' 1 1 nil!
+!provides: 'OSProcess' 1 9!
 !requires: 'SqueakCompatibility' 1 4 nil!
+!requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
 SystemOrganization addCategory: #'OSProcess-Mac'!
 SystemOrganization addCategory: #'OSProcess-OS2'!
@@ -2643,29 +2643,38 @@ restoreSignal: signalNumber
 	^ sema
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 2/28/2018 20:00'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/31/2019 15:47'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
 
-	^ self primGetStdErrHandle
-		ifNotNil: [:handle | self ioAccessorFromSQFile: handle]! !
+	| handle |
+	(handle := self primGetStdErrHandle)
+		ifNotNil: [^self ioAccessorFromSQFile: handle].
+	^nil
+! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 2/28/2018 20:00'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/31/2019 15:46'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
 
-	^ self primGetStdInHandle
-		ifNotNil: [:handle | self ioAccessorFromSQFile: handle]! !
+	| handle |
+	(handle := self primGetStdInHandle)
+		ifNotNil: [^self ioAccessorFromSQFile: handle].
+	^nil
+! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 2/28/2018 20:00'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/31/2019 15:45'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
 
-	^ self primGetStdOutHandle
-		ifNotNil: [:handle | self ioAccessorFromSQFile: handle]! !
+	| handle |
+	(handle := self primGetStdOutHandle)
+		ifNotNil: [^self ioAccessorFromSQFile: handle].
+	^nil
+! !
 
 !UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 3/17/2007 23:14'!
 getThreadID
@@ -10660,12 +10669,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/21/2019 10:45'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 8/31/2019 16:20'!
 versionString
 
 	"OSProcess versionString"
 
-	^'4.6.14'! !
+	^'4.6.15'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -10764,16 +10773,16 @@ readOnlyFileNamed: path
 		ifFalse: [ FileStream readOnlyFileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/20/2018 20:23:42'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 8/31/2019 15:50'!
 saveChangesInFileNamed: aString
 
 	self useFileMan
-		ifTrue: [ | newChangesName |
-			Smalltalk currentChangesName ifNotNil: [ :oldChangesName |
-			Smalltalk closeSourceFiles. "so copying the changes file will always work"
-			newChangesName _ self fullNameForChangesNamed: aString.
-			(Smalltalk at: #FileIOAccessor) default
-				copy: (oldChangesName perform: #asFileEntry) to: (newChangesName perform: #asFileEntry) ] ]
+		ifTrue: [ | oldChangesName newChangesName |
+			(oldChangesName := Smalltalk currentChangesName) ifNotNil: [
+				Smalltalk closeSourceFiles. "so copying the changes file will always work"
+				newChangesName := self fullNameForChangesNamed: aString.
+				(Smalltalk at: #FileIOAccessor) default
+					copy: (oldChangesName perform: #asFileEntry) to: (newChangesName perform: #asFileEntry) ] ]
 		ifFalse:
 			[Smalltalk saveChangesInFileNamed: aString ]! !
 
@@ -12304,6 +12313,55 @@ makeVmIn: buildDirectoryPathName
 	either located in, or linked to, the buildDirectoryPathName directory."
 ! !
 
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
+arguments
+
+	^ arguments
+! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+path
+
+	^ path := self pathString
+! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+path: aPathString
+
+	self environmentAt: #PATH put: aPathString.
+	path := self pathString! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 10/18/2001 20:01'!
+pid
+
+	^ pid := self processAccessor primGetPid
+! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+ppid
+	"Always refresh ppid from the processAccessor, because it is possible for a child
+	to be reparented when the parent exits. The child does not know about this, so
+	we refresh ppid on every access."
+
+	^ ppid := processAccessor primGetPPid
+! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+programName
+
+	^ programName
+! !
+
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 3/17/2007 22:54'!
+pthread
+	"The identity of the pthread in which the interpreter executes.
+	Always refresh pthread from the processAccessor, because it is possible for a child
+	to be reparented when the parent exits. The child does not know about this, so
+	we refresh pthread on every access."
+
+	^ pthread := processAccessor getThreadID
+! !
+
 !UnixProcess methodsFor: 'private' stamp: 'djr 4/6/2009 14:31'!
 argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	"Given anArrayOfNullTerminatedStrings, flatten the array into a string buffer,
@@ -12426,55 +12484,6 @@ pathString
 	path name is a colon delimited string stored in the PATH environment variable."
 
 	^ self environment at: #PATH ifAbsent: [nil]! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
-arguments
-
-	^ arguments
-! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
-path
-
-	^ path := self pathString
-! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
-path: aPathString
-
-	self environmentAt: #PATH put: aPathString.
-	path := self pathString! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 10/18/2001 20:01'!
-pid
-
-	^ pid := self processAccessor primGetPid
-! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
-ppid
-	"Always refresh ppid from the processAccessor, because it is possible for a child
-	to be reparented when the parent exits. The child does not know about this, so
-	we refresh ppid on every access."
-
-	^ ppid := processAccessor primGetPPid
-! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
-programName
-
-	^ programName
-! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 3/17/2007 22:54'!
-pthread
-	"The identity of the pthread in which the interpreter executes.
-	Always refresh pthread from the processAccessor, because it is possible for a child
-	to be reparented when the parent exits. The child does not know about this, so
-	we refresh pthread on every access."
-
-	^ pthread := processAccessor getThreadID
-! !
 
 !UnixProcess methodsFor: 'environment' stamp: 'dtl 1/25/2013 19:00'!
 chDir: pathString
@@ -14103,6 +14112,38 @@ waitForCommandOutputArray: aCommandString
 
 	^ self thisOSProcess waitForCommandOutputArray: aCommandString! !
 
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:15'!
+mainThread
+	"The main thread for this OS process. The handle for this thread is a
+	pseudo-handle, and cannot be used to close the main thread."
+
+	^ mainThread ifNil: [mainThread := processAccessor getMainThread]! !
+
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 16:43'!
+pid
+
+	^ pid := self processAccessor primGetPid
+! !
+
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:26'!
+processHandle
+	"The handle for this OS process. This is a pseudo-handle, a constant provided
+	by Windows to represent the process. Note that the main thread handle is also
+	represented by a pseudo-handle."
+
+	^ processHandle ifNil: [processHandle := self processAccessor primGetPidHandle]
+! !
+
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 08:04'!
+threads
+	"One or more threads of execution within the OS process. The main
+	thread for the process is held by the mainThread variable and is not
+	included in this collection. Threads are created to wait for the exit of
+	child processes, so this collection grows as child processes are created."
+
+	^ threads ifNil: [threads := OrderedCollection new]
+! !
+
 !WindowsProcess methodsFor: 'child process management' stamp: 'dtl 2/26/2002 16:08'!
 activeHandles
 	"Answer an Array of handles for all children that are believed to be running."
@@ -14189,38 +14230,6 @@ waitForCommand: aCommandString
 	proc ifNil: [self class noAccessorAvailable].
 	[proc runState == #complete] whileFalse: [d wait].
 	^ proc
-! !
-
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:15'!
-mainThread
-	"The main thread for this OS process. The handle for this thread is a
-	pseudo-handle, and cannot be used to close the main thread."
-
-	^ mainThread ifNil: [mainThread := processAccessor getMainThread]! !
-
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 16:43'!
-pid
-
-	^ pid := self processAccessor primGetPid
-! !
-
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:26'!
-processHandle
-	"The handle for this OS process. This is a pseudo-handle, a constant provided
-	by Windows to represent the process. Note that the main thread handle is also
-	represented by a pseudo-handle."
-
-	^ processHandle ifNil: [processHandle := self processAccessor primGetPidHandle]
-! !
-
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 08:04'!
-threads
-	"One or more threads of execution within the OS process. The main
-	thread for the process is held by the mainThread variable and is not
-	included in this collection. Threads are created to wait for the exit of
-	child processes, so this collection grows as child processes are created."
-
-	^ threads ifNil: [threads := OrderedCollection new]
 ! !
 
 !WindowsProcess methodsFor: 'environment' stamp: 'DamienCassou 5/3/2012 11:53'!
