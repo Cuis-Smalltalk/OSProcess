@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:53:41 am'!
+'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:54:48 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 11!
+!provides: 'OSProcess' 1 12!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -10264,6 +10264,25 @@ evaluate: aCommandString
 	self notify: 'CommandShell not found'
 ! !
 
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 2/8/2020 16:21'!
+outputOf: aCommandString
+	"Evaluate a command pipeline created from aCommandString. Answer a
+	the output of the evaluation. If the command string resulted in error outputs,
+	then raise an error before answering the output result."
+
+	"OSProcess outputOf: 'ls | cat | wc' "
+	"OSProcess outputOf: 'ls * NOSUCHFILE' "
+	"OSProcess outputOf: 'ls -ldt * | edit' "
+	"OSProcess outputOf: 'ls | copyToOutput | wc' "
+
+	|pipeline out err|
+	pipeline := self evaluate: aCommandString.
+	out := pipeline upToEndOfFile.
+	err := pipeline errorUpToEnd.
+	err isEmpty ifFalse: [self error: err].
+	^ out
+! !
+
 !OSProcess class methodsFor: 'external command processing' stamp: 'dtl 1/7/2001 13:06'!
 squeak
 	"Start a new instance of Squeak running in a child OS process. The new instance
@@ -10714,12 +10733,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 2/8/2020 12:43'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 2/8/2020 16:11'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.6.17'! !
+	^ '4.6.18'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
