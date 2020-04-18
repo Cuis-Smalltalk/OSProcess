@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4047] on 24 February 2020 at 10:55:43 am'!
+'From Cuis 5.0 [latest update: #4117] on 18 April 2020 at 10:26:29 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 13!
+!provides: 'OSProcess' 1 14!
 !requires: 'SqueakCompatibility' 1 4 nil!
 !requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -10733,12 +10733,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 2/8/2020 16:11'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 3/21/2020 14:18'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.6.18'! !
+	^ '4.6.19'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -10837,7 +10837,7 @@ readOnlyFileNamed: path
 		ifFalse: [ FileStream readOnlyFileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 8/31/2019 15:50'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 3/21/2020 11:37'!
 saveChangesInFileNamed: aString
 
 	self useFileMan
@@ -10848,7 +10848,9 @@ saveChangesInFileNamed: aString
 				(Smalltalk at: #FileIOAccessor) default
 					copy: (oldChangesName perform: #asFileEntry) to: (newChangesName perform: #asFileEntry) ] ]
 		ifFalse:
-			[Smalltalk saveChangesInFileNamed: aString ]! !
+			[(Smalltalk respondsTo: #saveChangesInFileNamed:)
+				ifTrue: [Smalltalk saveChangesInFileNamed: aString].
+			(Smalltalk classNamed: #SmalltalkImage) current perform: #saveChangesInFileNamed: with: aString]! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
 accessor
