@@ -591,7 +591,7 @@ startUp: resuming
 	This method is called by ThisOSProcess>>startUp. AioEventHandler does
 	not need to be registered in the system startup list."
 
-	resuming ifTrue: [AioPluginPresent := nil]
+	resuming ifTrue: [AioPluginPresent _ nil]
 ! !
 
 !ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
@@ -600,7 +600,7 @@ printOn: aStream
 	for OSPipe. This implementation is copied from Object."
 
 	| title |
-	title := self class name.
+	title _ self class name.
 	aStream
 		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
 		nextPutAll: title! !
@@ -676,9 +676,9 @@ shutDown: quitting
 
 	quitting
 		ifTrue: [ | osp |
-			(osp := OSProcess thisOSProcess) notNil
+			(osp _ OSProcess thisOSProcess) notNil
 				ifTrue: [ | acc |
-					(acc := osp processAccessor) notNil
+					(acc _ osp processAccessor) notNil
 						ifTrue: [ acc breakDependents ] ] ]! !
 
 !ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
@@ -695,7 +695,7 @@ startUp: resuming
 	notification is done in the initialization of my OSProcessAccessor."
 
 	| aio |
-	(aio := Smalltalk at: #AioEventHandler)
+	(aio _ Smalltalk at: #AioEventHandler)
 		ifNotNil: [ aio startUp: resuming ].
 	resuming ifTrue: [ self initializeThisOSProcess ]! !
 
@@ -829,7 +829,7 @@ emulateWin32FileLocking
 !OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 9/24/2009 21:36'!
 fileLockRegistry
 
-	^ FileLockRegistry ifNil: [FileLockRegistry := Set new]
+	^ FileLockRegistry ifNil: [FileLockRegistry _ Set new]
 ! !
 
 !OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:06'!
@@ -868,7 +868,7 @@ unregister: fileRegionLock
 canObtainSessionIdentifierFromPlugin
 
 	^ canObtainSessionIdentifierFromPlugin
-		ifNil: [canObtainSessionIdentifierFromPlugin := self primGetSession notNil]! !
+		ifNil: [canObtainSessionIdentifierFromPlugin _ self primGetSession notNil]! !
 
 !OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/27/2015 19:54'!
 grimReaper
@@ -880,12 +880,12 @@ grimReaper
 grimReaper: anObject
 	"Set the value of grimReaper"
 
-	grimReaper := anObject! !
+	grimReaper _ anObject! !
 
 !OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 3/2/2002 08:32'!
 sessionIdentifier
 
-	^ sessionIdentifier ifNil: [sessionIdentifier := self getSessionIdentifier]
+	^ sessionIdentifier ifNil: [sessionIdentifier _ self getSessionIdentifier]
 ! !
 
 !OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/15/2018 10:12:22'!
@@ -899,8 +899,8 @@ getSessionIdentifier
 	"OSProcess accessor getSessionIdentifier"
 
 	| session |
-	session := self primGetSession.
-	session ifNil: [session :=  self getSessionIdentifierFromSourcesFile].
+	session _ self primGetSession.
+	session ifNil: [session _  self getSessionIdentifierFromSourcesFile].
 	^ session
 ! !
 
@@ -920,11 +920,11 @@ getSessionIdentifierFromSourcesFile
 	"OSProcess accessor getSessionIdentifierFromSourcesFile"
 
 	| s id |
-	s := SourceFiles first.
+	s _ SourceFiles first.
 	s ifNil: [^ nil].
 	^ (Smalltalk hasClassNamed: #IOHandle)
 		ifTrue: [(s ioHandle perform: #getHandle) copyFrom: 5 to: 8]
-		ifFalse: [(id := s fileID) ifNotNil: [id copyFrom: 5 to: 8]]
+		ifFalse: [(id _ s fileID) ifNotNil: [id copyFrom: 5 to: 8]]
 ! !
 
 !OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 3/2/2002 09:07'!
@@ -986,9 +986,9 @@ ioAccessorFromSQFile: aByteArray
 !OSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 2/27/2015 19:51'!
 initialize
 
-	canObtainSessionIdentifierFromPlugin := nil.
+	canObtainSessionIdentifierFromPlugin _ nil.
 	self canObtainSessionIdentifierFromPlugin.
-	sessionIdentifier := nil.
+	sessionIdentifier _ nil.
 	self sessionIdentifier.
 ! !
 
@@ -1000,7 +1000,7 @@ newPid
 
 	grimReaper notNil
 		ifTrue: [ grimReaper terminate.
-			grimReaper := nil ].
+			grimReaper _ nil ].
 	self changed: #pid.
 	self restartChildWatcherProcess! !
 
@@ -1064,7 +1064,7 @@ makePipeHandles
 	"OSProcess accessor makePipeHandles"
 
 	| p |
-	p := self primCreatePipe.
+	p _ self primCreatePipe.
 	p isNil
 		ifFalse: [ ^ p collect: [ :e | self ioAccessorFromSQFile: e ] ].
 	^ nil! !
@@ -1105,7 +1105,7 @@ emulateWin32FileLocking: trueOrFalse
 	"self emulateWin32FileLocking: true"
 	"self emulateWin32FileLocking: false"
 
-	EmulateWin32FileLocking := trueOrFalse
+	EmulateWin32FileLocking _ trueOrFalse
 ! !
 
 !OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 12/14/2013 09:15'!
@@ -1113,8 +1113,8 @@ initialize
 
 	"OSProcessAccessor initialize"
 
-	UseIOHandle := (Smalltalk hasClassNamed: #IOHandle).
-	ThisOSProcessAccessor := nil.
+	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle).
+	ThisOSProcessAccessor _ nil.
 	self emulateWin32FileLocking: false.
 	self allSubInstances do: [:e | e finalize]
 ! !
@@ -1135,7 +1135,7 @@ forThisOSProcess
 						["We are running on a different platform, so start a new accessor"
 						ThisOSProcessAccessor changed: #invalidProcessAccessor.
 						ThisOSProcessAccessor finalize]].
-	^ ThisOSProcessAccessor := self concreteClass basicNew initialize
+	^ ThisOSProcessAccessor _ self concreteClass basicNew initialize
 ! !
 
 !OSProcessAccessor class methodsFor: 'instance creation' stamp: 'dtl 3/2/2002 08:29'!
@@ -1328,12 +1328,12 @@ chDir: pathString
 	"OSProcess accessor chDir: FileDirectory default name"
 
 	| result message |
-	result := self primChdir: pathString.
+	result _ self primChdir: pathString.
 	result isNil
 		ifTrue:
 			[^ nil]
 		ifFalse:
-			[message := self primErrorMessageAt: result.
+			[message _ self primErrorMessageAt: result.
 			^ message]
 ! !
 
@@ -1407,7 +1407,7 @@ primEnvironmentAt: index
 
 !UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/31/2001 11:03'!
 primErrorMessageAt: anInteger
-	"Answer an error message string from the sys:=errlist array, indexed by anInteger."
+	"Answer an error message string from the sys_errlist array, indexed by anInteger."
 
 	"OSProcess accessor primErrorMessageAt: 0"
 	"OSProcess accessor primErrorMessageAt: 100"
@@ -1545,7 +1545,7 @@ putPath: aString
 	"Convenience method. Set the environment PATH variable to aString."
 
 	| pathString |
-	pathString := 'PATH=', aString, ((Character value: 0) asString). 
+	pathString _ 'PATH=', aString, ((Character value: 0) asString). 
 	^ self environmentPut: pathString
 
 
@@ -1641,9 +1641,9 @@ currentSigHandlerAddress: signalNumber
 	"OSProcess accessor currentSigHandlerAddress: OSProcess accessor primSigIntNumber"
 
 	| sema index previousHandlerAddress |
-	sema := Semaphore new.
-	index := Smalltalk registerExternalObject: sema.
-	(previousHandlerAddress := self primForwardSignal: signalNumber toSemaphore: index)
+	sema _ Semaphore new.
+	index _ Smalltalk registerExternalObject: sema.
+	(previousHandlerAddress _ self primForwardSignal: signalNumber toSemaphore: index)
 		ifNil:
 			[Smalltalk unregisterExternalObject: sema.
 			^ self error: 'could not forward signal number ', signalNumber asString].
@@ -1656,7 +1656,7 @@ listSigHandlerAddressesOnConsole
 	"OSProcess accessor listSigHandlerAddressesOnConsole"
 
 	(0 to: 67) do: [:sigNum | | prev |
-		[prev := OSProcess accessor currentSigHandlerAddress: sigNum.
+		[prev _ OSProcess accessor currentSigHandlerAddress: sigNum.
 		OSProcess debugMessage: 'signal ', sigNum asString,' hander is ', prev printString]
 			on: Error
 			do: [:ex | OSProcess debugMessage: ex printString]]
@@ -1669,7 +1669,7 @@ listSigHandlerAddressesOnTranscript
 
 	Transcript cr.
 	(0 to: 67) do: [:sigNum | | prev |
-		[prev := OSProcess accessor currentSigHandlerAddress: sigNum.
+		[prev _ OSProcess accessor currentSigHandlerAddress: sigNum.
 		Transcript show: 'signal ', sigNum asString,' hander is ', prev printString; cr]
 			on: Error
 			do: [:ex | Transcript show: ex printString; cr]]
@@ -1684,7 +1684,7 @@ environmentPut: aString
 	"OSProcess thisOSProcess processAccessor environmentPut: 'SOMEKEY=somevalue'"
 
 	| cString |
-	cString := aString, (Character value: 0) asString.
+	cString _ aString, (Character value: 0) asString.
 	^ self primPutEnv: cString
 ! !
 
@@ -1831,8 +1831,8 @@ primKill: listOfPids withSignal: signumOrNil
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/3/2004 19:59'!
 primLockFileRegion: aSQFileStruct offset: begin length: len exclusive: flag
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
-	If the exclusive flag is true, then request an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, request a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
+     file. Otherwise, request a shared (F_RDLCK) lock. Any number of Unix processes
      may  hold  a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock). Answer the result of the call to fcntl()."
 
@@ -1992,8 +1992,8 @@ primTestEndOfFileFlag: aSqFileStruct
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/4/2004 15:29'!
 primTestLockableFileRegion: aSQFileStruct offset: begin length: len exclusive: flag
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
-	If the exclusive flag is true, then specify an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, specify a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
+     file. Otherwise, specify a shared (F_RDLCK) lock. Any number of Unix processes
      may hold  a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock).
 
@@ -2003,11 +2003,11 @@ primTestLockableFileRegion: aSQFileStruct offset: begin length: len exclusive: f
 	If the fcntl() call fails, answer -1 (the result of the failed call). Otherwise,
 	answer an array with the following six fields:
 		lockable (true or false)
-		l:=pid (pid of the process preventing this lock request, or nil)
-		l:=type (request type F:=WRLCK or F:=RDLOCK of the process preventing this lock request)
-		l:=whence (the SEEK:=SET, SEEK:=CUR, or SEEK:=END value of the lock preventing this lock request).
-		l:=start (offset of the region lock preventing this lock request)
-		l:=len (length of the region lock preventing this lock request)"
+		l_pid (pid of the process preventing this lock request, or nil)
+		l_type (request type F:=WRLCK or F:=RDLOCK of the process preventing this lock request)
+		l_whence (the SEEK:=SET, SEEK:=CUR, or SEEK:=END value of the lock preventing this lock request).
+		l_start (offset of the region lock preventing this lock request)
+		l_len (length of the region lock preventing this lock request)"
 
 	<primitive: 'primitiveTestLockableFileRegion' module: 'UnixOSProcessPlugin'>
 	^ nil
@@ -2082,7 +2082,7 @@ fileProtectionMask: aPathString
 
 	| mask |
 	(aPathString isKindOf: String) ifFalse: [self error: 'expected a path string'. ^ nil].
-	mask := self primFileProtectionMask: aPathString.
+	mask _ self primFileProtectionMask: aPathString.
 	(mask == nil) ifTrue: [^ nil].
 	(mask isKindOf: Integer)
 		ifTrue: [^ self primErrorMessageAt: mask].
@@ -2101,7 +2101,7 @@ fileStat: aPathString
 
 	| mask |
 	(aPathString isKindOf: String) ifFalse: [self error: 'expected a path string'. ^ nil].
-	mask := self primFileStat: aPathString.
+	mask _ self primFileStat: aPathString.
 	(mask == nil) ifTrue: [^ nil].
 	(mask isKindOf: Integer)
 		ifTrue: [^ self primErrorMessageAt: mask].
@@ -2130,22 +2130,22 @@ isExecutable: aPathName forUser: uid inGroup: gid
 		inGroup: OSProcess accessor primGetGid"
 
 	| fStat suid sgid user group protectionMask |
-	fStat := self fileStat: aPathName.
+	fStat _ self fileStat: aPathName.
 	(fStat isKindOf: String)
 		ifTrue: [self inform: aPathName, ': ', fStat. ^ nil].
-	protectionMask := fStat at: 3.
+	protectionMask _ fStat at: 3.
 	((protectionMask at: 4) allMask: 1)
 		ifTrue: [^ true]. "Test executable by any user ID"
-	sgid := (protectionMask at: 1) allMask: 2.
+	sgid _ (protectionMask at: 1) allMask: 2.
 	sgid
-		ifTrue: [group := gid]
-		ifFalse: [group := fStat at: 2].
+		ifTrue: [group _ gid]
+		ifFalse: [group _ fStat at: 2].
 	((gid == group) and: [(protectionMask at: 3) allMask: 1])
 		ifTrue: [^ true]. "Test executable by my group ID"
-	suid := (protectionMask at: 1) allMask: 4.
+	suid _ (protectionMask at: 1) allMask: 4.
 	suid
-		ifTrue: [user := uid]
-		ifFalse: [user := fStat at: 1].
+		ifTrue: [user _ uid]
+		ifFalse: [user _ fStat at: 1].
 	((uid == user) and: [(protectionMask at: 2) allMask: 1])
 		ifTrue: [^ true]. "Test executable by my user ID"
 	^ false
@@ -2173,16 +2173,16 @@ isReadable: aPathName forUser: uid inGroup: gid
 		inGroup: OSProcess accessor primGetGid"
 
 	| fStat user group protectionMask |
-	fStat := self fileStat: aPathName.
+	fStat _ self fileStat: aPathName.
 	(fStat isKindOf: String)
 		ifTrue: [self inform: aPathName, ': ', fStat. ^ nil].
-	protectionMask := fStat at: 3.
+	protectionMask _ fStat at: 3.
 	((protectionMask at: 4) allMask: 4)
 		ifTrue: [^ true]. "Test readable by any user ID"
-	group := fStat at: 2.
+	group _ fStat at: 2.
 	((gid == group) and: [(protectionMask at: 3) allMask: 4])
 		ifTrue: [^ true]. "Test readable by my group ID"
-	user := fStat at: 1.
+	user _ fStat at: 1.
 	((uid == user) and: [(protectionMask at: 2) allMask: 4])
 		ifTrue: [^ true]. "Test readable by my user ID"
 	^ false
@@ -2210,16 +2210,16 @@ isWritable: aPathName forUser: uid inGroup: gid
 		inGroup: OSProcess accessor primGetGid"
 
 	| fStat user group protectionMask |
-	fStat := self fileStat: aPathName.
+	fStat _ self fileStat: aPathName.
 	(fStat isKindOf: String)
 		ifTrue: [self inform: aPathName, ': ', fStat. ^ nil].
-	protectionMask := fStat at: 3.
+	protectionMask _ fStat at: 3.
 	((protectionMask at: 4) allMask: 2)
 		ifTrue: [^ true]. "Test writable by any user ID"
-	group := fStat at: 2.
+	group _ fStat at: 2.
 	((gid == group) and: [(protectionMask at: 3) allMask: 2])
 		ifTrue: [^ true]. "Test writable by my group ID"
-	user := fStat at: 1.
+	user _ fStat at: 1.
 	((uid == user) and: [(protectionMask at: 2) allMask: 2])
 		ifTrue: [^ true]. "Test writable by my user ID"
 	^ false
@@ -2232,7 +2232,7 @@ finalize
 
 	self grimReaper ifNotNil:
 			[grimReaper terminate.
-			grimReaper := nil].
+			grimReaper _ nil].
 	self sigChldSemaphore ifNotNil:
 			[self restoreSigChld.
 			self sigChldSemaphore: nil]
@@ -2246,13 +2246,13 @@ grimReaperProcess
 
 	| eventWaiter processSynchronizationDelay |
 	^ self canAccessSystem
-		ifTrue: [ eventWaiter := (self canAccessSystem
+		ifTrue: [ eventWaiter _ (self canAccessSystem
 				and: [ self canForwardExternalSignals ])
 				ifTrue: [ self sigChldSemaphore	"semaphore signaled by SIGCHLD" ]
 				ifFalse: [ Delay forMilliseconds: 200	"simple polling loop" ].
-			processSynchronizationDelay := Delay forMilliseconds: 20.
+			processSynchronizationDelay _ Delay forMilliseconds: 20.
 			grimReaper
-				ifNil: [ grimReaper := [ [ (eventWaiter respondsTo: #waitTimeoutMSecs:)
+				ifNil: [ grimReaper _ [ [ (eventWaiter respondsTo: #waitTimeoutMSecs:)
 						ifTrue: [ eventWaiter waitTimeoutMSecs: 1000	"semaphore with timeout" ]
 						ifFalse: [ eventWaiter wait ].
 					processSynchronizationDelay wait.	"Avoids lost signals in heavy process switching"
@@ -2278,7 +2278,7 @@ initialize
 	ThisProcessPid ~~ self primGetPid
 		ifTrue: 
 			["Image has been restarted and is now running in a different OS process"
-			ThisProcessPid := self primGetPid.
+			ThisProcessPid _ self primGetPid.
 			self changed: #startUp].
 	self changed.
 	self restartChildWatcherProcess.
@@ -2539,8 +2539,8 @@ forwardSignal: signalNumber
 	"OSProcess accessor forwardSignal: OSProcess accessor primSigIntNumber"
 
 	| sema index |
-	sema := Semaphore new.
-	index := Smalltalk registerExternalObject: sema.
+	sema _ Semaphore new.
+	index _ Smalltalk registerExternalObject: sema.
 	(self primForwardSignal: signalNumber toSemaphore: index)
 		ifNil:
 			[Smalltalk unregisterExternalObject: sema.
@@ -2656,9 +2656,9 @@ restoreSignal: signalNumber
 	"OSProcess accessor restoreSignal: OSProcess accessor primSigIntNumber"
 
 	| semaphoreIndex sema |
-	semaphoreIndex := self primSemaIndexFor: signalNumber.
+	semaphoreIndex _ self primSemaIndexFor: signalNumber.
 	semaphoreIndex ifNotNil:
-		[sema := Smalltalk externalObjects at: semaphoreIndex ifAbsent: [].
+		[sema _ Smalltalk externalObjects at: semaphoreIndex ifAbsent: [].
 		sema ifNotNil:
 			[self primForwardSignal: signalNumber toSemaphore: nil.
 			Smalltalk unregisterExternalObject: sema]].
@@ -2671,7 +2671,7 @@ getStdErrHandle
 	OS process in which I am currently executing."
 
 	| handle |
-	(handle := self primGetStdErrHandle)
+	(handle _ self primGetStdErrHandle)
 		ifNotNil: [^self ioAccessorFromSQFile: handle].
 	^nil
 ! !
@@ -2682,7 +2682,7 @@ getStdInHandle
 	OS process in which I am currently executing."
 
 	| handle |
-	(handle := self primGetStdInHandle)
+	(handle _ self primGetStdInHandle)
 		ifNotNil: [^self ioAccessorFromSQFile: handle].
 	^nil
 ! !
@@ -2693,7 +2693,7 @@ getStdOutHandle
 	OS process in which I am currently executing."
 
 	| handle |
-	(handle := self primGetStdOutHandle)
+	(handle _ self primGetStdOutHandle)
 		ifNotNil: [^self ioAccessorFromSQFile: handle].
 	^nil
 ! !
@@ -2707,7 +2707,7 @@ getThreadID
 	"OSProcess accessor getThreadID"
 
 	| osppVer |
-	[osppVer := OSProcess accessor osppModuleVersionString asNumber]
+	[osppVer _ OSProcess accessor osppModuleVersionString asNumber]
 		on: Error
 		do: [^ nil].
 	(osppVer notNil and: [osppVer >= 4.2])
@@ -2743,15 +2743,15 @@ isLockableFile: aFileStream exclusive: flag
 
 	| fileLock |
 	aFileStream ifNil: [^ false].
-	fileLock := OSFileLock onFile: aFileStream exclusive: flag.
+	fileLock _ OSFileLock onFile: aFileStream exclusive: flag.
 	^ self isLockableFileRegion: fileLock
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/14/2004 15:09'!
 isLockableFile: aFileStream from: start to: end
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
-	If the exclusive flag is true, then specify an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, specify a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
+     file. Otherwise, specify a shared (F_RDLCK) lock. Any number of Unix processes
      may hold  a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock).
 
@@ -2766,8 +2766,8 @@ isLockableFile: aFileStream from: start to: end
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:10'!
 isLockableFile: aFileStream from: start to: end exclusive: flag
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
-	If the exclusive flag is true, then specify an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, specify a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
+     file. Otherwise, specify a shared (F_RDLCK) lock. Any number of Unix processes
      may hold  a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock).
 
@@ -2778,15 +2778,15 @@ isLockableFile: aFileStream from: start to: end exclusive: flag
 
 	| fileRegion |
 	aFileStream ifNil: [^ false].
-	fileRegion := OSFileRegionLock onFile: aFileStream from: start to: end exclusive: flag.
+	fileRegion _ OSFileRegionLock onFile: aFileStream from: start to: end exclusive: flag.
 	^ self isLockableFileRegion: fileRegion
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 2/22/2004 18:42'!
 isLockableFileRegion: aFileLock
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
-	If the exclusive flag is true, then specify an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, specify a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
+     file. Otherwise, specify a shared (F_RDLCK) lock. Any number of Unix processes
      may hold  a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock).
 
@@ -2845,15 +2845,15 @@ lockFile: aFileStream exclusive: flag ifFail: failBlock
 
 	| fileLock |
 	aFileStream ifNil: [^ failBlock value].
-	fileLock := OSFileLock onFile: aFileStream exclusive: flag.
+	fileLock _ OSFileLock onFile: aFileStream exclusive: flag.
 	^ self lockFileRegion: fileLock ifFail: failBlock
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/14/2004 15:01'!
 lockFile: aFileStream from: start to: end
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
-	If the exclusive flag is true, then request an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, request a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
+     file. Otherwise, request a shared (F_RDLCK) lock. Any number of Unix processes
      may hold a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock). Answer a descriptor for the locked file region,
 	an Array of file handle and region interval; or answer nil on error.
@@ -2872,8 +2872,8 @@ lockFile: aFileStream from: start to: end
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:10'!
 lockFile: aFileStream from: start to: end exclusive: flag
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
-	If the exclusive flag is true, then request an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, request a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
+     file. Otherwise, request a shared (F_RDLCK) lock. Any number of Unix processes
      may hold a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock). Answer a descriptor for the locked file region,
 	an Array of file handle and region interval; or answer nil on error.
@@ -2888,7 +2888,7 @@ lockFile: aFileStream from: start to: end exclusive: flag
 
 	| fileRegion |
 	aFileStream ifNil: [^ nil].
-	fileRegion := OSFileRegionLock onFile: aFileStream from: start to: end exclusive: flag.
+	fileRegion _ OSFileRegionLock onFile: aFileStream from: start to: end exclusive: flag.
 	^ self lockFileRegion: fileRegion
 ! !
 
@@ -2896,7 +2896,7 @@ lockFile: aFileStream from: start to: end exclusive: flag
 lockFile: fileStream from: start to: end exclusive: writeLockFlag ifFail: failBlock
 
 	| lock |
-	lock := OSFileRegionLock onFile: fileStream from: start to: end exclusive: writeLockFlag.
+	lock _ OSFileRegionLock onFile: fileStream from: start to: end exclusive: writeLockFlag.
 	^ self lockFileRegion: lock ifFail: [failBlock value]! !
 
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 11/28/2010 19:07'!
@@ -2923,8 +2923,8 @@ lockFile: aFileStream ifFail: failBlock
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/8/2006 07:04'!
 lockFileRegion: aFileLock
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
-	If the exclusive flag is true, then request an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, request a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
+     file. Otherwise, request a shared (F_RDLCK) lock. Any number of Unix processes
      may hold a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock). Answer a descriptor for the locked file region,
 	an Array of file handle and region interval; or answer nil on error.
@@ -2943,8 +2943,8 @@ lockFileRegion: aFileLock
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/8/2006 07:03'!
 lockFileRegion: aFileLock ifFail: failBlock
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
-	If the exclusive flag is true, then request an exclusive (F:=WRLCK) lock on the
-     file. Otherwise, request a shared (F:=RDLCK) lock. Any number of Unix processes
+	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
+     file. Otherwise, request a shared (F_RDLCK) lock. Any number of Unix processes
      may hold a read lock (shared lock) on a file region, but only one process may
      hold a write lock (exclusive lock). Answer a descriptor for the locked file region,
 	an Array of file handle and region interval; or answer nil on error.
@@ -3003,7 +3003,7 @@ unlockFile: aFileStream exclusive: flag
 
 	| fileLock |
 	aFileStream ifNil: [^ nil].
-	fileLock := OSFileLock onFile: aFileStream exclusive: flag.
+	fileLock _ OSFileLock onFile: aFileStream exclusive: flag.
 	^ self unlockFileRegion: fileLock
 ! !
 
@@ -3020,7 +3020,7 @@ unlockFile: aFileStream exclusive: flag ifFail: failBlock
 
 	| fileLock |
 	aFileStream ifNil: [^ failBlock value].
-	fileLock := OSFileLock onFile: aFileStream exclusive: flag.
+	fileLock _ OSFileLock onFile: aFileStream exclusive: flag.
 	^ self unlockFileRegion: fileLock ifFail: failBlock
 
 ! !
@@ -3062,7 +3062,7 @@ unlockFile: aFileStream from: start to: end exclusive: flag
 
 	| fileRegion |
 	aFileStream ifNil: [^ nil].
-	fileRegion := OSFileRegionLock onFile: aFileStream from: start to: end exclusive: flag.
+	fileRegion _ OSFileRegionLock onFile: aFileStream from: start to: end exclusive: flag.
 	^ self unlockFileRegion: fileRegion
 ! !
 
@@ -3070,7 +3070,7 @@ unlockFile: aFileStream from: start to: end exclusive: flag
 unlockFile: fileStream from: start to: end exclusive: writeLockFlag ifFail: failBlock
 
 	| lock |
-	lock := OSFileRegionLock onFile: fileStream from: start to: end exclusive: writeLockFlag.
+	lock _ OSFileRegionLock onFile: fileStream from: start to: end exclusive: writeLockFlag.
 	^ self unlockFileRegion: lock ifFail: [failBlock value]! !
 
 !UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/30/2009 16:25'!
@@ -3132,7 +3132,7 @@ unlockFileRegion: aFileLock ifFail: failBlock
 	"Check region lock overlap for Win32 compatibility"
 	self emulateWin32FileLocking
 		ifTrue: [ | unregisteredLock |
-				(unregisteredLock := self unregister: aFileLock)
+				(unregisteredLock _ self unregister: aFileLock)
 					ifNil: [^ failBlock value]
 					ifNotNil: [unregisteredLock unlock
 						ifTrue: [^ unregisteredLock]
@@ -3164,7 +3164,7 @@ killOnVmExit: proxies withSignal: signumOrNil
 	"OSProcess accessor killOnVmExit: OSProcess thisOSProcess allMyChildren withSignal: nil"
 
 	| pids |
-	pids := (proxies select: [:p | p isRunning] thenCollect: [:e | e pid]) asArray.
+	pids _ (proxies select: [:p | p isRunning] thenCollect: [:e | e pid]) asArray.
 	^ self kill: pids withSignal: signumOrNil
 ! !
 
@@ -3206,11 +3206,11 @@ mkstemp: templateString
 
 	"OSProcess accessor mkstemp: 'foo.XXXXXX' "
 
-	" | s | { s := 'foo.XXXXXX' . OSProcess accessor mkstemp: s } "
+	" | s | { s _ 'foo.XXXXXX' . OSProcess accessor mkstemp: s } "
 
 	| fileName sqFile |
-	fileName := templateString copy.
-	sqFile := self primMkstemp: fileName.
+	fileName _ templateString copy.
+	sqFile _ self primMkstemp: fileName.
 	^ AttachableFileStream
 		name: fileName
 		attachTo: sqFile
@@ -3272,7 +3272,7 @@ oldPrimIsConnectedToXServer
 	"OSProcess accessor primIsConnectedToXServer inspect"
 	"| x |
 	OSProcess accessor primKillDisplay.
-	x := OSProcess accessor primIsConnectedToXServer.
+	x _ OSProcess accessor primIsConnectedToXServer.
 	OSProcess accessor primOpenXDisplay.
 	x inspect"
 
@@ -3385,7 +3385,7 @@ primIsConnectedToXServer
 	"OSProcess accessor primIsConnectedToXServer inspect"
 	"| x |
 	OSProcess accessor primKillDisplay.
-	x := OSProcess accessor primIsConnectedToXServer.
+	x _ OSProcess accessor primIsConnectedToXServer.
 	OSProcess accessor primOpenXDisplay.
 	x inspect"
 
@@ -3717,14 +3717,14 @@ unregister: fileRegionLock
 sigChldSemaphore
 	"Answer the value of sigChldSemaphore"
 
-	^ sigChldSemaphore ifNil: [sigChldSemaphore := self forwardSigChld].
+	^ sigChldSemaphore ifNil: [sigChldSemaphore _ self forwardSigChld].
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 1/25/2004 21:29'!
 sigChldSemaphore: anObject
 	"Set the value of sigChldSemaphore"
 
-	sigChldSemaphore := anObject! !
+	sigChldSemaphore _ anObject! !
 
 !UnixOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:49'!
 isResponsibleForThisPlatform
@@ -3746,7 +3746,7 @@ grimReaperProcess
 	"This is a process which waits for the death of a child OSProcess, and 
 	informs any dependents of the change."
 
-	grimReaper ifNil: [grimReaper := [
+	grimReaper ifNil: [grimReaper _ [
 				[self sigChldSemaphoreSet wait.
 				self changed: #childProcessStatus] repeat] newProcess.
 				grimReaper resume.
@@ -3769,7 +3769,7 @@ primGetExitStatusForHandle: handleObject
 	the process is still active, or if the GetExitCodeProcess call fails."
 
 	"| procInfo |
-	procInfo := OSProcess accessor primCommand: 'SOL'.
+	procInfo _ OSProcess accessor primCommand: 'SOL'.
 	(Delay forSeconds: 5) wait.
 	OSProcess accessor primGetExitStatusForHandle: procInfo first"
 
@@ -3799,7 +3799,7 @@ primTerminateThread: aThreadHandle
 restartChildWatcherProcess
 	grimReaper notNil
 		ifTrue: [ grimReaper terminate.
-			grimReaper := nil ].
+			grimReaper _ nil ].
 	self grimReaperProcess! !
 
 !WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 1/13/2007 09:48'!
@@ -3823,7 +3823,7 @@ setWaitForAnyProcessExit: arrayOfProcessHandleObjects
 
 	| threadInfo |
 	arrayOfProcessHandleObjects isEmpty ifTrue: [^ nil].
-	threadInfo := self
+	threadInfo _ self
 		primSetWaitForAnyProcessExit: arrayOfProcessHandleObjects
 		thenSignalSemaphoreWithIndex: self semaIndex.
 	^ WindowsThread
@@ -3837,8 +3837,8 @@ setWaitForAnyProcessExit: arrayOfProcessHandleObjects
 sigChldSemaphoreSet
 
 	sigChldSemaphore ifNil:
-		[sigChldSemaphore := Semaphore new.
-		semaIndex := Smalltalk registerExternalObject: sigChldSemaphore].
+		[sigChldSemaphore _ Semaphore new.
+		semaIndex _ Smalltalk registerExternalObject: sigChldSemaphore].
 	^ sigChldSemaphore! !
 
 !WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 9/10/2002 09:24'!
@@ -3848,7 +3848,7 @@ canAccessChildProcess: anExternalProcess
 	watching."
 
 	| handle |
-	^ (handle := anExternalProcess handle) notNil
+	^ (handle _ anExternalProcess handle) notNil
 		ifTrue: [self primCanAccessChildProcess: handle]
 		ifFalse: [false]
 ! !
@@ -3892,7 +3892,7 @@ childWatcherThread
 childWatcherThread: aThreadObject
 	"A thread which signals my sigChldSemaphore when any child process exits."
 
-	childWatcherThread := aThreadObject
+	childWatcherThread _ aThreadObject
 ! !
 
 !WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/25/2002 21:17'!
@@ -3908,11 +3908,11 @@ finalize
 
 	grimReaper ifNotNil:
 			[grimReaper terminate.
-			grimReaper := nil].
+			grimReaper _ nil].
 	sigChldSemaphore ifNotNil:
 			[Smalltalk unregisterExternalObject: sigChldSemaphore.
-			sigChldSemaphore := nil].
-	semaIndex := nil
+			sigChldSemaphore _ nil].
+	semaIndex _ nil
 ! !
 
 !WindowsOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 3/2/2002 08:33'!
@@ -4015,7 +4015,7 @@ getStdErr
 	"OSProcess accessor getStdErr"
 
 	| error |
-	error := self primGetStdErrorForSession: self sessionIdentifier.
+	error _ self primGetStdErrorForSession: self sessionIdentifier.
 	^ (error notNil and: [error last])
 		ifTrue: [self ioAccessorFromSQFile: error first]
 		ifFalse: [nil]
@@ -4038,7 +4038,7 @@ getStdIn
 	"OSProcess accessor getStdIn"
 
 	| input |
-	input := self primGetStdInputForSession: self sessionIdentifier.
+	input _ self primGetStdInputForSession: self sessionIdentifier.
 	^ (input notNil and: [input last])
 		ifTrue: [self ioAccessorFromSQFile: input first]
 		ifFalse: [nil]
@@ -4061,7 +4061,7 @@ getStdOut
 	"OSProcess accessor getStdOut"
 
 	| output |
-	output := self primGetStdOutputForSession: self sessionIdentifier.
+	output _ self primGetStdOutputForSession: self sessionIdentifier.
 	^ (output notNil and: [output last])
 		ifTrue: [self ioAccessorFromSQFile: output first]
 		ifFalse: [nil]
@@ -4084,12 +4084,12 @@ openStdErr
 	"OSProcess accessor openStdErr"
 
 	| error |
-	error := self primGetStdErrorForSession: self sessionIdentifier.
+	error _ self primGetStdErrorForSession: self sessionIdentifier.
 	error ifNil: [^ nil].
 	error last
 		ifFalse:
 			[self primAllocConsole.
-			error := self primGetStdOutputForSession: self sessionIdentifier].
+			error _ self primGetStdOutputForSession: self sessionIdentifier].
 	^ self ioAccessorFromSQFile: error first
 ! !
 
@@ -4102,12 +4102,12 @@ openStdIn
 	"OSProcess accessor openStdIn"
 
 	| input |
-	input := self primGetStdInputForSession: self sessionIdentifier.
+	input _ self primGetStdInputForSession: self sessionIdentifier.
 	input ifNil: [^ nil].
 	input last
 		ifFalse:
 			[self primAllocConsole.
-			input := self primGetStdOutputForSession: self sessionIdentifier].
+			input _ self primGetStdOutputForSession: self sessionIdentifier].
 	^ self ioAccessorFromSQFile: input first
 ! !
 
@@ -4120,12 +4120,12 @@ openStdOut
 	"OSProcess accessor openStdOut"
 
 	| output |
-	output := self primGetStdOutputForSession: self sessionIdentifier.
+	output _ self primGetStdOutputForSession: self sessionIdentifier.
 	output ifNil: [^ nil].
 	output last
 		ifFalse:
 			[self primAllocConsole.
-			output := self primGetStdOutputForSession: self sessionIdentifier].
+			output _ self primGetStdOutputForSession: self sessionIdentifier].
 	^ self ioAccessorFromSQFile: output first
 ! !
 
@@ -4134,12 +4134,12 @@ setStdErr: aFileStream
 	"Set the standard error handle for this OSProcess to be that of aFileStream"
 
 	"| fs |
-	fs := FileStream fileNamed: 'stdError.tmp'.
+	fs _ FileStream fileNamed: 'stdError.tmp'.
 	OSProcess accessor setStdErr: fs"
 
 	| sqFile |
 	aFileStream ifNil: [^ false].
-	sqFile := UseIOHandle
+	sqFile _ UseIOHandle
 				ifTrue: [aFileStream ioHandle handle]
 				ifFalse: [aFileStream fileID].
 	^ self primSetStdErr: sqFile
@@ -4150,14 +4150,14 @@ setStdIn: aFileStream
 	"Set the standard input handle for this OSProcess to be that of aFileStream"
 
 	"| fs |
-	fs := FileStream fileNamed: 'stdInput.tmp'.
+	fs _ FileStream fileNamed: 'stdInput.tmp'.
 	fs nextPutAll: 'this is a line of text'; cr.
 	fs position: 0.
 	OSProcess accessor setStdIn: fs"
 
 	| sqFile |
 	aFileStream ifNil: [^ false].
-	sqFile := UseIOHandle
+	sqFile _ UseIOHandle
 				ifTrue: [aFileStream ioHandle handle]
 				ifFalse: [aFileStream fileID].
 	^ self primSetStdIn: sqFile
@@ -4168,12 +4168,12 @@ setStdOut: aFileStream
 	"Set the standard output handle for this OSProcess to be that of aFileStream"
 
 	"| fs |
-	fs := FileStream fileNamed: 'stdOutput.tmp'.
+	fs _ FileStream fileNamed: 'stdOutput.tmp'.
 	OSProcess accessor setStdOut: fs"
 
 	| sqFile |
 	aFileStream ifNil: [^ false].
-	sqFile := UseIOHandle
+	sqFile _ UseIOHandle
 				ifTrue: [aFileStream ioHandle handle]
 				ifFalse: [aFileStream fileID].
 	^ self primSetStdOut: sqFile
@@ -4186,8 +4186,8 @@ lastReadFor: aSemaphoreIndex
 	was read, or -1 if an error occurred on the read."
 
 	| c readResult |
-	readResult := Array new: 3.
-	c := self primLastReadFor: aSemaphoreIndex storeIn: readResult.
+	readResult _ Array new: 3.
+	c _ self primLastReadFor: aSemaphoreIndex storeIn: readResult.
 	(c < 1) ifTrue: [self error: 'primLastReadFor: error, returned negative value'].
 	^ c
 ! !
@@ -4208,7 +4208,7 @@ nextFrom: aFileStream signaling: aSemaphoreIndex
 	signal the specified Semaphore to notify that the character is available."
 
 	| sqFile |
-	sqFile := UseIOHandle
+	sqFile _ UseIOHandle
 				ifTrue: [aFileStream ioHandle handle]
 				ifFalse: [aFileStream fileID].
 	^ self primNextFrom: sqFile signaling: aSemaphoreIndex
@@ -4381,7 +4381,7 @@ primCloseHandle: handleObject
 	some other Win32 object."
 
 	"| procInfo |
-	procInfo := OSProcess accessor primCommand: 'SOL'.
+	procInfo _ OSProcess accessor primCommand: 'SOL'.
 	OSProcess accessor primCloseHandle: procInfo first"
 
 	<primitive: 'primitiveCloseHandle' module: 'Win32OSProcessPlugin'>
@@ -4561,10 +4561,10 @@ close
 	self breakDependents.
 	Smalltalk unregisterExternalObject: semaphore.
 	self aioDisable: self descriptor.
-	semaphore := nil.
-	semaIndex := nil.
-	p := handlerProc.
-	handlerProc := nil.
+	semaphore _ nil.
+	semaIndex _ nil.
+	p _ handlerProc.
+	handlerProc _ nil.
 	p ifNotNil: [p terminate] "p may be the active process, do this last"
 ! !
 
@@ -4638,15 +4638,15 @@ forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writ
 !AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 9/3/2010 16:48'!
 initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 
-	semaphore := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: semaphore.
+	semaphore _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: semaphore.
 	([self aioEnable: self descriptor forSemaphore: self semaIndex externalObject: true]
 		on: Warning
 		do: [:e |
 			self close. "unregister the semaphore"
 			self notify: e messageText. nil])
 		ifNotNil:
-			[handlerProc := self
+			[handlerProc _ self
 				handleExceptions: exceptionEventFlag
 				readEvents: readEventFlag
 				writeEvents: writeEventFlag]
@@ -4671,8 +4671,8 @@ handleExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writ
 	"Generate a #changed notification whenever the requested type of external aio event occurs."
 
 	| p sema handler |
-	sema := Semaphore new.
-	handler := [[self hasValidHandler] whileTrue:
+	sema _ Semaphore new.
+	handler _ [[self hasValidHandler] whileTrue:
 		[self aioHandle: self descriptor
 			exceptionEvents: exceptionEventFlag
 			readEvents: readEventFlag
@@ -4680,7 +4680,7 @@ handleExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writ
 		sema signal. "event handler is ready"
 		self semaphore wait.
 		self changed]].
-	p := handler forkAt: Processor userBackgroundPriority.
+	p _ handler forkAt: Processor userBackgroundPriority.
 	sema wait. "until process has been started and events are being handled"
 	^p! !
 
@@ -4716,7 +4716,7 @@ descriptor
 !AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:05'!
 descriptor: aLowLevelIODescriptor
 
-	descriptor := aLowLevelIODescriptor! !
+	descriptor _ aLowLevelIODescriptor! !
 
 !AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:04'!
 handlerProc
@@ -4748,7 +4748,7 @@ handleForFile: aFileStream
 	"self new handleForFile: SourceFiles first"
 
 	| ioHandle |
-	ioHandle := self useIOHandle
+	ioHandle _ self useIOHandle
 		ifTrue: [aFileStream ioHandle]
 		ifFalse: [aFileStream fileID].
 	^ self primOSFileHandle: ioHandle
@@ -4760,7 +4760,7 @@ handleForSocket: aSocket
 	"self new handleForSocket: Socket newTCP"
 
 	| ioHandle |
-	ioHandle := self useIOHandle
+	ioHandle _ self useIOHandle
 		ifTrue: [aSocket ioHandle]
 		ifFalse: [aSocket socketHandle].
 	^ self primOSSocketHandle: ioHandle
@@ -4863,7 +4863,7 @@ aioPluginPresent
 	"AioEventHandler aioPluginPresent"
 
 	^ AioPluginPresent
-		ifNil: [AioPluginPresent := self basicNew primAioModuleVersionString notNil.
+		ifNil: [AioPluginPresent _ self basicNew primAioModuleVersionString notNil.
 			AioPluginPresent ifFalse:
 				[OSProcess trace: ' AioPlugin not present, AioEventHandler will use polling input'].
 			^ AioPluginPresent]! !
@@ -4878,7 +4878,7 @@ initializeAioPluginPresent
 	"AioEventHandler initializeAioPluginPresent"
 
 	^ AioPluginPresent
-		ifNil: [AioPluginPresent := self basicNew primAioModuleVersionString notNil]! !
+		ifNil: [AioPluginPresent _ self basicNew primAioModuleVersionString notNil]! !
 
 !AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/5/2003 09:16'!
 for: aSocketOrFileStream
@@ -4952,8 +4952,8 @@ eventGeneratorProcess
 	"A process that generates periodic #changed events"
 
 	| d p|
-	d := Delay forMilliseconds: 125.
-	p := [[self changed.
+	d _ Delay forMilliseconds: 125.
+	p _ [[self changed.
 	d wait] repeat] newProcess.
 	^p resume.! !
 
@@ -4967,7 +4967,7 @@ initialize
 eventGenerator
 	"Answer the value of eventGenerator"
 
-	^ eventGenerator ifNil: [eventGenerator := self eventGeneratorProcess]! !
+	^ eventGenerator ifNil: [eventGenerator _ self eventGeneratorProcess]! !
 
 !AttachableFileStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 21:01'!
 asAsyncFileReadStream
@@ -5005,7 +5005,7 @@ autoClose
 	this object is finalized."
 
 	^ autoClose
-		ifNil: [autoClose := true]! !
+		ifNil: [autoClose _ true]! !
 
 !AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 7/6/2006 22:17'!
 finalize
@@ -5017,7 +5017,7 @@ finalize
 keepOpen
 	"Do not allow the file to be closed when this object is finalized."
 
-	autoClose := false
+	autoClose _ false
 ! !
 
 !AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 1/20/2018 19:19:25'!
@@ -5025,7 +5025,7 @@ close
 	"Close this file."
 
 	| h |
-	(h := self ioHandle) ifNotNil:
+	(h _ self ioHandle) ifNotNil:
 		[UseIOHandle
 			ifTrue:
 				[h close.
@@ -5033,7 +5033,7 @@ close
 			ifFalse:
 				[self primCloseNoError: h.
 				self unregister.
-				fileID := nil]]
+				fileID _ nil]]
 ! !
 
 !AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:00'!
@@ -5094,9 +5094,9 @@ upToEnd
 	currently available, but the pipe is not yet closed."
 
 	| newStream buffer nextBytes |
-	buffer := buffer1 species new: 1000.
-	newStream := WriteStream on: (buffer1 species new: 100).
-	[self atEnd or: [(nextBytes := self nextInto: buffer) isEmpty]]
+	buffer _ buffer1 species new: 1000.
+	newStream _ WriteStream on: (buffer1 species new: 100).
+	[self atEnd or: [(nextBytes _ self nextInto: buffer) isEmpty]]
 		whileFalse: [newStream nextPutAll: nextBytes].
 	^ newStream contents
 ! !
@@ -5109,8 +5109,8 @@ upToEndOfFile
 	OS pipes."
 
 	| newStream buffer |
-	buffer := buffer1 species new: 1000.
-	newStream := WriteStream on: (buffer1 species new: 100).
+	buffer _ buffer1 species new: 1000.
+	newStream _ WriteStream on: (buffer1 species new: 100).
 	[self atEndOfFile] whileFalse: [newStream nextPutAll: (self nextInto: buffer)].
 	^ newStream contents! !
 
@@ -5131,10 +5131,10 @@ isPipe
 name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
 	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
 
-	name := aSymbolOrString.
+	name _ aSymbolOrString.
 	UseIOHandle
 		ifTrue: [self perform: #ioHandle: with: anIOHandle]
-		ifFalse: [fileID := anIOHandle].
+		ifFalse: [fileID _ anIOHandle].
 	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
 	self ascii.
 	UseIOHandle ifFalse: [self register]
@@ -5185,7 +5185,7 @@ initialize
 
 	"AttachableFileStream initialize"
 
-	UseIOHandle := (Smalltalk hasClassNamed: #IOHandle)
+	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle)
 ! !
 
 !AttachableFileStream class methodsFor: 'instance creation' stamp: 'dtl 3/15/2006 19:50'!
@@ -5230,7 +5230,7 @@ stdIn
 actAsExecutor
 
 	super actAsExecutor.
-	eventHandler := nil! !
+	eventHandler _ nil! !
 
 !AsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 9/3/2010 16:57'!
 finalize
@@ -5325,7 +5325,7 @@ eventHandler
 eventHandler: anAioEventHandler
 	"The aio event handler. Provides notification whenever external data is available."
 
-	eventHandler := anAioEventHandler! !
+	eventHandler _ anAioEventHandler! !
 
 !AsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 9/2/2006 09:58'!
 upToEndOfFile
@@ -5335,7 +5335,7 @@ upToEndOfFile
 	OS pipes. Close the file when end of file is detected."
 
 	| b |
-	b := super upToEndOfFile.
+	b _ super upToEndOfFile.
 	self isReadOnly
 		ifTrue: [self close].
 	^ b! !
@@ -5359,10 +5359,10 @@ stdIn
 actAsExecutor
 
 	super actAsExecutor.
-	nonBlockingMode := nil.
-	readBuffer := nil.
-	readSyncSemaphore := nil.
-	dataAvailableSemaphore := nil
+	nonBlockingMode _ nil.
+	readBuffer _ nil.
+	readSyncSemaphore _ nil.
+	dataAvailableSemaphore _ nil
 ! !
 
 !BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 10/1/2006 17:12'!
@@ -5376,7 +5376,7 @@ appendAllToBuffer: chars
 		[(self readBuffer position > self maxReadBufferSize) ifTrue:
 			["Read buffer is getting too large. Replace it."
 			self readBuffer: (ReadWriteStream on: readBuffer upToEnd)].
-		pos := readBuffer position.
+		pos _ readBuffer position.
 		readBuffer setToEnd.
 		readBuffer nextPutAll: chars.
 		readBuffer position: pos].
@@ -5391,7 +5391,7 @@ appendToBuffer: aCharacter
 
 	| pos |
 	self readSyncSemaphore critical:
-		[pos := self readBuffer position.
+		[pos _ self readBuffer position.
 		readBuffer setToEnd.
 		readBuffer nextPut: aCharacter.
 		readBuffer position: pos].
@@ -5405,9 +5405,9 @@ moveAvailableDataFrom: sqFile
 	(readBuffer notNil and: [readBuffer size > self readBufferMemoryWarningThreshold])
 		ifTrue: [self notify: 'buffer size ', readBuffer size asString.
 			^(Delay forSeconds: 2) wait].
-	bufferSize := self readAheadChunkSize.
-	buffer := String new: bufferSize.
-	count := self readAvailableDataFrom: sqFile into: buffer.
+	bufferSize _ self readAheadChunkSize.
+	buffer _ String new: bufferSize.
+	count _ self readAvailableDataFrom: sqFile into: buffer.
 	count > 0
 		ifTrue:
 			[count == bufferSize
@@ -5434,15 +5434,15 @@ readAvailableDataFrom: sqFile into: buffer
 	the number of bytes read into the buffer."
 
 	| bytesRead |
-	bytesRead := 0.
+	bytesRead _ 0.
 	[ | count |
-		[count := self primRead: sqFile
+		[count _ self primRead: sqFile
 				into: buffer
 				startingAt: 1 + bytesRead
 				count: self readAheadChunkSize - bytesRead]
 			on: Error	"Could fail if closed"
-			do: [count := 0].
-	bytesRead := bytesRead + count.
+			do: [count _ 0].
+	bytesRead _ bytesRead + count.
 	count > 0] whileTrue.
 	^ bytesRead.
 ! !
@@ -5550,7 +5550,7 @@ next: n into: aString startingAt: startIndex
 	Return aString or a partial copy if less than n elements have been read."
 
 	| count |
-	count := self readInto: aString startingAt: startIndex count: n.
+	count _ self readInto: aString startingAt: startIndex count: n.
 	count = n
 		ifTrue: [^ aString]
 		ifFalse: [^ aString copyFrom: 1 to: startIndex+count-1]! !
@@ -5575,11 +5575,11 @@ readInto: byteArray startingAt: startIndex count: count
 	| s size |
 	self isBlocking
 		ifTrue: [self waitForDataReady: count.
-			s := self readSyncSemaphore
+			s _ self readSyncSemaphore
 						critical: [self readBuffer next: count].
-			size := count]
-		ifFalse: [size := self readBuffer size - readBuffer position min: count.
-			s := self readSyncSemaphore
+			size _ count]
+		ifFalse: [size _ self readBuffer size - readBuffer position min: count.
+			s _ self readSyncSemaphore
 						critical: [self readBuffer next: size]].
 	byteArray
 		replaceFrom: startIndex
@@ -5601,8 +5601,8 @@ upToEndOfFile
 	OS pipes. Close the file when end of file is detected."
 
 	| newStream buffer |
-	buffer := buffer1 species new: 1000.
-	newStream := WriteStream on: (buffer1 species new: 100).
+	buffer _ buffer1 species new: 1000.
+	newStream _ WriteStream on: (buffer1 species new: 100).
 	[self atEndOfFile] whileFalse:
 		[self moveAvailableDataToBuffer.
 		newStream nextPutAll: (self nextInto: buffer)].
@@ -5615,40 +5615,40 @@ dataAvailableSemaphore
 	"Signalled one or more times when data becomes available. Only one Process
 	is permitted to wait on this Semaphore."
 
-	^ dataAvailableSemaphore ifNil: [dataAvailableSemaphore := Semaphore new]
+	^ dataAvailableSemaphore ifNil: [dataAvailableSemaphore _ Semaphore new]
 ! !
 
 !BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/9/2003 20:57'!
 nonBlockingMode
 	"True if nonblocking read behavior should be implemented"
 
-	^ nonBlockingMode ifNil: [nonBlockingMode := true]
+	^ nonBlockingMode ifNil: [nonBlockingMode _ true]
 ! !
 
 !BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/9/2003 20:58'!
 nonBlockingMode: trueOrFalse
 	"True if nonblocking read behavior should be implemented"
 
-	nonBlockingMode := trueOrFalse
+	nonBlockingMode _ trueOrFalse
 ! !
 
 !BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 2/24/2013 10:22'!
 readBuffer
 	"Read ahead buffer, filled asynchronously as data becomes available on the IO channel"
 
-	^ readBuffer ifNil: [readBuffer := ReadWriteStream on: String new]
+	^ readBuffer ifNil: [readBuffer _ ReadWriteStream on: String new]
 ! !
 
 !BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/6/2003 10:15'!
 readBuffer: aStream
 
-	readBuffer := aStream! !
+	readBuffer _ aStream! !
 
 !BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/6/2003 10:15'!
 readSyncSemaphore
 	"A semaphore for synchronizing access to readBuffer"
 
-	^ readSyncSemaphore ifNil: [readSyncSemaphore := Semaphore forMutualExclusion]! !
+	^ readSyncSemaphore ifNil: [readSyncSemaphore _ Semaphore forMutualExclusion]! !
 
 !BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 7/6/2003 10:15'!
 maxReadBufferSize
@@ -5740,13 +5740,13 @@ isPipe
 blocking
 	"True if reader end is set to blocking mode."
 
-	^ blocking ifNil: [blocking := true]! !
+	^ blocking ifNil: [blocking _ true]! !
 
 !ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 20:00'!
 blocking: trueOrFalse
 	"True if reader end is set to blocking mode."
 
-	blocking := trueOrFalse! !
+	blocking _ trueOrFalse! !
 
 !ExternalPipe methodsFor: 'accessing' stamp: 'dtl 4/16/2003 06:01'!
 contents
@@ -5758,7 +5758,7 @@ contents
 	self closed ifTrue:
 		[self notify: self printString, ' ', self reader printString, ' closed'.
 		^ nil].
-	s := self reader upToEnd.
+	s _ self reader upToEnd.
 	s isEmpty ifFalse:
 		[self writer closed
 			ifTrue: [self notify: self printString, ' ', self writer printString,
@@ -5811,7 +5811,7 @@ reader
 !ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
 reader: aReadStream
 
-	reader := aReadStream! !
+	reader _ aReadStream! !
 
 !ExternalPipe methodsFor: 'accessing' stamp: 'dtl 9/18/2002 20:29'!
 upToEnd
@@ -5840,7 +5840,7 @@ writer
 !ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
 writer: aWriteStream
 
-	writer := aWriteStream! !
+	writer _ aWriteStream! !
 
 !ExternalPipe methodsFor: 'finalization' stamp: 'dtl 3/7/2006 19:44'!
 close
@@ -5877,7 +5877,7 @@ makePipe
 	"Create an OS pipe and attach it to my input and output streams."
 
 	| handleArray |
-	handleArray := OSProcess accessor makePipeHandles.
+	handleArray _ OSProcess accessor makePipeHandles.
 	handleArray isNil
 		ifTrue:
 			[self error: 'cannot create OS pipe']
@@ -5989,10 +5989,10 @@ testPipe
 	"OSPipe testPipe inspect"
 
 	| pipe result |
-	pipe := self new.
+	pipe _ self new.
 	pipe nextPutAll: 'string to send through an OSPipe'.
 	pipe writer close.
-	result := pipe upToEnd.
+	result _ pipe upToEnd.
 	pipe close.
 	^ result
 ! !
@@ -6008,8 +6008,8 @@ next
 				on: Error
 				do: [nil]]
 		ifFalse:
-			[c := nextChar.
-			nextChar := nil.
+			[c _ nextChar.
+			nextChar _ nil.
 			^ c]
 ! !
 
@@ -6018,10 +6018,10 @@ next: anInteger
 	"Answer the next anInteger elements of my collection."
 
 	| c strm |
-	strm := WriteStream on: String new.
+	strm _ WriteStream on: String new.
 	(1 to: anInteger) do:
 		[:index |
-		c := self next.
+		c _ self next.
 		c isNil
 			ifTrue: [^ strm contents]	
 			ifFalse: [strm nextPut: c. false]].
@@ -6033,7 +6033,7 @@ peek
 
 	^ nextChar isNil
 		ifTrue: [reader closed
-				ifFalse: [nextChar := reader next]]
+				ifFalse: [nextChar _ reader next]]
 		ifFalse: [nextChar]! !
 
 !OSPipe methodsFor: 'accessing' stamp: 'dtl 2/24/2013 10:24'!
@@ -6042,8 +6042,8 @@ upToEnd
 	compatibility with older versions of CommandShell."
 
 	| strm s |
-	strm := WriteStream on: String new.
-	[(s := self next: 2000) isEmpty
+	strm _ WriteStream on: String new.
+	[(s _ self next: 2000) isEmpty
 		ifTrue: [^ strm contents]
 		ifFalse: [strm nextPutAll: s]] repeat
 ! !
@@ -6056,9 +6056,9 @@ upToEndOfFile
 	of file test in FilePlugin."
 
 	| strm d s |
-	strm := WriteStream on: String new.
-	d := Delay forMilliseconds: 200.
-	[(s := self next: 2000) isEmpty
+	strm _ WriteStream on: String new.
+	d _ Delay forMilliseconds: 200.
+	[(s _ self next: 2000) isEmpty
 		ifTrue: [self atEndOfFile
 			ifTrue: [^ strm contents]
 			ifFalse: [d wait]]
@@ -6085,7 +6085,7 @@ doRemote: remoteBlock doLocal: localBlock
 					nextPut: Character lf]"
 
 	| result |
-	self shouldnt: [remoteProcess := OSProcess thisOSProcess forkHeadlessSqueak]
+	self shouldnt: [remoteProcess _ OSProcess thisOSProcess forkHeadlessSqueak]
 		raise: Warning.
 	self assert: remoteProcess notNil. "Fail if fork did not succeed"
 	(remoteProcess == OSProcess thisOSProcess)
@@ -6096,7 +6096,7 @@ doRemote: remoteBlock doLocal: localBlock
 			["parent Squeak"
 			[[remoteProcess isRunning] whileFalse: [self delay wait].
 			self delay wait.
-			result := localBlock value]
+			result _ localBlock value]
 				ensure:	[remoteProcess terminate.
 					[remoteProcess isComplete] whileFalse: [self delay wait].
 					self delay wait.
@@ -6148,7 +6148,7 @@ expectedFailures
 initialize
 
 	initialCompatibilitySetting
-		ifNil: [initialCompatibilitySetting := OSProcess accessor emulateWin32FileLocking]! !
+		ifNil: [initialCompatibilitySetting _ OSProcess accessor emulateWin32FileLocking]! !
 
 !AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/13/2006 09:36'!
 isValidUnlockResult: result
@@ -6181,10 +6181,10 @@ setUp
 
 	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
 		ifTrue: [self perform: #timeout: with: 30].
-	delay := Delay forMilliseconds: 150.
-	accessor := ThisOSProcess accessor.
+	delay _ Delay forMilliseconds: 150.
+	accessor _ ThisOSProcess accessor.
 	OSProcess deleteFileNamed: 'junkfile'.
-	fileStream := OSProcess fileNamed: 'junkfile'.
+	fileStream _ OSProcess fileNamed: 'junkfile'.
 	1000 timesRepeat: (fileStream nextPutAll: 'hello world ').
 ! !
 
@@ -6193,12 +6193,12 @@ tearDown
 
 	| d |
 	OSProcessAccessor emulateWin32FileLocking: initialCompatibilitySetting.
-	d := Delay forMilliseconds: 50.
+	d _ Delay forMilliseconds: 50.
 	fileStream close.
 	remoteProcess ifNotNil:
 		[remoteProcess terminate.
 		[remoteProcess isComplete] whileFalse: [d wait].
-		remoteProcess := nil]
+		remoteProcess _ nil]
 ! !
 
 !AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 12/17/2016 16:30'!
@@ -6209,7 +6209,7 @@ testCooperatingProcesses01
 	"(self selector: #testCooperatingProcesses01) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
 			fileStream position: 100.
@@ -6235,7 +6235,7 @@ testCooperatingProcesses01
 			delay wait].
 	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
 	fileStream position: 100.
-	result := fileStream next: 14.
+	result _ fileStream next: 14.
 	accessor unlockFile: fileStream from: 100 to: 140.
 	self assert: result = 'THIS is A test'
 ! !
@@ -6248,7 +6248,7 @@ testCooperatingProcesses02
 	"(self selector: #testCooperatingProcesses02) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
 			fileStream position: 100.
@@ -6272,7 +6272,7 @@ testCooperatingProcesses02
 			accessor unlockFile: fileStream from: 108 to: 120].
 	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
 	fileStream position: 100.
-	result := fileStream next: 17.
+	result _ fileStream next: 17.
 	accessor unlockFile: fileStream from: 100 to: 140.
 	self assert: result = 'THIS IS A TEST 44'
 ! !
@@ -6285,7 +6285,7 @@ testCooperatingProcesses03
 	"(self selector: #testCooperatingProcesses03) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
 			fileStream position: 100.
@@ -6308,7 +6308,7 @@ testCooperatingProcesses03
 			accessor unlockFile: fileStream from: 108 to: 120].
 	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
 	fileStream position: 100.
-	result := fileStream next: 17.
+	result _ fileStream next: 17.
 	accessor unlockFile: fileStream from: 100 to: 140.
 	self assert: result = 'THIS IS 22TEST 44'
 ! !
@@ -6321,7 +6321,7 @@ testCooperatingProcesses04
 	"(self selector: #testCooperatingProcesses04) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
 			delay wait.
@@ -6349,7 +6349,7 @@ testCooperatingProcesses04
 			accessor unlockFile: fileStream from: 108 to: 120].
 	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
 	fileStream position: 100.
-	result := fileStream next: 17.
+	result _ fileStream next: 17.
 	accessor unlockFile: fileStream from: 100 to: 140.
 	self assert: result = 'THIS IS A TEST 44'
 ! !
@@ -6362,7 +6362,7 @@ testCooperatingProcesses05
 	"(self selector: #testCooperatingProcesses05) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[OSProcess thisOSProcess stdOut nextPutAll: 'starting remote squeak requesting lock on 100 to 120';
 				nextPut: Character lf.
@@ -6406,7 +6406,7 @@ testCooperatingProcesses05
 			delay wait].
 	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
 	fileStream position: 100.
-	result := fileStream next: 14.
+	result _ fileStream next: 14.
 	accessor unlockFile: fileStream from: 100 to: 140.
 	self assert: result = 'THIS IS A TEST'
 ! !
@@ -6418,12 +6418,12 @@ testLockEntireFileForWrite01
 	"(self selector: #testLockEntireFileForWrite01) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [nil]
 		doLocal: [accessor lockFile: fileStream].
 	self delay wait; wait.
 	self assert: (result isKindOf: OSFileLock).
-	result := accessor unlockFile: fileStream.
+	result _ accessor unlockFile: fileStream.
 	self assert: (result isKindOf: OSFileLock)
 ! !
 
@@ -6434,7 +6434,7 @@ testLockEntireFileForWrite02
 	"(self selector: #testLockEntireFileForWrite02) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[accessor lockFile: fileStream]
 		doLocal: [accessor lockFile: fileStream].
@@ -6445,7 +6445,7 @@ testLockEntireFileForWrite02
 	locally. However, it is not quite correct because the remote lock may pertain to
 	a different but overlapping region. Nevertheless, this seems like reasonable
 	behavior."
-	result := accessor unlockFile: fileStream.
+	result _ accessor unlockFile: fileStream.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6456,7 +6456,7 @@ testLockEntireFileForWrite03
 	"(self selector: #testLockEntireFileForWrite03) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[accessor lockFile: fileStream.
 			accessor unlockFile: fileStream]
@@ -6464,7 +6464,7 @@ testLockEntireFileForWrite03
 			[accessor lockFile: fileStream].
 	self delay wait; wait.
 	self assert: (result isKindOf: OSFileLock).
-	result := accessor unlockFile: fileStream.
+	result _ accessor unlockFile: fileStream.
 	self assert: (result isKindOf: OSFileLock)! !
 
 !AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:48'!
@@ -6474,13 +6474,13 @@ testLockEntireFileForWrite04
 	"(self selector: #testLockEntireFileForWrite04) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [nil]
 		doLocal: [accessor isLockableFile: fileStream].
 	self delay wait; wait.
 	self should: result.
 	"No lock on the region, so the unlock should fail."
-	result := accessor unlockFile: fileStream.
+	result _ accessor unlockFile: fileStream.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6491,7 +6491,7 @@ testLockEntireFileForWrite05
 	"(self selector: #testLockEntireFileForWrite05) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[accessor lockFile: fileStream]
 		doLocal: [accessor isLockableFile: fileStream].
@@ -6500,7 +6500,7 @@ testLockEntireFileForWrite05
 	"No local lock in the cache for this file, so the unlock call will appear to fail.
 	Actually, it will have passed the unlock request through to the operating system,
 	and it will actually unlock the file."
-	result := accessor unlockFile: fileStream.
+	result _ accessor unlockFile: fileStream.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6511,7 +6511,7 @@ testLockEntireFileForWrite06
 	"(self selector: #testLockEntireFileForWrite06) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote:
 			[accessor lockFile: fileStream.
 			accessor unlockFile: fileStream]
@@ -6522,7 +6522,7 @@ testLockEntireFileForWrite06
 	"No local lock in the cache for this file, so the unlock call will appear to fail.
 	Actually, it will have passed the unlock request through to the operating system,
 	but it will have no effect because the file was never locked."
-	result := accessor unlockFile: fileStream.
+	result _ accessor unlockFile: fileStream.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6533,13 +6533,13 @@ testLockRegionForRead01
 	"(self selector: #testLockRegionForRead01) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false]
 		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false].
 	self delay wait; wait.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	result := accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))! !
 
@@ -6550,12 +6550,12 @@ testLockRegionForRead02
 	"(self selector: #testLockRegionForRead02) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false].
 	self delay wait; wait.
 	self assert: result isNil.
-	result := accessor unlockFile: fileStream from: 100 to: 199.
+	result _ accessor unlockFile: fileStream from: 100 to: 199.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6566,13 +6566,13 @@ testLockRegionForWrite01
 	"(self selector: #testLockRegionForWrite01) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [nil]
 		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true].
 	self delay wait; wait.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	result := accessor unlockFile: fileStream from: 100 to: 199.
+	result _ accessor unlockFile: fileStream from: 100 to: 199.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))! !
 
@@ -6583,7 +6583,7 @@ testLockRegionForWrite02
 	"(self selector: #testLockRegionForWrite02) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true].
 	self delay wait; wait.
@@ -6601,12 +6601,12 @@ testLockRegionForWrite03
 	"(self selector: #testLockRegionForWrite03) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor isLockableFile: fileStream from: 200 to: 299 exclusive: true].
 	self delay wait; wait.
 	self assert: result.
-	result := accessor unlockFile: fileStream from: 200 to: 299.
+	result _ accessor unlockFile: fileStream from: 200 to: 299.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6617,12 +6617,12 @@ testLockRegionForWrite04
 	"(self selector: #testLockRegionForWrite04) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor lockFile: fileStream from: 150 to: 249 exclusive: true].
 	self delay wait; wait.
 	self assert: result isNil.
-	result := accessor unlockFile: fileStream from: 150 to: 249.
+	result _ accessor unlockFile: fileStream from: 150 to: 249.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6633,13 +6633,13 @@ testLockRegionForWrite05
 	"(self selector: #testLockRegionForWrite05) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor lockFile: fileStream from: 200 to: 299 exclusive: true].
 	self delay wait; wait.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (200 to: 299)).
-	result := accessor unlockFile: fileStream from: 200 to: 299.
+	result _ accessor unlockFile: fileStream from: 200 to: 299.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (200 to: 299))! !
 
@@ -6650,12 +6650,12 @@ testLockRegionForWrite06
 	"(self selector: #testLockRegionForWrite06) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor lockFile: fileStream from: 199 to: 199 exclusive: true].
 	self delay wait; wait.
 	self assert: result isNil.
-	result := accessor unlockFile: fileStream from: 199 to: 199.
+	result _ accessor unlockFile: fileStream from: 199 to: 199.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6666,12 +6666,12 @@ testLockRegionForWrite07
 	"(self selector: #testLockRegionForWrite07) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor isLockableFile: fileStream from: 100 to: 199 exclusive: true].
 	self delay wait; wait.
 	self deny: result.
-	result := accessor unlockFile: fileStream from: 100 to: 199.
+	result _ accessor unlockFile: fileStream from: 100 to: 199.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6682,12 +6682,12 @@ testLockRegionForWrite08
 	"(self selector: #testLockRegionForWrite08) run"
 
 	| result |
-	result := self
+	result _ self
 		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
 		doLocal: [accessor isLockableFile: fileStream from: 150 to: 299 exclusive: true].
 	self delay wait; wait.
 	self deny: result.
-	result := accessor unlockFile: fileStream from: 150 to: 299.
+	result _ accessor unlockFile: fileStream from: 150 to: 299.
 	self assert: (self isValidUnlockResult: result)
 ! !
 
@@ -6700,13 +6700,13 @@ testWin32LockEmulation01
 
 	| result |
 	accessor class emulateWin32FileLocking: true.
-	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	result := accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))
 ! !
@@ -6720,12 +6720,12 @@ testWin32LockEmulation02
 
 	| result |
 	accessor class emulateWin32FileLocking: true.
-	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: result isNil.
-	result := accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))
 ! !
@@ -6739,14 +6739,14 @@ testWin32LockEmulation03
 
 	| result stream2 |
 	accessor class emulateWin32FileLocking: true.
-	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	stream2 := OSProcess fileNamed: 'junkfile'.
-	[result := accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
+	stream2 _ OSProcess fileNamed: 'junkfile'.
+	[result _ accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
 	self assert: result isNil]
 		ensure: [stream2 close].
-	result := accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))
 ! !
@@ -6760,15 +6760,15 @@ testWin32LockEmulation04
 
 	| result stream2 |
 	accessor class emulateWin32FileLocking: true.
-	stream2 := OSProcess fileNamed: 'junkfile'.
-	[result := accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
+	stream2 _ OSProcess fileNamed: 'junkfile'.
+	[result _ accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))]
 		ensure: [stream2 close].
-	result := accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199)).
-	result := accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))! !
 
@@ -6970,11 +6970,11 @@ testLockFileIfFail
 	"(self selector: #testLockFileIfFail) run"
 
 	| fail |
-	fail := false.
-	accessor lockFile: fileStream ifFail: [fail := true].
+	fail _ false.
+	accessor lockFile: fileStream ifFail: [fail _ true].
 	self shouldnt: fail.
 	fileStream close.
-	accessor lockFile: fileStream ifFail: [fail := true].
+	accessor lockFile: fileStream ifFail: [fail _ true].
 	self should: fail
 ! !
 
@@ -6984,19 +6984,19 @@ testLockFileRegionIfFail
 	"(self selector: #testLockFileRegionIfFail) run"
 
 	| fail |
-	fail := false.
+	fail _ false.
 	accessor
 		lockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self shouldnt: fail.
 	fileStream close.
 	accessor
 		lockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self should: fail.
 	accessor
 		lockFile: fileStream from: 100 to: 199
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self should: fail
 ! !
 
@@ -7006,13 +7006,13 @@ testUnlockFileIfFail
 	"(self selector: #testUnlockFileIfFail) run"
 
 	| fail |
-	fail := false.
-	accessor lockFile: fileStream ifFail: [fail := true].
+	fail _ false.
+	accessor lockFile: fileStream ifFail: [fail _ true].
 	self shouldnt: fail.
-	accessor unlockFile: fileStream ifFail: [fail := true].
+	accessor unlockFile: fileStream ifFail: [fail _ true].
 	self shouldnt: fail.
 	fileStream close.
-	accessor unlockFile: fileStream ifFail: [fail := true].
+	accessor unlockFile: fileStream ifFail: [fail _ true].
 	self should: fail
 ! !
 
@@ -7022,23 +7022,23 @@ testUnlockFileRegionIfFail
 	"(self selector: #testUnlockFileRegionIfFail) run"
 
 	| fail |
-	fail := false.
+	fail _ false.
 	accessor
 		lockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self shouldnt: fail.
 	accessor
 		unlockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self shouldnt: fail.
 	fileStream close.
 	accessor
 		unlockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self should: fail.
 	accessor
 		unlockFile: fileStream from: 100 to: 199
-		ifFail: [fail := true].
+		ifFail: [fail _ true].
 	self should: fail
 
 ! !
@@ -7049,7 +7049,7 @@ tryUntil: aBlock
 
 	| result |
 	10 timesRepeat:
-		[result := aBlock value.
+		[result _ aBlock value.
 		result ifTrue: [^ result].
 		delay wait].
 	^ result
@@ -7259,49 +7259,49 @@ isAbstract
 testEnableHandleAndDisable
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult aioDisableResult |
-	eventHandler := AioEventHandler new.
-	anOpenFile := SourceFiles at: 1.
-	fileHandle := eventHandler handleForFile: anOpenFile.
-	sema := Semaphore new.
-	[semaIndex := Smalltalk registerExternalObject: sema.
-	[aioEnableResult := eventHandler
+	eventHandler _ AioEventHandler new.
+	anOpenFile _ SourceFiles at: 1.
+	fileHandle _ eventHandler handleForFile: anOpenFile.
+	sema _ Semaphore new.
+	[semaIndex _ Smalltalk registerExternalObject: sema.
+	[aioEnableResult _ eventHandler
 			aioEnable: fileHandle
 			forSemaphore: semaIndex
 			externalObject: true]
 		on: Warning
 		do: ["Suppress warning dialog. Unit test will fail next assert."].
 	self assert: semaIndex == aioEnableResult.
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: true
 		readEvents: true
 		writeEvents: true.
 	self assert: aioHandleResult == 2r0111. "return bitmask, all three bits set"
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: true
 		readEvents: false
 		writeEvents: true.
 	self assert: aioHandleResult == 2r0101.
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: false
 		writeEvents: true.
 	self assert: aioHandleResult == 2r0100.
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: true
 		readEvents: false
 		writeEvents: false.
 	self assert: aioHandleResult == 2r0001.
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: false
 		writeEvents: false.
 	self assert: aioHandleResult == 2r0000.
-	aioDisableResult := eventHandler aioDisable: fileHandle.
+	aioDisableResult _ eventHandler aioDisable: fileHandle.
 	self assert: aioDisableResult == fileHandle]
 		ensure:
 			[Smalltalk unregisterExternalObject: sema.
@@ -7311,15 +7311,15 @@ testEnableHandleAndDisable
 testFileReadableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
-	fileName := 'DeleteThisTemporaryFile'.
+	fileName _ 'DeleteThisTemporaryFile'.
 
-	eventHandler := AioEventHandler new.
+	eventHandler _ AioEventHandler new.
 	OSProcess deleteFileNamed: fileName.
-	[anOpenFile := OSProcess fileNamed: fileName.
-	fileHandle := eventHandler handleForFile: anOpenFile.
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	[aioEnableResult := eventHandler
+	[anOpenFile _ OSProcess fileNamed: fileName.
+	fileHandle _ eventHandler handleForFile: anOpenFile.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	[aioEnableResult _ eventHandler
 			aioEnable: fileHandle
 			forSemaphore: semaIndex
 			externalObject: true]
@@ -7327,7 +7327,7 @@ testFileReadableEvent
 		do: ["Suppress warning dialog. Unit test will fail next assert."].
 	self assert: semaIndex == aioEnableResult.
 
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: true
@@ -7341,7 +7341,7 @@ testFileReadableEvent
 	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
 	self deny: sema isSignaled. "Nothing has happened to indicate more data available."
 
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: true
@@ -7355,7 +7355,7 @@ testFileReadableEvent
 	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
 	self deny: sema isSignaled. "Nothing has happened to indicate more data available."
 
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: true
@@ -7368,7 +7368,7 @@ testFileReadableEvent
 	begin reading data based on having received this initial signal."
 	sema wait. "consume the signal"
 
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: true
@@ -7392,15 +7392,15 @@ testFileReadableEvent
 testFileWritableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
-	fileName := 'DeleteThisTemporaryFile'.
+	fileName _ 'DeleteThisTemporaryFile'.
 
-	eventHandler := AioEventHandler new.
+	eventHandler _ AioEventHandler new.
 	OSProcess deleteFileNamed: fileName.
-	[anOpenFile := OSProcess fileNamed: fileName.
-	fileHandle := eventHandler handleForFile: anOpenFile.
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	[aioEnableResult := eventHandler
+	[anOpenFile _ OSProcess fileNamed: fileName.
+	fileHandle _ eventHandler handleForFile: anOpenFile.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	[aioEnableResult _ eventHandler
 			aioEnable: fileHandle
 			forSemaphore: semaIndex
 			externalObject: true]
@@ -7408,7 +7408,7 @@ testFileWritableEvent
 		do: ["Suppress warning dialog. Unit test will fail next assert."].
 	self assert: semaIndex == aioEnableResult.
 
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: false
@@ -7422,7 +7422,7 @@ testFileWritableEvent
 	self deny: sema isSignaled.
 
 	"Reset handler"
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: false
@@ -7435,7 +7435,7 @@ testFileWritableEvent
 	self deny: sema isSignaled.
 
 	"Reset handler"
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: false
@@ -7449,7 +7449,7 @@ testFileWritableEvent
 	self deny: sema isSignaled.
 
 	"Reset handler"
-	aioHandleResult := eventHandler
+	aioHandleResult _ eventHandler
 		aioHandle: fileHandle
 		exceptionEvents: false
 		readEvents: false
@@ -7473,9 +7473,9 @@ testFileWritableEvent
 testHandleForFile
 
 	| eventHandler anOpenFile fileHandle |
-	eventHandler := AioEventHandler new.
-	anOpenFile := SourceFiles at: 1.
-	fileHandle := eventHandler handleForFile: anOpenFile.
+	eventHandler _ AioEventHandler new.
+	anOpenFile _ SourceFiles at: 1.
+	fileHandle _ eventHandler handleForFile: anOpenFile.
 	self assert: fileHandle notNil.
 	self assert: (fileHandle isKindOf: Integer)
 ! !
@@ -7484,9 +7484,9 @@ testHandleForFile
 testHandleForSocket
 
 	| eventHandler socket socketHandle |
-	eventHandler := AioEventHandler new.
-	socket := Socket newTCP.
-	socketHandle := eventHandler handleForSocket: socket.
+	eventHandler _ AioEventHandler new.
+	socket _ Socket newTCP.
+	socketHandle _ eventHandler handleForSocket: socket.
 	self assert: socketHandle notNil.
 	self assert: (socketHandle isKindOf: Integer).
 	self assert: (socketHandle ~= 0) "0 is stdin on unix, unlikely to be used on other platforms"
@@ -7496,8 +7496,8 @@ testHandleForSocket
 testPrimAioModuleName
 
 	| eventHandler moduleName |
-	eventHandler := AioEventHandler new.
-	moduleName := eventHandler primAioModuleName.
+	eventHandler _ AioEventHandler new.
+	moduleName _ eventHandler primAioModuleName.
 	self assert: ('AioPlugin*' match: moduleName)
 ! !
 
@@ -7505,8 +7505,8 @@ testPrimAioModuleName
 testPrimAioModuleVersionString
 
 	| eventHandler versionString |
-	eventHandler := AioEventHandler new.
-	versionString := eventHandler primAioModuleName.
+	eventHandler _ AioEventHandler new.
+	versionString _ eventHandler primAioModuleName.
 	self assert: (versionString isKindOf: String)
 ! !
 
@@ -7515,16 +7515,16 @@ testSocketExceptionEvent
 	"Close the client socket to generate an event on the server socket"
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port := 8086.
-	serverName := '127.0.0.1'.
+	port _ 8086.
+	serverName _ '127.0.0.1'.
 	Socket initializeNetwork.
 
 	"Create the server (reader) socket"
-	serverTcpSocket := Socket newTCP.
+	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
 
 	"Create the client (writer) socket"
-	clientTcpSocket := Socket newTCP.
+	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
 
 	"Esstablish socket connection"
@@ -7532,10 +7532,10 @@ testSocketExceptionEvent
 	clientTcpSocket waitForConnectionFor: 10.
 
 	["Set up a read event handler on the server socket"
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	eventHandler := AioEventHandler new.
-	socketHandle := eventHandler handleForSocket: serverTcpSocket.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7558,13 +7558,13 @@ testSocketExceptionEvent
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
 	self deny: sema isSignaled.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	self deny: sema isSignaled.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	clientTcpSocket close.
 	(Delay forMilliseconds: 200) wait.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	(Delay forMilliseconds: 200) wait.
 "	self assert: sema isSignaled.	FIXME: no error generated; need to find a way to generate an error -dtl"
 	self deny: sema isSignaled.
@@ -7578,18 +7578,18 @@ testSocketExceptionEvent2
 	"Close the client socket to generate an event on the server socket"
 
 	| port serverTcpSocket sema semaIndex socketHandle eventHandler |
-	port := 8086.
+	port _ 8086.
 	Socket initializeNetwork.
 
 	"Create the server (reader) socket"
-	serverTcpSocket := Socket newTCP.
+	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
 
 	["Set up an exception event handler on the server socket"
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	eventHandler := AioEventHandler new.
-	socketHandle := eventHandler handleForSocket: serverTcpSocket.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7630,16 +7630,16 @@ testSocketExceptionEvent2
 testSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port := 8086.
-	serverName := '127.0.0.1'.
+	port _ 8086.
+	serverName _ '127.0.0.1'.
 	Socket initializeNetwork.
 
 	"Create the server (reader) socket"
-	serverTcpSocket := Socket newTCP.
+	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
 
 	"Create the client (writer) socket"
-	clientTcpSocket := Socket newTCP.
+	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
 
 	"Establish socket connection"
@@ -7647,10 +7647,10 @@ testSocketReadableEvent
 	clientTcpSocket waitForConnectionFor: 10.
 
 	["Set up a read event handler on the server socket"
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	eventHandler := AioEventHandler new.
-	socketHandle := eventHandler handleForSocket: serverTcpSocket.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7675,7 +7675,7 @@ testSocketReadableEvent
 	(Delay forMilliseconds: 200) wait.
 	self assert: sema isSignaled.
 	sema wait. "consume the signal"
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 
 	eventHandler
@@ -7688,7 +7688,7 @@ testSocketReadableEvent
 	(Delay forMilliseconds: 200) wait.
 	self assert: sema isSignaled.
 	sema wait. "consume the signal"
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 
 	eventHandler
@@ -7701,7 +7701,7 @@ testSocketReadableEvent
 	(Delay forMilliseconds: 200) wait.
 	self assert: sema isSignaled.
 	sema wait. "consume the signal"
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 
 	clientTcpSocket close.
@@ -7717,16 +7717,16 @@ testSocketReadableEventWithMaskNotSet
 	the event mask is working."
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port := 8086.
-	serverName := '127.0.0.1'.
+	port _ 8086.
+	serverName _ '127.0.0.1'.
 	Socket initializeNetwork.
 
 	"Create the server (reader) socket"
-	serverTcpSocket := Socket newTCP.
+	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
 
 	"Create the client (writer) socket"
-	clientTcpSocket := Socket newTCP.
+	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
 
 	"Establish socket connection"
@@ -7734,10 +7734,10 @@ testSocketReadableEventWithMaskNotSet
 	clientTcpSocket waitForConnectionFor: 10.
 
 	["Set up a read event handler on the server socket"
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	eventHandler := AioEventHandler new.
-	socketHandle := eventHandler handleForSocket: serverTcpSocket.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7760,7 +7760,7 @@ testSocketReadableEventWithMaskNotSet
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
 	self deny: sema isSignaled. "This time we should not receive a signal"
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	clientTcpSocket close.
 	serverTcpSocket close]
@@ -7772,16 +7772,16 @@ testSocketReadableEventWithMaskNotSet
 testSuspendAioForSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port := 8086.
-	serverName := '127.0.0.1'.
+	port _ 8086.
+	serverName _ '127.0.0.1'.
 	Socket initializeNetwork.
 
 	"Create the server (reader) socket"
-	serverTcpSocket := Socket newTCP.
+	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
 
 	"Create the client (writer) socket"
-	clientTcpSocket := Socket newTCP.
+	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
 
 	"Establish socket connection"
@@ -7789,10 +7789,10 @@ testSuspendAioForSocketReadableEvent
 	clientTcpSocket waitForConnectionFor: 10.
 
 	["Set up a read event handler on the server socket"
-	sema := Semaphore new.
-	semaIndex := Smalltalk registerExternalObject: sema.
-	eventHandler := AioEventHandler new.
-	socketHandle := eventHandler handleForSocket: serverTcpSocket.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7818,7 +7818,7 @@ testSuspendAioForSocketReadableEvent
 	"Handler generates a signal"
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	self assert: sema isSignaled.
 	sema wait.
@@ -7827,7 +7827,7 @@ testSuspendAioForSocketReadableEvent
 	"Handler has not been reset, so no signal this time"
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	self deny: sema isSignaled.
 
@@ -7841,7 +7841,7 @@ testSuspendAioForSocketReadableEvent
 	"Handler generates a signal"
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	self assert: sema isSignaled.
 	sema wait.
@@ -7862,7 +7862,7 @@ testSuspendAioForSocketReadableEvent
 	"Handler suspended, so no signal this time"
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	self deny: sema isSignaled.
 
@@ -7876,7 +7876,7 @@ testSuspendAioForSocketReadableEvent
 	"Handler generates a signal"
 	clientTcpSocket sendData: 'some data to send to the socket'.
 	(Delay forMilliseconds: 200) wait.
-	receivedData := serverTcpSocket receiveAvailableData.
+	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
 	self assert: sema isSignaled.
 	sema wait.
@@ -7905,7 +7905,7 @@ readFromAndClose: aPipe writingTo: aStream
 
 	| s |
 	[aPipe atEndOfFile] whileFalse:
-		[s := aPipe next: 10000.
+		[s _ aPipe next: 10000.
 		aStream nextPutAll: s asString.
 		(Delay forMilliseconds: 100) wait].
 	(aPipe respondsTo: #reader) ifTrue: [aPipe reader close].
@@ -7937,7 +7937,7 @@ testBlocking
 	"(OSPipeTestCase selector: #testBlocking) run"
 
 	| p |
-	p := OSPipe blockingPipe.
+	p _ OSPipe blockingPipe.
 	(1 to: 10) do: [:i | p nextPutAll: 'this is line ', i printString; cr].
 	p flush. "protect against buggy clib that may never flush output"
 	self should: ['this is line 1*' match: (p next: 15)].
@@ -7962,7 +7962,7 @@ testBlockingBufferedPipe
 	"(OSPipeTestCase selector: #testBlockingBufferedPipe) run"
 
 	| p |
-	p := ExternalPipe bufferedBlockingPipe.
+	p _ ExternalPipe bufferedBlockingPipe.
 	[(1 to: 10) do: [:i | p nextPutAll: 'this is line ', i printString; cr; flush].
 	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
 	self should: ['this is line 1*' match: (p next: 15)].
@@ -7987,7 +7987,7 @@ testBlockingPeek
 	"(OSPipeTestCase selector: #testBlockingPeek) run"
 
 	| p |
-	p := OSPipe blockingPipe.
+	p _ OSPipe blockingPipe.
 	p nextPutAll: 'abc'.
 	p flush. "protect against buggy clib that may never flush output"
 	self assert: (p peek == $a).
@@ -8009,7 +8009,7 @@ testBlockingPeekBufferedPipe
 	"(OSPipeTestCase selector: #testBlockingPeekBufferedPipe) run"
 
 	| p |
-	p := ExternalPipe bufferedBlockingPipe.
+	p _ ExternalPipe bufferedBlockingPipe.
 	[p nextPutAll: 'abc'; flush.
 	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
 	self assert: (p peek == $a).
@@ -8031,15 +8031,15 @@ testBufferedUpToEnd
 	"(OSPipeTestCase selector: #testBufferedUpToEnd) debug"
 
 	| s p r1 r2 |
-	s := 'some data to put through the pipe'.
-	p := OSPipe new.
+	s _ 'some data to put through the pipe'.
+	p _ OSPipe new.
 	self primTestEndOfFileFlag: p reader fileID. "check that OSPP is updated"
 	self assert: p setBufferedReader.
 	[p nextPutAll: s.
 	p closeWriter.
-	r1 := p upToEnd. "#atEnd does not detect EOF on a pipe"
+	r1 _ p upToEnd. "#atEnd does not detect EOF on a pipe"
 	self assert: r1 isEmpty.
-	r2 := p upToEndOfFile. "detects EOF correctly, gets remaining data"
+	r2 _ p upToEndOfFile. "detects EOF correctly, gets remaining data"
 	self assert: r2 = s]
 		ensure: [p close]
 ! !
@@ -8050,7 +8050,7 @@ testIsAtEndOfFile
 	"(OSPipeTestCase selector: #testIsAtEndOfFile) debug"
 
 	| p |
-	p := OSPipe new.
+	p _ OSPipe new.
 	self primTestEndOfFileFlag: p reader fileID. "check that OSPP is updated"
 	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
 	self deny: p reader atEnd.
@@ -8089,14 +8089,14 @@ testIsAtEndOfFile2
 	"(OSPipeTestCase selector: #testIsAtEndOfFile2) debug"
 
 	| p s |
-	p := OSPipe new.
+	p _ OSPipe new.
 	[p nextPutAll: 'hello'; flush.
-	s := p next: 100.
+	s _ p next: 100.
 	self assert: s = 'hello'.
 	self deny: p atEndOfFile.
 	p closeWriter.
 	self deny: p atEndOfFile.
-	s := p next: 100.
+	s _ p next: 100.
 	self assert: s = ''.
 	self assert: p atEndOfFile]
 		ensure: [p close]
@@ -8108,10 +8108,10 @@ testNonBlocking
 	"(OSPipeTestCase selector: #testNonBlocking) run"
 
 	| p ws str |
-	p := OSPipe nonBlockingPipe.
+	p _ OSPipe nonBlockingPipe.
 	self writeStuffOnThenClose: p.
-	ws := self readFromAndClose: p writingTo: (WriteStream on: String new).
-	str := (ws contents last: 16).
+	ws _ self readFromAndClose: p writingTo: (WriteStream on: String new).
+	str _ (ws contents last: 16).
 	self should: ['this is line 10*' match: str].
 	p close
 ! !
@@ -8122,12 +8122,12 @@ testNonBlockingBufferedPipe
 	"(OSPipeTestCase selector: #testNonBlockingBufferedPipe) run"
 
 	| p ws str |
-	p := ExternalPipe bufferedNonBlockingPipe.
+	p _ ExternalPipe bufferedNonBlockingPipe.
 	[self writeStuffOnThenClose: p.
 	self assert: (p peek == nil).
 	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	ws := self readFromAndClose: p writingTo: (WriteStream on: String new).
-	str := (ws contents last: 16).
+	ws _ self readFromAndClose: p writingTo: (WriteStream on: String new).
+	str _ (ws contents last: 16).
 	self should: ['this is line 10*' match: str]]
 		ensure: [p close]
 ! !
@@ -8138,7 +8138,7 @@ testNonBlockingPeek
 	"(OSPipeTestCase selector: #testNonBlockingPeek) run"
 
 	| p |
-	p := OSPipe nonBlockingPipe.
+	p _ OSPipe nonBlockingPipe.
 	p nextPutAll: 'abc'; flush.
 	self assert: (p peek == $a).
 	self assert: (p next == $a).
@@ -8159,7 +8159,7 @@ testNonBlockingPeekBufferedPipe
 	"(OSPipeTestCase selector: #testNonBlockingPeekBufferedPipe) run"
 
 	| p |
-	p := ExternalPipe bufferedNonBlockingPipe.
+	p _ ExternalPipe bufferedNonBlockingPipe.
 	[p nextPutAll: 'abc'; flush.
 	self assert: (p peek == nil).
 	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
@@ -8185,7 +8185,7 @@ primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: co
 	someone runs into problems on other hardware or compilers. -dtl"
 
 	"| a |
-	a := OSProcess thisOSProcess envAsFlatArrayAndOffsets: UnixProcess env.
+	a _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: UnixProcess env.
 	UnixProcessAccessorTestCase new
 		primFixPointersInArrayOfStrings: (a at: 1)
 		withOffsets: (a at: 2)
@@ -8202,56 +8202,56 @@ testArgsAsFlatArrayAndOffsets
 	"(UnixProcessAccessorTestCase selector: #testArgsAsFlatArrayAndOffsets) debug"
 
 	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
-	pointerSize := OSProcess accessor sizeOfPointer.
-	a := { 'one ' . 'two ' . 'three ' }.
+	pointerSize _ OSProcess accessor sizeOfPointer.
+	a _ { 'one ' . 'two ' . 'three ' }.
 	a do: [:e | e at: e size put: (Character value: 0)].
-	stringsAndOffsets := OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
+	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
 	self assert: stringsAndOffsets size == 2.
 	self assert: stringsAndOffsets second size == 3.
-	lengthOfCStrings := (a collect: [:e | e size]) sum.
-	totalLength := 4 * pointerSize + lengthOfCStrings.
+	lengthOfCStrings _ (a collect: [:e | e size]) sum.
+	totalLength _ 4 * pointerSize + lengthOfCStrings.
 	self assert: stringsAndOffsets first size == totalLength.
 	stringsAndOffsets second do: [:offset |
 		(stringsAndOffsets first at: offset) == (Character value: 0)].
 
-	rs := ReadStream on: stringsAndOffsets first.
+	rs _ ReadStream on: stringsAndOffsets first.
 	rs next: 4 * pointerSize.
-	s :=  rs next: 3.
+	s _  rs next: 3.
 	rs next.
 	self assert: s = 'one'.
-	s :=  rs next: 3.
+	s _  rs next: 3.
 	rs next.
 	self assert: s = 'two'.
-	s :=  rs next: 5.
+	s _  rs next: 5.
 	rs next.
 	self assert: s = 'three'.
 
-	rs := ReadStream on: stringsAndOffsets first.
+	rs _ ReadStream on: stringsAndOffsets first.
 	rs next: (stringsAndOffsets second at: 1).
-	s :=  rs next: 3.
+	s _  rs next: 3.
 	self assert: s = 'one'.
-	rs := ReadStream on: stringsAndOffsets first.
+	rs _ ReadStream on: stringsAndOffsets first.
 	rs next: (stringsAndOffsets second at: 2).
-	s :=  rs next: 3.
+	s _  rs next: 3.
 	self assert: s = 'two'.
-	rs := ReadStream on: stringsAndOffsets first.
+	rs _ ReadStream on: stringsAndOffsets first.
 	rs next: (stringsAndOffsets second at: 3).
-	s :=  rs next: 5.
+	s _  rs next: 5.
 	self assert: s = 'three'.
 
-	arrayWithMachineDependentPointers := self
+	arrayWithMachineDependentPointers _ self
 		primFixPointersInArrayOfStrings: stringsAndOffsets first
 		withOffsets: stringsAndOffsets second
 		count: stringsAndOffsets second size.
 	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
-	rs := ReadStream on: arrayWithMachineDependentPointers.
-	s := rs next: pointerSize.
+	rs _ ReadStream on: arrayWithMachineDependentPointers.
+	s _ rs next: pointerSize.
 	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s := rs next: pointerSize.
+	s _ rs next: pointerSize.
 	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s := rs next: pointerSize.
+	s _ rs next: pointerSize.
 	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s := rs next: pointerSize.
+	s _ rs next: pointerSize.
 	self assert: s = (String new: pointerSize). "a NULL pointer"
 	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
 ! !
@@ -8264,37 +8264,37 @@ testEnvAsFlatArrayAndOffsets
 	"(UnixProcessAccessorTestCase selector: #testEnvAsFlatArrayAndOffsets) debug"
 
 	| pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers d |
-	pointerSize := OSProcess accessor sizeOfPointer.
-	d := Dictionary new.
+	pointerSize _ OSProcess accessor sizeOfPointer.
+	d _ Dictionary new.
 	d at: #ONE put: 'one'.
 	d at: #TWO put: 'two'.
 	d at: #THREE put: 'three'.
-	stringsAndOffsets := OSProcess thisOSProcess envAsFlatArrayAndOffsets: d.
+	stringsAndOffsets _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: d.
 	self assert: stringsAndOffsets size == 2.
 	self assert: stringsAndOffsets second size == 3.
 
-	lengthOfCStrings := d keys
+	lengthOfCStrings _ d keys
 		inject: 0
 		into: [:sum :e | sum + e size + '=' size + (d at: e) size + (String new: 1) size].
 
-	totalLength := 4 * pointerSize + lengthOfCStrings.
+	totalLength _ 4 * pointerSize + lengthOfCStrings.
 	self assert: stringsAndOffsets first size == totalLength.
 	stringsAndOffsets second do: [:offset |
 		(stringsAndOffsets first at: offset) == (Character value: 0)].
 
-	arrayWithMachineDependentPointers := self
+	arrayWithMachineDependentPointers _ self
 		primFixPointersInArrayOfStrings: stringsAndOffsets first
 		withOffsets: stringsAndOffsets second
 		count: stringsAndOffsets second size.
 	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
-	rs := ReadStream on: arrayWithMachineDependentPointers.
-	s := rs next: pointerSize.
+	rs _ ReadStream on: arrayWithMachineDependentPointers.
+	s _ rs next: pointerSize.
 	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s := rs next: pointerSize.
+	s _ rs next: pointerSize.
 	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s := rs next: pointerSize.
+	s _ rs next: pointerSize.
 	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s := rs next: pointerSize.
+	s _ rs next: pointerSize.
 	self assert: s = (String new: pointerSize). "a NULL pointer"
 	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
 ! !
@@ -8305,7 +8305,7 @@ runAll
 	"UnixProcessAccessorTestCase new runAll"
 
 	| result suite |
-	suite := TestSuite new.
+	suite _ TestSuite new.
 	suite addTest: (UnixProcessAccessorTestCase selector: #testSessionIdentifier).
 	suite addTest: (UnixProcessAccessorTestCase selector: #testCanAccessSystem).
 	suite addTest: (UnixProcessAccessorTestCase selector: #testMakePipeHandles).
@@ -8322,7 +8322,7 @@ runAll
 	suite addTest: (UnixProcessAccessorTestCase selector: #runExternalProcessAccess).
 	suite addTest: (UnixProcessAccessorTestCase selector: #runForkAndExec).
 
-	result := suite run.
+	result _ suite run.
 	self should: [result defects size == 0].
 	^ result
 ! !
@@ -8333,7 +8333,7 @@ runExternalProcessAccess
 	"UnixProcessAccessorTestCase new runExternalProcessAccess"
 
 	| result suite |
-	suite := TestSuite new.
+	suite _ TestSuite new.
 	suite addTest: (UnixProcessAccessorTestCase selector: #testCanAccessSystem).
 	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory).
 	suite addTest: (UnixProcessAccessorTestCase selector: #testChDir).
@@ -8356,7 +8356,7 @@ runExternalProcessAccess
 	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetSession).
 	suite addTest: (UnixProcessAccessorTestCase selector: #testRealpath).
 
-	result := suite run.
+	result _ suite run.
 	self should: [result defects size == 0].
 	^ result
 ! !
@@ -8368,10 +8368,10 @@ runForkAndExec
 	"UnixProcessAccessorTestCase new runForkAndExec"
 
 	| result suite |
-	suite := TestSuite new.
+	suite _ TestSuite new.
 	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetChildExitStatus).
 	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimForkAndExec).
-	result := suite run.
+	result _ suite run.
 	self should: [result defects size == 0].
 	^ result
 ! !
@@ -8379,7 +8379,7 @@ runForkAndExec
 !UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 10/6/2001 08:29'!
 setUp
 
-	accessor := ThisOSProcess accessor! !
+	accessor _ ThisOSProcess accessor! !
 
 !UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/6/2001 08:36'!
 testCanAccessSystem
@@ -8397,28 +8397,28 @@ testDupTo
 	| f1 f2 fd1 fd2 result contents1 contents2 |
 	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
 	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
-	f1 := OSProcess newFileNamed: '/tmp/delete-1.me'.
-	f2 := OSProcess newFileNamed: '/tmp/delete-2.me'.
-	fd1 := OSProcess accessor primUnixFileNumber: f1 fileID.
-	fd2 := OSProcess accessor primUnixFileNumber: f2 fileID.
-	result := OSProcess accessor primDup: fd1 to: fd2.
+	f1 _ OSProcess newFileNamed: '/tmp/delete-1.me'.
+	f2 _ OSProcess newFileNamed: '/tmp/delete-2.me'.
+	fd1 _ OSProcess accessor primUnixFileNumber: f1 fileID.
+	fd2 _ OSProcess accessor primUnixFileNumber: f2 fileID.
+	result _ OSProcess accessor primDup: fd1 to: fd2.
 	"f1 and f2 now both refer to the same IO stream"
 	self assert: result = fd2.
 	f2 nextPutAll: 'write something to the original f2 file stream that will appear in duped f1 instead'; flush.
 	f1 reset.
-	contents1 := f1 upToEnd.
+	contents1 _ f1 upToEnd.
 	self deny: contents1 isEmpty.
 	self assert: ('write something*' match: contents1).
 	f2 reset.
-	contents2 := f2 upToEnd.
+	contents2 _ f2 upToEnd.
 	self deny: contents2 isEmpty.
 	self assert: ('write something*' match: contents2).
 	f1 close.
 	f2 close.
 	"check the contents of the actual files"
-	contents1 := (OSProcess fileNamed: '/tmp/delete-1.me') contentsOfEntireFile.
+	contents1 _ (OSProcess fileNamed: '/tmp/delete-1.me') contentsOfEntireFile.
 	self assert: ('write something*' match: contents1).
-	contents2 := (OSProcess fileNamed: '/tmp/delete-2.me') contentsOfEntireFile.
+	contents2 _ (OSProcess fileNamed: '/tmp/delete-2.me') contentsOfEntireFile.
 	self assert: contents2 isEmpty.
 	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
 	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
@@ -8430,7 +8430,7 @@ testFileProtectionMask
 	"(UnixProcessAccessorTestCase selector: #testFileProtectionMask) run"
 
 	| mask |
-	mask := accessor fileProtectionMask: '/bin/rm'.
+	mask _ accessor fileProtectionMask: '/bin/rm'.
 	self assert: (mask isKindOf: Array).
 	self assert: (mask size == 4)
 ! !
@@ -8441,7 +8441,7 @@ testFileStat
 	"(UnixProcessAccessorTestCase selector: #testFileStat) run"
 
 	| stat |
-	stat := accessor fileStat: '/bin/rm'.
+	stat _ accessor fileStat: '/bin/rm'.
 	self assert: (stat isKindOf: Array).
 	self assert: (stat size == 3).
 	self assert: ((stat at: 1) isKindOf: Integer).
@@ -8567,7 +8567,7 @@ testMakePipeHandles
 	"(UnixProcessAccessorTestCase selector: #testMakePipeHandles) run"
 
 	| p |
-	p := OSPipe new.
+	p _ OSPipe new.
 	self assert: p reader closed not.
 	self assert: p writer closed not.
 	p close! !
@@ -8580,17 +8580,17 @@ testRedirectStdOutTo
 	"(UnixProcessAccessorTestCase selector: #testRedirectStdOutTo) run"
 
 	| out aFileStream contents outFd saveFd newFileNo saveFs |
-	out := OSProcess thisOSProcess stdOut.
+	out _ OSProcess thisOSProcess stdOut.
 	"save file number to allow cleanup at end of test"
 	OSProcess deleteFileNamed: '/tmp/delete.2.me'.	
-	saveFs := OSProcess newFileNamed: '/tmp/delete.2.me'.
-	outFd := OSProcess accessor primUnixFileNumber: out fileID.
-	saveFd := OSProcess accessor primUnixFileNumber: saveFs fileID.
+	saveFs _ OSProcess newFileNamed: '/tmp/delete.2.me'.
+	outFd _ OSProcess accessor primUnixFileNumber: out fileID.
+	saveFd _ OSProcess accessor primUnixFileNumber: saveFs fileID.
 	OSProcess accessor primDup: outFd to: saveFd.
 	"Original stdout file descriptor is saved as safeFd, to be restored at end of test"
 
 	OSProcess deleteFileNamed: '/tmp/delete.me'.	
-	aFileStream := OSProcess newFileNamed: '/tmp/delete.me'.
+	aFileStream _ OSProcess newFileNamed: '/tmp/delete.me'.
 	"nb - #contentsOfEntireFile closes the file, do not use"
 	aFileStream reset.
 	self assert: aFileStream upToEnd isEmpty.
@@ -8601,20 +8601,20 @@ testRedirectStdOutTo
 	OSProcess thisOSProcess redirectStdOutTo: aFileStream.
 	out nextPutAll: 'foo'; flush.
 	aFileStream reset.
-	contents := aFileStream upToEnd.
+	contents _ aFileStream upToEnd.
 	self deny: contents isEmpty.
 	self assert: contents = 'foo'. "assume noone else is using stdout right now"
 	"ensure the we can still find the real stdout"
 	self deny: OSProcess thisOSProcess stdOut closed.
 	OSProcess thisOSProcess stdOut nextPutAll: 'bar'; flush.
 	aFileStream reset.
-	contents := aFileStream upToEnd.
+	contents _ aFileStream upToEnd.
 	self deny: contents isEmpty.
 	self assert: contents = 'foobar'.
 	"Restore the original file number. The stdOut stream is cached in ThisOSProcess
 	(and should probably be recalculated following a dup2(), so find the real handle
 	with getStdOutHandle."
-	newFileNo := OSProcess accessor primUnixFileNumber: OSProcess accessor getStdOutHandle.
+	newFileNo _ OSProcess accessor primUnixFileNumber: OSProcess accessor getStdOutHandle.
 	OSProcess accessor primDup: saveFd to: newFileNo.
 	OSProcess thisOSProcess stdOut lf; nextPutAll: 'UnixProcessAccessorTestCase>>testRedirectStdOutTo - this should appear on original console stdout'; lf.
 	saveFs close.
@@ -8641,7 +8641,7 @@ testSessionIdentifier
 
 	| installedOSPPMajorVersion |
 	self should: [accessor getSessionIdentifier isKindOf: ByteArray].
-	installedOSPPMajorVersion := (OSProcess accessor osppModuleVersionString
+	installedOSPPMajorVersion _ (OSProcess accessor osppModuleVersionString
 		ifNil: [-1]) asInteger.
 	(installedOSPPMajorVersion >= 4)
 		ifTrue: ["ignore this test"]
@@ -8687,17 +8687,17 @@ testUnixFileNumber
 	"(UnixProcessAccessorTestCase selector: #testUnixFileNumber) run"
 
 	| err errFileNo errHandle in inFileNo inHandle aFileStream fFileNo fHandle |
-	err := OSProcess thisOSProcess stdErr.
-	errHandle := err fileID.
-	errFileNo := OSProcess accessor unixFileNumber: errHandle.
+	err _ OSProcess thisOSProcess stdErr.
+	errHandle _ err fileID.
+	errFileNo _ OSProcess accessor unixFileNumber: errHandle.
 	self assert: errFileNo == 2.
-	in := OSProcess thisOSProcess stdIn.
-	inHandle := in fileID.
-	inFileNo := OSProcess accessor unixFileNumber: inHandle.
+	in _ OSProcess thisOSProcess stdIn.
+	inHandle _ in fileID.
+	inFileNo _ OSProcess accessor unixFileNumber: inHandle.
 	self assert: inFileNo == 0.
-	aFileStream := OSProcess fileNamed: '/tmp/delete.me'.
-	fHandle := aFileStream fileID.
-	fFileNo := OSProcess accessor unixFileNumber: fHandle.
+	aFileStream _ OSProcess fileNamed: '/tmp/delete.me'.
+	fHandle _ aFileStream fileID.
+	fFileNo _ OSProcess accessor unixFileNumber: fHandle.
 	self assert: fFileNo notNil.
 	self assert: fFileNo > 2.
 	aFileStream close
@@ -8710,8 +8710,8 @@ testChDir
 	"(UnixProcessAccessorTestCase selector: #testChDir) run"
 
 	| cwd new |
-	cwd := accessor primGetCurrentWorkingDirectory.
-	new := '/bin'. "nb Do not use /tmp because OS X implements it as a sym link to private/tmp"
+	cwd _ accessor primGetCurrentWorkingDirectory.
+	new _ '/bin'. "nb Do not use /tmp because OS X implements it as a sym link to private/tmp"
 	accessor chDir: new.
 	self should: [new = accessor primGetCurrentWorkingDirectory].
 	accessor chDir: cwd.
@@ -8724,7 +8724,7 @@ testEnvironmentAt
 	"(UnixProcessAccessorTestCase selector: #testEnvironmentAt) run"
 
 	| path |
-	path := accessor environmentAt: 'PATH'.
+	path _ accessor environmentAt: 'PATH'.
 	self should: [path notNil and: [path isEmpty not]]! !
 
 !UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 2/24/2013 10:26'!
@@ -8733,17 +8733,17 @@ testEnvironmentAtPut
 	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut) run"
 
 	| oldPath newPath resetPath s |
-	oldPath := accessor environmentAt: 'PATH'.
-	newPath := 'this is a test string'.
+	oldPath _ accessor environmentAt: 'PATH'.
+	newPath _ 'this is a test string'.
 	accessor environmentAt: 'PATH' put: newPath.
-	resetPath := accessor environmentAt: 'PATH'.
+	resetPath _ accessor environmentAt: 'PATH'.
 	self should: [newPath = resetPath].
 	accessor environmentAt: 'PATH' put: oldPath.
-	resetPath := accessor environmentAt: 'PATH'.
+	resetPath _ accessor environmentAt: 'PATH'.
 	self should: [oldPath = resetPath].
-	s := WriteStream on: String new.
+	s _ WriteStream on: String new.
 	10000 timesRepeat: [s nextPutAll: 'Do something to provoke garbage collection'].
-	resetPath := accessor environmentAt: 'PATH'.
+	resetPath _ accessor environmentAt: 'PATH'.
 	self should: [oldPath = resetPath].
 
 
@@ -8755,10 +8755,10 @@ testEnvironmentAtPut1
 	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1) run"
 
 	| oldVal newVal resetVal |
-	oldVal := accessor environmentAt: 'AAAA'.
-	newVal := 'this is a test string'.
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
 	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal := accessor environmentAt: 'AAAA'.
+	resetVal _ accessor environmentAt: 'AAAA'.
 	self should: [resetVal notNil and: [resetVal isEmpty not]].
 	self should: [newVal = resetVal].
 	accessor environmentAt: 'AAAA' put: oldVal.
@@ -8773,19 +8773,19 @@ testEnvironmentAtPut2
 	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2) run"
 
 	| oldVal newVal resetVal count ws goodResults notFound totallyBogus |
-	oldVal := accessor environmentAt: 'AAAA'.
-	newVal := 'this is a test string'.
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
 	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal := accessor environmentAt: 'AAAA'.
+	resetVal _ accessor environmentAt: 'AAAA'.
 	self should: [resetVal notNil and: [resetVal isEmpty not]].
 	self should: [newVal = resetVal].
 
-	count := 50000.
-	ws := WriteStream on: Array new.
+	count _ 50000.
+	ws _ WriteStream on: Array new.
 	count timesRepeat: [ws nextPut: (accessor environmentAt: 'AAAA')].
-	goodResults := ws contents select: [:e | e = newVal].
-	notFound := ws contents select: [:e | e isNil].
-	totallyBogus := ws contents select: [:e | e notNil and: [e ~= newVal]].
+	goodResults _ ws contents select: [:e | e = newVal].
+	notFound _ ws contents select: [:e | e isNil].
+	totallyBogus _ ws contents select: [:e | e notNil and: [e ~= newVal]].
 
 	"Uncomment the following to see when the problem is happening"
 	"(Array with: goodResults with: notFound with: totallyBogus) inspect."
@@ -8804,7 +8804,7 @@ testGetStdErrHandle
 	"(UnixProcessAccessorTestCase selector: #testGetStdErrHandle) run"
 
 	| handle |
-	handle := accessor primGetStdErrHandle.
+	handle _ accessor primGetStdErrHandle.
 	self assert: handle notNil
 ! !
 
@@ -8814,7 +8814,7 @@ testGetStdInHandle
 	"(UnixProcessAccessorTestCase selector: #testGetStdInHandle) run"
 
 	| handle |
-	handle := accessor primGetStdInHandle.
+	handle _ accessor primGetStdInHandle.
 	self assert: handle notNil
 ! !
 
@@ -8824,7 +8824,7 @@ testGetStdOutHandle
 	"(UnixProcessAccessorTestCase selector: #testGetStdOutHandle) run"
 
 	| handle |
-	handle := accessor primGetStdOutHandle.
+	handle _ accessor primGetStdOutHandle.
 	self assert: handle notNil
 ! !
 
@@ -8834,7 +8834,7 @@ testPrimArgumentAt
 	"(UnixProcessAccessorTestCase selector: #testPrimArgumentAt) run"
 
 	| progName |
-	progName := accessor primArgumentAt: 1.
+	progName _ accessor primArgumentAt: 1.
 	self should: [progName notNil and: [progName isEmpty not]]
 ! !
 
@@ -8844,9 +8844,9 @@ testPrimErrorMessageAt
 	"(UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt) run"
 
 	| msg |
-	msg := accessor primErrorMessageAt: 1.
+	msg _ accessor primErrorMessageAt: 1.
 	self should: [msg notNil and: [msg isEmpty not]].
-	msg := accessor primErrorMessageAt: 0.
+	msg _ accessor primErrorMessageAt: 0.
 	self should: [msg notNil and: [msg isEmpty not]]
 ! !
 
@@ -8856,7 +8856,7 @@ testPrimGetCurrentWorkingDirectory
 	"(UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory) run"
 
 	| cwd |
-	cwd := accessor primGetCurrentWorkingDirectory.
+	cwd _ accessor primGetCurrentWorkingDirectory.
 	self should: [cwd notNil and: [cwd isEmpty not]]! !
 
 !UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:49'!
@@ -8865,7 +8865,7 @@ testPrimGetEGid
 	"(UnixProcessAccessorTestCase selector: #testPrimGetEGid) run"
 
 	| id |
-	id := accessor primGetEGid.
+	id _ accessor primGetEGid.
 	self should: [id isKindOf: Integer]
 ! !
 
@@ -8875,7 +8875,7 @@ testPrimGetEUid
 	"(UnixProcessAccessorTestCase selector: #testPrimGetEUid) run"
 
 	| id |
-	id := accessor primGetEUid.
+	id _ accessor primGetEUid.
 	self should: [id isKindOf: Integer]
 ! !
 
@@ -8885,7 +8885,7 @@ testPrimGetGid
 	"(UnixProcessAccessorTestCase selector: #testPrimGetGid) run"
 
 	| id |
-	id := accessor primGetGid.
+	id _ accessor primGetGid.
 	self should: [id isKindOf: Integer]
 ! !
 
@@ -8895,7 +8895,7 @@ testPrimGetPPid
 	"(UnixProcessAccessorTestCase selector: #testPrimGetPPid) run"
 
 	| id |
-	id := accessor primGetPPid.
+	id _ accessor primGetPPid.
 	self should: [id isKindOf: Integer]
 ! !
 
@@ -8905,7 +8905,7 @@ testPrimGetPid
 	"(UnixProcessAccessorTestCase selector: #testPrimGetPid) run"
 
 	| id |
-	id := accessor primGetPid.
+	id _ accessor primGetPid.
 	self should: [id isKindOf: Integer]
 ! !
 
@@ -8917,10 +8917,10 @@ testPrimGetSession
 	"(UnixProcessAccessorTestCase selector: #testPrimGetSession) run"
 
 	| id expectedSessionSize |
-	expectedSessionSize := [OSProcess accessor sizeOfInt] on: Error do: [4].
-	id := OSProcess accessor primGetSession.
+	expectedSessionSize _ [OSProcess accessor sizeOfInt] on: Error do: [4].
+	id _ OSProcess accessor primGetSession.
 	self assert: (id isNil or: [id isKindOf: ByteArray]).
-	id := OSProcess accessor getSessionIdentifier.
+	id _ OSProcess accessor getSessionIdentifier.
 	self assert: (id isKindOf: ByteArray).
 	self assert: (id size / expectedSessionSize) == 1
 
@@ -8932,7 +8932,7 @@ testPrimGetUid
 	"(UnixProcessAccessorTestCase selector: #testPrimGetUid) run"
 
 	| id |
-	id := accessor primGetUid.
+	id _ accessor primGetUid.
 	self should: [id isKindOf: Integer]
 ! !
 
@@ -8942,15 +8942,15 @@ testPrimUnsetEnv
 	"(UnixProcessAccessorTestCase selector: #testPrimUnsetEnv) run"
 
 	| oldVal newVal resetVal |
-	oldVal := accessor environmentAt: 'AAAA'.
-	newVal := 'this is a test string'.
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
 	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal := accessor environmentAt: 'AAAA'.
+	resetVal _ accessor environmentAt: 'AAAA'.
 	self should: [resetVal notNil and: [resetVal isEmpty not]].
 	self should: [newVal = resetVal].
 
 	accessor primUnsetEnv: 'AAAA', (Character value: 0) asString.
-	resetVal := accessor environmentAt: 'AAAA'.
+	resetVal _ accessor environmentAt: 'AAAA'.
 	self should: [resetVal isNil].
 
 	accessor environmentAt: 'AAAA' put: oldVal.
@@ -8963,9 +8963,9 @@ testRealpath
 	"(UnixProcessAccessorTestCase selector: #testRealpath) run"
 
 	| p |
-	p := accessor realpath: '/usr/bin'.
+	p _ accessor realpath: '/usr/bin'.
 	self should: [p notNil and: [p isEmpty not]].
-	p := accessor realpath: '/bogus/path/name'.
+	p _ accessor realpath: '/bogus/path/name'.
 	self should: [p isNil]
 ! !
 
@@ -8975,23 +8975,23 @@ testIsLockableFile
 	"(UnixProcessAccessorTestCase selector: #testIsLockableFile) debug"
 
 	| fs result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
 
-	result := OSProcess accessor isLockableFile: fs.
+	result _ OSProcess accessor isLockableFile: fs.
 	self should: result.
 
-	result := OSProcess accessor lockFile: fs.
+	result _ OSProcess accessor lockFile: fs.
 	self should: (result isKindOf: OSFileLock).
-	result := OSProcess accessor isLockableFile: fs.
+	result _ OSProcess accessor isLockableFile: fs.
 	self should: result.
 
 	OSProcess accessor unlockFile: fs.
-	result := OSProcess accessor isLockableFile: fs.
+	result _ OSProcess accessor isLockableFile: fs.
 	self should: result.
 
 	fs close.
-	result := OSProcess accessor isLockableFile: fs.
+	result _ OSProcess accessor isLockableFile: fs.
 	self shouldnt: result.
 	] ensure: [fs close]
 ! !
@@ -9002,12 +9002,12 @@ testLockFile
 	"(UnixProcessAccessorTestCase selector: #testLockFile) debug"
 
 	| fs result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	result := OSProcess accessor lockFile: fs.
+	result _ OSProcess accessor lockFile: fs.
 	self should: (result isKindOf: OSFileLock).
 	fs close.
-	result := OSProcess accessor lockFile: fs.
+	result _ OSProcess accessor lockFile: fs.
 	self should: (result == nil).
 	] ensure: [fs close]
 ! !
@@ -9018,15 +9018,15 @@ testOSFileLockLock
 	"(UnixProcessAccessorTestCase selector: #testOSFileLockLock) debug"
 
 	| fs fileLock result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	fileLock := OSFileLock onFile: fs exclusive: true.
-	result := fileLock lock.
+	fileLock _ OSFileLock onFile: fs exclusive: true.
+	result _ fileLock lock.
 	self should: (result == true).
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == true).
 	fs close.
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == false).
 	] ensure: [fs close]
 ! !
@@ -9037,21 +9037,21 @@ testOSFileLockTest
 	"(UnixProcessAccessorTestCase selector: #testOSFileLockTest) debug"
 
 	| fs fileLock result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	fileLock := OSFileLock onFile: fs exclusive: true.
-	result := fileLock test.
+	fileLock _ OSFileLock onFile: fs exclusive: true.
+	result _ fileLock test.
 	self should: (result == true).
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == true).
-	result := fileLock test.
+	result _ fileLock test.
 	self should: (result == true).
-	result := fileLock unlock.
+	result _ fileLock unlock.
 	self should: (result == true).
-	result := fileLock test.
+	result _ fileLock test.
 	self should: (result == true).
 	fs close.
-	result := fileLock test.
+	result _ fileLock test.
 	self should: (result == false).
 	] ensure: [fs close]
 ! !
@@ -9062,17 +9062,17 @@ testOSFileLockUnlock
 	"(UnixProcessAccessorTestCase selector: #testOSFileLockUnlock) debug"
 
 	| fs fileLock result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	fileLock := OSFileLock onFile: fs exclusive: true.
-	result := fileLock unlock.
+	fileLock _ OSFileLock onFile: fs exclusive: true.
+	result _ fileLock unlock.
 	self should: (result == true).
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == true).
-	result := fileLock unlock.
+	result _ fileLock unlock.
 	self should: (result == true).
 	fs close.
-	result := fileLock unlock.
+	result _ fileLock unlock.
 	self should: (result == false).
 	] ensure: [fs close]
 ! !
@@ -9083,15 +9083,15 @@ testOSFileRegionLockLock
 	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockLock) debug"
 
 	| fs fileLock result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	fileLock := OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
-	result := fileLock lock.
+	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
+	result _ fileLock lock.
 	self should: (result == true).
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == true).
 	fs close.
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == false).
 	] ensure: [fs close]
 ! !
@@ -9102,21 +9102,21 @@ testOSFileRegionLockTest
 	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockTest) debug"
 
 	| fs fileLock result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	fileLock := OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
-	result := fileLock test.
+	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
+	result _ fileLock test.
 	self should: (result == true).
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == true).
-	result := fileLock test.
+	result _ fileLock test.
 	self should: (result == true).
-	result := fileLock unlock.
+	result _ fileLock unlock.
 	self should: (result == true).
-	result := fileLock test.
+	result _ fileLock test.
 	self should: (result == true).
 	fs close.
-	result := fileLock test.
+	result _ fileLock test.
 	self should: (result == false).
 	] ensure: [fs close]
 ! !
@@ -9127,17 +9127,17 @@ testOSFileRegionLockUnlock
 	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockUnlock) debug"
 
 	| fs fileLock result |
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[fs nextPutAll: 'ABCDEFG'.
-	fileLock := OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
-	result := fileLock unlock.
+	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
+	result _ fileLock unlock.
 	self should: (result == true).
-	result := fileLock lock.
+	result _ fileLock lock.
 	self should: (result == true).
-	result := fileLock unlock.
+	result _ fileLock unlock.
 	self should: (result == true).
 	fs close.
-	result := fileLock unlock.
+	result _ fileLock unlock.
 	self should: (result == false).
 	] ensure: [fs close]
 ! !
@@ -9148,23 +9148,23 @@ testUnlockFileUnixCompatible
 	"(UnixProcessAccessorTestCase selector: #testUnlockFileUnixCompatible) debug"
 
 	| mode fs result |
-	mode := OSProcess accessor emulateWin32FileLocking. "remember setting"
+	mode _ OSProcess accessor emulateWin32FileLocking. "remember setting"
 
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[OSProcessAccessor emulateWin32FileLocking: false. "unix mode"
 	fs nextPutAll: 'ABCDEFG'.
-	result := OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor unlockFile: fs.
 	"On Unix, the fcntl call to unlock the file will succeed even if
 	the file is not locked."
 	self should: (result isKindOf: OSFileLock).
 
-	result := OSProcess accessor lockFile: fs.
+	result _ OSProcess accessor lockFile: fs.
 	self should: (result isKindOf: OSFileLock).
-	result := OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor unlockFile: fs.
 	self should: (result isKindOf: OSFileLock).
 
 	fs close.
-	result := OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor unlockFile: fs.
 	self should: result == nil] ensure:
 		[OSProcessAccessor emulateWin32FileLocking: mode.
 		fs close]
@@ -9176,21 +9176,21 @@ testUnlockFileWin32Compatible
 	"(UnixProcessAccessorTestCase selector: #testUnlockFileWin32Compatible) debug"
 
 	| mode fs result |
-	mode := OSProcess accessor emulateWin32FileLocking. "remember setting"
+	mode _ OSProcess accessor emulateWin32FileLocking. "remember setting"
 
-	fs := OSProcess fileNamed: 'junkfile'.
+	fs _ OSProcess fileNamed: 'junkfile'.
 	[OSProcessAccessor emulateWin32FileLocking: true. "win32 mode"
 	fs nextPutAll: 'ABCDEFG'.
-	result := OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor unlockFile: fs.
 	self should: result == nil.
 
-	result := OSProcess accessor lockFile: fs.
+	result _ OSProcess accessor lockFile: fs.
 	self should: (result isKindOf: OSFileLock).
-	result := OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor unlockFile: fs.
 	self should: (result isKindOf: OSFileLock).
 
 	fs close.
-	result := OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor unlockFile: fs.
 	self should: result == nil] ensure:
 		[OSProcessAccessor emulateWin32FileLocking: mode.
 		fs close]
@@ -9204,7 +9204,7 @@ testPrimForkAndExec
 	"(UnixProcessAccessorTestCase selector: #testPrimForkAndExec) run"
 
 	| p |
-	self shouldnt: [p := UnixProcess command: 'ls /bin']
+	self shouldnt: [p _ UnixProcess command: 'ls /bin']
 		raise: Warning.
 	(Delay forMilliseconds: 500) wait.
 	self should: [p isComplete].
@@ -9220,9 +9220,9 @@ testPrimGetChildExitStatus
 	"(UnixProcessAccessorTestCase selector: #testPrimGetChildExitStatus) run"
 
 	| stat |
-	stat := accessor primGetChildExitStatus: -1.
+	stat _ accessor primGetChildExitStatus: -1.
 	self should: [stat isNil].
-	stat := accessor primGetChildExitStatus: 1.
+	stat _ accessor primGetChildExitStatus: 1.
 	self should: [stat isNil]
 ! !
 
@@ -9258,7 +9258,7 @@ fileStream
 !UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 1/15/2018 22:18:35'!
 setUp
 	OSProcess deleteFileNamed: 'junkfile'.
-	fileStream := OSProcess fileNamed: 'junkfile'.! !
+	fileStream _ OSProcess fileNamed: 'junkfile'.! !
 
 !UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 1/23/2013 19:42'!
 tearDown
@@ -9453,7 +9453,7 @@ numberOfOpenFiles
 	"UnixProcessTestCase new numberOfOpenFiles"
 
 	| path |
-	path := '/proc/' , OSProcess thisOSProcess pid printString, '/fd'.
+	path _ '/proc/' , OSProcess thisOSProcess pid printString, '/fd'.
 	(OSProcess directoryExists: path) ifFalse: [ ^ 0].
 	^ OSProcess useFileMan
 		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #withPathName: with: path) children size]
@@ -9471,7 +9471,7 @@ runAll
 
 	| result suite |
 	Smalltalk garbageCollect.
-	suite := TestSuite new.
+	suite _ TestSuite new.
 	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueak).
 	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueakAndDo).
 	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit).
@@ -9491,7 +9491,7 @@ runAll
 	suite addTest: (UnixProcessTestCase selector: #testPipe).
 	suite addTest: (UnixProcessTestCase selector: #testPipeLine).
 
-	result := suite run.
+	result _ suite run.
 	self should: [result defects size == 0].
 	^ result
 ! !
@@ -9501,7 +9501,7 @@ setUp
 
 	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
 		ifTrue: [self perform: #timeout: with: 60].
-	thisOSProcess := OSProcess thisOSProcess
+	thisOSProcess _ OSProcess thisOSProcess
 ! !
 
 !UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 6/11/2011 12:26'!
@@ -9510,8 +9510,8 @@ testCatAFile
 	"(UnixProcessTestCase selector: #testCatAFile) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
-	self shouldnt: [p := UnixProcess catAFile]
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ UnixProcess catAFile]
 		raise: Warning.
 	self assert: p notNil.
 	self should: [p isRunning].
@@ -9530,10 +9530,10 @@ testCatFromFileToFiles
 	"(UnixProcessTestCase selector: #testCatFromFileToFiles) run"
 
 	| p f openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	OSProcess deleteFileNamed: '/tmp/deleteMe.out'.
 	OSProcess deleteFileNamed: '/tmp/deleteMe.err'.
-	self shouldnt: [p := UnixProcess catFromFileToFiles]
+	self shouldnt: [p _ UnixProcess catFromFileToFiles]
 		raise: Warning.
 	self assert: p notNil.
 	self should: [p isRunning].
@@ -9543,10 +9543,10 @@ testCatFromFileToFiles
 	self should: [p initialStdIn closed].
 	self should: [p initialStdOut closed].
 	self should: [p initialStdErr closed].
-	f := OSProcess oldFileNamed: '/tmp/deleteMe.out'.
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.out'.
 	self shouldnt: [f upToEnd isEmpty].
 	f close.
-	f := OSProcess oldFileNamed: '/tmp/deleteMe.err'.
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.err'.
 	self should: [f upToEnd isEmpty].
 	f close.
 	self assert: self numberOfOpenFiles == openFileCount
@@ -9558,8 +9558,8 @@ testEightLeafSqueakTree
 	"(UnixProcessTestCase selector: #testEightLeafSqueakTree) run"
 
 	| a openFileCount |
-	openFileCount := self numberOfOpenFiles.
-	self shouldnt: [a := UnixProcess eightLeafSqueakTree]
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [a _ UnixProcess eightLeafSqueakTree]
 		raise: Warning.
 	self assert: (a isKindOf: Array).
 	self assert: a size == 3.
@@ -9575,8 +9575,8 @@ testHeadlessChild
 	"(UnixProcessTestCase selector: #testHeadlessChild) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
-	self shouldnt: [p := UnixProcess headlessChild]
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ UnixProcess headlessChild]
 		raise: Warning. "Catch warning if fork fails"
 	[p isComplete] whileFalse: [(Delay forMilliseconds: 100) wait].
 	self assert: p isComplete.
@@ -9590,7 +9590,7 @@ testPipe
 	"(UnixProcessTestCase selector: #testPipe) run"
 
 	| openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self should: [UnixProcess testPipe = 'this is some text to write into the pipe'].
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
@@ -9601,7 +9601,7 @@ testPipeLine
 	"(UnixProcessTestCase selector: #testPipeLine) run"
 
 	| openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self should: ['This is the text to write*' match: UnixProcess testPipeLine].
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
@@ -9612,10 +9612,10 @@ testRunCommand
 	"(UnixProcessTestCase selector: #testRunCommand) run"
 
 	| p f openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	OSProcess deleteFileNamed: '/tmp/deleteMe.out'.
 	OSProcess deleteFileNamed: '/tmp/deleteMe.err'.
-	self shouldnt: [p := UnixProcess testRunCommand]
+	self shouldnt: [p _ UnixProcess testRunCommand]
 		raise: Warning.
 	self assert: p notNil.
 	self should: [p isRunning].
@@ -9627,10 +9627,10 @@ testRunCommand
 	"but the output and error streams should have been closed."
 	self should: [p initialStdOut closed].
 	self should: [p initialStdErr closed].
-	f := OSProcess oldFileNamed: '/tmp/deleteMe.out'.
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.out'.
 	self shouldnt: [f upToEnd isEmpty].
 	f close.
-	f := OSProcess oldFileNamed: '/tmp/deleteMe.err'.
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.err'.
 	self shouldnt: [f upToEnd isEmpty].
 	f close.
 	self assert: self numberOfOpenFiles == openFileCount
@@ -9644,8 +9644,8 @@ testSpawnTenHeadlessChildren
 	"(UnixProcessTestCase selector: #testSpawnTenHeadlessChildren) run"
 
 	| a openFileCount |
-	openFileCount := self numberOfOpenFiles.
-	self shouldnt: [a := UnixProcess spawnTenHeadlessChildren]
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [a _ UnixProcess spawnTenHeadlessChildren]
 		raise: Warning. "Catch warning if fork fails"
 	[(a detect: [:p | p isComplete not] ifNone: []) notNil]
 		whileTrue: [(Delay forMilliseconds: 100) wait].
@@ -9659,9 +9659,9 @@ testClassForkHeadlessSqueakAndDo
 	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDo) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-		[p := UnixProcess forkHeadlessSqueakAndDo:
+		[p _ UnixProcess forkHeadlessSqueakAndDo:
 			[(Delay forMilliseconds: 100) wait.
 			OSProcess snapshot: false andQuit: true]]
 		raise: Warning. "Catch warning if fork fails"
@@ -9682,9 +9682,9 @@ testClassForkHeadlessSqueakAndDoThenQuit
 	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDoThenQuit) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-		[p := UnixProcess forkHeadlessSqueakAndDoThenQuit:
+		[p _ UnixProcess forkHeadlessSqueakAndDoThenQuit:
 			[(Delay forMilliseconds: 100) wait]]
 		raise: Warning. "Catch warning if fork fails"
 	self assert: p notNil.
@@ -9704,8 +9704,8 @@ testClassForkSqueak
 	"(UnixProcessTestCase selector: #testClassForkSqueak) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
-	self shouldnt: [p := UnixProcess forkSqueak]
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ UnixProcess forkSqueak]
 		raise: Warning.
 	self assert: p notNil.
 	(p == thisOSProcess)
@@ -9729,9 +9729,9 @@ testClassForkSqueakAndDo
 	"(UnixProcessTestCase selector: #testClassForkSqueakAndDo) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-			[p := UnixProcess forkSqueakAndDo:
+			[p _ UnixProcess forkSqueakAndDo:
 					[(Delay forMilliseconds: 100) wait.
 					OSProcess snapshot: false andQuit: true]]
 		raise: Warning.
@@ -9752,9 +9752,9 @@ testClassForkSqueakAndDoThenQuit
 	"(UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-			[p := UnixProcess forkSqueakAndDoThenQuit:
+			[p _ UnixProcess forkSqueakAndDoThenQuit:
 					[(Delay forMilliseconds: 100) wait]]
 		raise: Warning.
 	self assert: p notNil.
@@ -9774,9 +9774,9 @@ testForkHeadlessSqueakAndDo
 	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDo) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-			[p := thisOSProcess forkHeadlessSqueakAndDo:
+			[p _ thisOSProcess forkHeadlessSqueakAndDo:
 					[(Delay forMilliseconds: 100) wait.
 					OSProcess snapshot: false andQuit: true]]
 		raise: Warning. "Catch warning if fork fails"
@@ -9797,9 +9797,9 @@ testForkHeadlessSqueakAndDoThenQuit
 	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDoThenQuit) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-			[p := thisOSProcess forkHeadlessSqueakAndDoThenQuit:
+			[p _ thisOSProcess forkHeadlessSqueakAndDoThenQuit:
 					[(Delay forMilliseconds: 100) wait]]
 		raise: Warning. "Catch warning if fork fails"
 	self assert: p notNil.
@@ -9819,8 +9819,8 @@ testForkSqueak
 	"(UnixProcessTestCase selector: #testForkSqueak) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
-	self shouldnt: [p := thisOSProcess forkSqueak]
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ thisOSProcess forkSqueak]
 		raise: Warning. "Catch warning if fork fails"
 	self assert: p notNil.
 	(p == thisOSProcess)
@@ -9844,9 +9844,9 @@ testForkSqueakAndDo
 	"(UnixProcessTestCase selector: #testForkSqueakAndDo) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-			[p := thisOSProcess forkSqueakAndDo:
+			[p _ thisOSProcess forkSqueakAndDo:
 					[(Delay forMilliseconds: 100) wait.
 					OSProcess snapshot: false andQuit: true]]
 		raise: Warning.
@@ -9867,9 +9867,9 @@ testForkSqueakAndDoThenQuit
 	"(UnixProcessTestCase selector: #testForkSqueakAndDoThenQuit) run"
 
 	| p openFileCount |
-	openFileCount := self numberOfOpenFiles.
+	openFileCount _ self numberOfOpenFiles.
 	self shouldnt:
-			[p := thisOSProcess forkSqueakAndDoThenQuit:
+			[p _ thisOSProcess forkSqueakAndDoThenQuit:
 					[(Delay forMilliseconds: 100) wait]]
 		raise: Warning.
 	self assert: p notNil.
@@ -9930,13 +9930,13 @@ exclusive
 	"Answer the value of exclusive. Default is true, indicating a read-write lock
 	as opposed to a shared read lock."
 
-	^ exclusive ifNil: [exclusive := true].! !
+	^ exclusive ifNil: [exclusive _ true].! !
 
 !OSFileLock methodsFor: 'accessing' stamp: 'jf 2/22/2004 16:00'!
 exclusive: anObject
 	"Set the value of exclusive"
 
-	exclusive := anObject! !
+	exclusive _ anObject! !
 
 !OSFileLock methodsFor: 'accessing' stamp: 'jf 2/22/2004 16:00'!
 fileStream
@@ -9948,7 +9948,7 @@ fileStream
 fileStream: anObject
 	"Set the value of fileStream"
 
-	fileStream := anObject! !
+	fileStream _ anObject! !
 
 !OSFileLock methodsFor: 'testing' stamp: 'jf 2/22/2004 18:13'!
 isActive
@@ -9977,8 +9977,8 @@ lock
 lockIfFail: failBlock
 
 	| handle result |
-	handle := ThisOSProcess accessor handleFromFileStream: self fileStream.
-	result := ThisOSProcess accessor
+	handle _ ThisOSProcess accessor handleFromFileStream: self fileStream.
+	result _ ThisOSProcess accessor
 		primLockFileRegion: handle
 		offset: self offset
 		length: self length
@@ -9993,8 +9993,8 @@ test
 	"Answer true if this is a lockable file or region"
 
 	| handle result |
-	handle := ThisOSProcess accessor handleFromFileStream: self fileStream.
-	result := ThisOSProcess accessor
+	handle _ ThisOSProcess accessor handleFromFileStream: self fileStream.
+	result _ ThisOSProcess accessor
 		primTestLockableFileRegion: handle
 		offset: self offset
 		length: self length
@@ -10015,8 +10015,8 @@ unlock
 unlockIfFail: failBlock
 
 	| handle result |
-	handle := ThisOSProcess accessor handleFromFileStream: self fileStream.
-	result := ThisOSProcess accessor
+	handle _ ThisOSProcess accessor handleFromFileStream: self fileStream.
+	result _ ThisOSProcess accessor
 		primUnlockFileRegion: handle
 		offset: self offset
 		length: self length.
@@ -10071,7 +10071,7 @@ interval
 interval: anObject
 	"Set the value of interval"
 
-	interval := anObject! !
+	interval _ anObject! !
 
 !OSFileRegionLock methodsFor: 'private' stamp: 'jf 2/22/2004 18:02'!
 length
@@ -10126,7 +10126,7 @@ pid
 !OSProcess methodsFor: 'accessing' stamp: 'dtl 3/18/2000 13:58'!
 pid: processIdentifier
 
-	pid := processIdentifier
+	pid _ processIdentifier
 ! !
 
 !OSProcess class methodsFor: 'external process access' stamp: 'dtl 11/8/2000 22:04'!
@@ -10148,15 +10148,15 @@ allTestResults
 	self listLoadedModules
 		detect: [:e | '*OSProcessPlugin*' match: e]
 		ifNone: [self notify: 'no OSProcessPlugin loaded'].
-	wordSize := (Smalltalk respondsTo: #wordSize)
+	wordSize _ (Smalltalk respondsTo: #wordSize)
 		ifTrue: [Smalltalk wordSize]
 		ifFalse: [4].
-	resultsFileName := 'OSProcessTestResults-' , OSProcess platformName , '-' ,
+	resultsFileName _ 'OSProcessTestResults-' , OSProcess platformName , '-' ,
 		(wordSize * 8) asString , 'bitImage-' ,
 		(OSProcess accessor sizeOfPointer * 8) asString , 'bitHw.txt'.
-	[fs := self newFileNamed: resultsFileName.
-	problems := false.
-	writeStream := WriteStream on: String new.
+	[fs _ self newFileNamed: resultsFileName.
+	problems _ false.
+	writeStream _ WriteStream on: String new.
 	writeStream nextPutAll: self authorInitials , ' running OSProcess unit tests ' , DateAndTime now asString; cr.
 	writeStream nextPutAll: 'OSProcess platformName => ' , OSProcess platformName; cr.
 	writeStream nextPutAll: 'OSProcess platformSubtype => ' , OSProcess platformSubtype; cr.
@@ -10176,13 +10176,13 @@ allTestResults
 				do: [:testSelector |
 					OSProcess thisOSProcess stdOut nextPutAll:
 						testCase name, '>>',testSelector, String lf; flush.
-					resultString := (testSelector
-								-> ([result := (testCase selector: testSelector) run.
+					resultString _ (testSelector
+								-> ([result _ (testCase selector: testSelector) run.
 									result hasPassed
-										ifFalse: [problems := true].
+										ifFalse: [problems _ true].
 									result]
 										on: Error
-										do: [:ex | problems := true.
+										do: [:ex | problems _ true.
 											'caught exception ' , ex printString])) printString.
 					writeStream nextPutAll: resultString; cr.
 					Transcript show: resultString; cr]].
@@ -10191,7 +10191,7 @@ allTestResults
 			Transcript show: 'one or more problems were found, see results file'; cr]
 		ifFalse: [writeStream nextPutAll: 'all tests completed without problems'; cr.
 			Transcript show: 'all tests completed without problems'; cr].
-	results := writeStream contents copyReplaceAll: String cr with: String lf.
+	results _ writeStream contents copyReplaceAll: String cr with: String lf.
 	fs nextPutAll: results]
 		ensure: [fs close].
 	Transcript show: 'tests results have been saved in a file named ''' , resultsFileName , ''''; cr.
@@ -10276,9 +10276,9 @@ outputOf: aCommandString
 	"OSProcess outputOf: 'ls | copyToOutput | wc' "
 
 	|pipeline out err|
-	pipeline := self evaluate: aCommandString.
-	out := pipeline upToEndOfFile.
-	err := pipeline errorUpToEnd.
+	pipeline _ self evaluate: aCommandString.
+	out _ pipeline upToEndOfFile.
+	err _ pipeline errorUpToEnd.
 	err isEmpty ifFalse: [self error: err].
 	^ out
 ! !
@@ -10498,7 +10498,7 @@ helloStdErr
 	"OSProcess helloStdErr"
 
 	| this |
-	this := self thisOSProcess.
+	this _ self thisOSProcess.
 	this stdErr ifNil: [self noAccessorAvailable. ^ nil].
 	^ this stdErr nextPutAll: 'Hello stderr'; nextPut: (Character lf); yourself! !
 
@@ -10512,7 +10512,7 @@ helloWorld
 	"OSProcess helloWorld"
 
 	| this |
-	this := self thisOSProcess.
+	this _ self thisOSProcess.
 	this stdOut ifNil: [self noAccessorAvailable. ^ nil].
 	^ this stdOut nextPutAll: 'Hello world'; nextPut: Character lf; yourself! !
 
@@ -10530,11 +10530,11 @@ readFromStdIn
 	"OSProcess readFromStdIn inspect"
 
 	| input ioHandle resultString |
-	input := self thisOSProcess stdIn.
+	input _ self thisOSProcess stdIn.
 	input ifNil: [self noAccessorAvailable. ^ nil].
-	ioHandle := input ioHandle.
+	ioHandle _ input ioHandle.
 	self accessor setNonBlocking: ioHandle.
-	resultString := self thisOSProcess stdIn next: 10000.
+	resultString _ self thisOSProcess stdIn next: 10000.
 	self accessor setBlocking: ioHandle.
 	^ resultString
 ! !
@@ -10544,7 +10544,7 @@ initialize
 
 	"OSProcess initialize"
 
-	UseIOHandle := (Smalltalk hasClassNamed: #IOHandle)
+	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle)
 ! !
 
 !OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:41'!
@@ -10554,7 +10554,7 @@ isNonUnixMac
 	"OSProcess isNonUnixMac"
 
 	| numericOsVersion |
-	numericOsVersion := self osVersion asInteger ifNil: [0].
+	numericOsVersion _ self osVersion asInteger ifNil: [0].
 	^ (self platformName = 'Mac OS') and: [numericOsVersion < 1000]
 ! !
 
@@ -10593,7 +10593,7 @@ isUnix
 	| numericOsVersion |
 
 	^ (self platformName = 'unix') or:
-		[numericOsVersion := self osVersion asInteger ifNil: [0].
+		[numericOsVersion _ self osVersion asInteger ifNil: [0].
 		(self platformName = 'Mac OS') and: [numericOsVersion >= 1000]]
 ! !
 
@@ -10604,9 +10604,9 @@ isUnixMac
 	"OSProcess isUnixMac"
 
 	| osVersion numericOsVersion |
-	osVersion := self osVersion.
+	osVersion _ self osVersion.
 	^ ('darwin*' match: osVersion "Ian's VM")
-		or: [numericOsVersion := osVersion asInteger ifNil: [0].
+		or: [numericOsVersion _ osVersion asInteger ifNil: [0].
 			(self platformName = 'Mac OS') and: [numericOsVersion >= 1000] "John's VM"]
 ! !
 
@@ -10652,13 +10652,13 @@ quitAndRestart
 	"OSProcess quitAndRestart"
 
 	| firstPid this |
-	firstPid := OSProcess thisOSProcess pid.
+	firstPid _ OSProcess thisOSProcess pid.
 	firstPid ifNil: 
 			[self noAccessorAvailable.
 			^ nil].
 	Smalltalk saveSession.
 	"Value of firstPid gets saved in the image"
-	this := OSProcess thisOSProcess.
+	this _ OSProcess thisOSProcess.
 	this pid = firstPid ifTrue: [self squeak ifNotNil: [Smalltalk quitPrimitive]].
 	^ this! !
 
@@ -10670,29 +10670,29 @@ systemAttributes
 	"OSProcess systemAttributes"
 
 	| args idx a |
-	args := Dictionary new.
+	args _ Dictionary new.
 
-	idx := -1.
-	[a := self getSystemAttribute: idx.
+	idx _ -1.
+	[a _ self getSystemAttribute: idx.
 	a notNil and: [a size > 0]]
-		whileTrue: [args at: idx put: a. idx := idx - 1].
+		whileTrue: [args at: idx put: a. idx _ idx - 1].
 
-	a := self getSystemAttribute: 0.
-	(a notNil and: [a size > 0]) ifTrue: [args at: 0 put: a. idx := idx - 1].
-	a := self getSystemAttribute: 1.
-	(a notNil and: [a size > 0]) ifTrue: [args at: 1 put: a. idx := idx - 1].
-	a := self getSystemAttribute: 2.
-	(a notNil and: [a size > 0]) ifTrue: [args at: 2 put: a. idx := idx - 1].
+	a _ self getSystemAttribute: 0.
+	(a notNil and: [a size > 0]) ifTrue: [args at: 0 put: a. idx _ idx - 1].
+	a _ self getSystemAttribute: 1.
+	(a notNil and: [a size > 0]) ifTrue: [args at: 1 put: a. idx _ idx - 1].
+	a _ self getSystemAttribute: 2.
+	(a notNil and: [a size > 0]) ifTrue: [args at: 2 put: a. idx _ idx - 1].
 
-	idx := 2.
-	[a := self getSystemAttribute: idx.
+	idx _ 2.
+	[a _ self getSystemAttribute: idx.
 	a notNil and: [a size > 0]]
-		whileTrue: [args at: idx put: a. idx := idx + 1].
+		whileTrue: [args at: idx put: a. idx _ idx + 1].
 
-	idx := 1001.
-	[a := self getSystemAttribute: idx.
+	idx _ 1001.
+	[a _ self getSystemAttribute: idx.
 	a notNil and: [a size > 0]]
-		whileTrue: [args at: idx put: a. idx := idx + 1].
+		whileTrue: [args at: idx put: a. idx _ idx + 1].
 
 	^ args.
 
@@ -10714,7 +10714,7 @@ versionInformation
 	"OSProcess versionInformation"
 
 	| osppVersion |
-	osppVersion := (Smalltalk hasClassNamed: #OSProcessPlugin)
+	osppVersion _ (Smalltalk hasClassNamed: #OSProcessPlugin)
 		ifTrue:
 			[(Smalltalk at: #OSProcessPlugin) versionInformation]
 		ifFalse:
@@ -10758,8 +10758,8 @@ deleteFileNamed: fileName
 		ifTrue: [((Smalltalk at: #FileEntry) perform: #withPathName: with: fileName) delete]
 		ifFalse: [self useFileSystem
 			ifTrue: [ | file sel |
-				file := fileName perform: #asFileReference.
-				(sel := {#ensureDelete . #ensureDeleted . #delete}
+				file _ fileName perform: #asFileReference.
+				(sel _ {#ensureDelete . #ensureDeleted . #delete}
 					detect: [ :e | file respondsTo: e ]
 					ifNone: [ self error: 'do not know how to ensureDelete' ]) notNil
 						ifTrue: [ file perform: sel ].
@@ -10797,7 +10797,7 @@ fileExists: path
 fileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
-			entry := ((Smalltalk at: #FileEntry) perform: #withPathName: with: path) assureExistence.
+			entry _ ((Smalltalk at: #FileEntry) perform: #withPathName: with: path) assureExistence.
 			entry fileAccessor privateWriteableFile: entry]
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
@@ -10813,7 +10813,7 @@ newFileNamed: path
 oldFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
-			entry := (Smalltalk at: #FileEntry) perform: #withPathName: with: path.
+			entry _ (Smalltalk at: #FileEntry) perform: #withPathName: with: path.
 			entry fileAccessor privateWriteableFile: entry]
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
@@ -10832,7 +10832,7 @@ pathSeparator
 readOnlyFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
-			entry := (Smalltalk at: #FileEntry) perform: #withPathName: with: path.
+			entry _ (Smalltalk at: #FileEntry) perform: #withPathName: with: path.
 			entry fileAccessor privateReadOnlyFile: entry]
 		ifFalse: [ FileStream readOnlyFileNamed: path ]
 ! !
@@ -10842,9 +10842,9 @@ saveChangesInFileNamed: aString
 
 	self useFileMan
 		ifTrue: [ | oldChangesName newChangesName |
-			(oldChangesName := Smalltalk currentChangesName) ifNotNil: [
+			(oldChangesName _ Smalltalk currentChangesName) ifNotNil: [
 				Smalltalk closeSourceFiles. "so copying the changes file will always work"
-				newChangesName := self fullNameForChangesNamed: aString.
+				newChangesName _ self fullNameForChangesNamed: aString.
 				(Smalltalk at: #FileIOAccessor) default
 					copy: (oldChangesName perform: #asFileEntry) to: (newChangesName perform: #asFileEntry) ] ]
 		ifFalse:
@@ -10873,7 +10873,7 @@ initialStdErr
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:38'!
 initialStdErr: anExternalStream
 
-	initialStdErr := anExternalStream! !
+	initialStdErr _ anExternalStream! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:39'!
 initialStdIn
@@ -10888,7 +10888,7 @@ initialStdIn
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:39'!
 initialStdIn: anExternalStream
 
-	initialStdIn := anExternalStream! !
+	initialStdIn _ anExternalStream! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:39'!
 initialStdOut
@@ -10903,7 +10903,7 @@ initialStdOut
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:40'!
 initialStdOut: anExternalStream
 
-	initialStdOut := anExternalStream! !
+	initialStdOut _ anExternalStream! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/25/2004 11:01'!
 runState
@@ -10914,7 +10914,7 @@ runState
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/18/2000 12:30'!
 runState: aSymbol
 
-	runState := aSymbol.
+	runState _ aSymbol.
 	self changed: #runState
 ! !
 
@@ -11085,7 +11085,7 @@ arguments
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:49'!
 arguments: arrayOfArgumentStrings
 
-	arguments := arrayOfArgumentStrings! !
+	arguments _ arrayOfArgumentStrings! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:34'!
 exitStatus
@@ -11096,7 +11096,7 @@ exitStatus
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 10/22/1999 22:21'!
 exitStatus: anInteger
 
-	exitStatus := anInteger
+	exitStatus _ anInteger
 ! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/11/2001 09:17'!
@@ -11107,7 +11107,7 @@ initialEnvironment
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/21/2001 11:31'!
 initialEnvironment: aDictionary
 
-	initialEnvironment := aDictionary! !
+	initialEnvironment _ aDictionary! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:51'!
 pid
@@ -11118,7 +11118,7 @@ pid
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 10/22/1999 22:21'!
 pid: aPid
 
-	pid := aPid
+	pid _ aPid
 ! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:33'!
@@ -11130,7 +11130,7 @@ ppid
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 10/22/1999 22:21'!
 ppid: aPid
 
-	ppid := aPid
+	ppid _ aPid
 ! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:51'!
@@ -11141,18 +11141,18 @@ programName
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:51'!
 programName: fileName
 
-	programName := fileName! !
+	programName _ fileName! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/31/2001 17:08'!
 pwd
 
-	pwd ifNil: [pwd := self accessor primGetCurrentWorkingDirectory].
+	pwd ifNil: [pwd _ self accessor primGetCurrentWorkingDirectory].
 	^ pwd! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/31/2001 17:08'!
 pwd: pathString
 
-	pwd := pathString! !
+	pwd _ pathString! !
 
 !ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 4/4/2006 21:16'!
 forkChild
@@ -11184,7 +11184,7 @@ initialize
 setDefaults
 
 	| this |
-	this := OSProcess thisOSProcess.
+	this _ OSProcess thisOSProcess.
 	initialEnvironment ifNil: [self initialEnvironment: this environment].
 	initialStdIn ifNil: [self initialStdIn: this stdIn].
 	initialStdOut ifNil: [self initialStdOut: this stdOut].
@@ -11292,13 +11292,13 @@ update: aParameter
 	aParameter == #runState
 		ifTrue: [| statusArray | 
 			"Has the process exited?"
-			statusArray := self accessor primGetChildExitStatus: self pid.
+			statusArray _ self accessor primGetChildExitStatus: self pid.
 			statusArray notNil
 				ifTrue: [self exitStatus: (statusArray at: 2).
 						^ self complete]].
 	aParameter == #accessibility
 		ifTrue: ["Does the process still exist, and is it reachable?"
-			((accessible := self isAccessible) notNil and: [accessible])
+			((accessible _ self isAccessible) notNil and: [accessible])
 				ifFalse: [^ self isRunning ifTrue: [self unknownRunState]]].
 	super update: aParameter
 ! !
@@ -11315,7 +11315,7 @@ bashShellPath
 	"A more full-featured shell from the Free Software Foundation"
 
 	| path |
-	path := '/bin/bash'.
+	path _ '/bin/bash'.
 	(OSProcess fileExists: path)
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
@@ -11325,7 +11325,7 @@ defaultShellPath
 	"Default shell to run"
 
 	| path |
-	path := '/bin/sh'.
+	path _ '/bin/sh'.
 	(OSProcess fileExists: path)
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
@@ -11335,7 +11335,7 @@ remoteShellPath
 	"A remote shell processor. This may need to be edited for different systems."
 
 	| path |
-	path := '/usr/bin/rsh'.
+	path _ '/usr/bin/rsh'.
 	(OSProcess fileExists: path)
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
@@ -11346,7 +11346,7 @@ tkShellPath
 	of places, so you may need to edit this method for your system."
 
 	| path |
-	path := '/usr/bin/wish'.
+	path _ '/usr/bin/wish'.
 	(OSProcess fileExists: path)
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
@@ -11406,7 +11406,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 		descriptors: nil"
 
 	| proc |
-	proc := super new
+	proc _ super new
 		programName: executableFile;
 		arguments: arrayOfStrings;
 		initialEnvironment: stringDictionary.
@@ -11425,7 +11425,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	"ExternalUnixOSProcess forkAndExec: '/bin/ls' arguments: nil environment: nil descriptors: nil workingDir: '/etc'"
 
 	| proc |
-	proc := super new
+	proc _ super new
 		programName: executableFile;
 		arguments: arrayOfStrings;
 		initialEnvironment: stringDictionary.
@@ -11476,7 +11476,7 @@ closeHandles
 	self threads do: [:thread | thread closeHandle].
 	handle ifNotNil:
 		[OSProcess accessor primCloseHandle: handle.
-		handle := nil]
+		handle _ nil]
 ! !
 
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/26/2002 10:09'!
@@ -11487,7 +11487,7 @@ commandLine
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/26/2002 10:09'!
 commandLine: aCommandLineString
 
-	commandLine := aCommandLineString! !
+	commandLine _ aCommandLineString! !
 
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 08:32'!
 exitStatus
@@ -11497,7 +11497,7 @@ exitStatus
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 08:33'!
 exitStatus: status
 
-	exitStatus := status
+	exitStatus _ status
 ! !
 
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:24'!
@@ -11512,7 +11512,7 @@ handle: aHandleObject
 	"A Windows HANDLE for this OS process, represented as a ByteArray. The
 	handle should be closed when the process exits."
 
-	handle := aHandleObject! !
+	handle _ aHandleObject! !
 
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:29'!
 ppid
@@ -11523,7 +11523,7 @@ ppid
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:29'!
 ppid: aProcessID
 
-	ppid := aProcessID! !
+	ppid _ aProcessID! !
 
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 10:28'!
 pwd
@@ -11535,13 +11535,13 @@ pwd
 pwd: pathString
 	"The current working directory string."
 
-	pwd := pathString! !
+	pwd _ pathString! !
 
 !ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:09'!
 threads
 	"One or more threads of execution within the OS process"
 
-	^ threads ifNil: [threads := OrderedCollection new]
+	^ threads ifNil: [threads _ OrderedCollection new]
 ! !
 
 !ExternalWindowsOSProcess methodsFor: 'setting run state' stamp: 'dtl 6/24/2006 08:41'!
@@ -11560,11 +11560,11 @@ update: aParameter
 	aParameter == #runState
 		ifTrue:
 			["Has the process exited?"
-	 		stat := self accessor primGetExitStatusForHandle: self handle.
+	 		stat _ self accessor primGetExitStatusForHandle: self handle.
 			stat ifNotNil: [self complete closeHandles exitStatus: stat]].
 	aParameter == #accessibility
 		ifTrue: ["Does the process still exist, and is it reachable?"
-			((accessible := self isAccessible) notNil and: [accessible])
+			((accessible _ self isAccessible) notNil and: [accessible])
 				ifFalse: [self isRunning ifTrue: [self unknownRunState]]].
 	super update: aParameter
 ! !
@@ -11575,10 +11575,10 @@ value
 
 	| procInfo mainThread |
 	self isNotYetRunning ifTrue:
-		[procInfo := OSProcess accessor primCommand: self commandLine.
+		[procInfo _ OSProcess accessor primCommand: self commandLine.
 		procInfo isNil
 			ifTrue:
-				[ | err | (err := self initialStdErr) notNil ifTrue: [
+				[ | err | (err _ self initialStdErr) notNil ifTrue: [
 					err nextPutAll: 'cannot execute ', self commandLine; cr ].
 				self exitStatus: #cannotExecuteCommandLine.
 				"FIXME: Close the OSPipes now, otherwise the image will block on a read"
@@ -11587,7 +11587,7 @@ value
 			ifFalse:
 				[self pid: (procInfo at: 3).
 				self handle: (procInfo at: 1).
-				mainThread := WindowsThread
+				mainThread _ WindowsThread
 						threadID: (procInfo at: 4)
 						handle: (procInfo at: 2)
 						running: true.
@@ -11628,7 +11628,7 @@ programName: executableFile arguments: arrayOfStrings initialEnvironment: string
 	a command line string and ignore the environment argument."
 
 	| commandLine |
-	commandLine := WriteStream on: String new.
+	commandLine _ WriteStream on: String new.
 	commandLine nextPutAll: executableFile.
 	arrayOfStrings ifNotNil:
 		[arrayOfStrings do: [:arg | commandLine nextPut: Character space; nextPutAll: arg]].
@@ -11757,7 +11757,7 @@ updateAllMyChildren
 	running, check to see if it has exited, and update runState and exitStatus accordingly."
 
 	| children |
-	accessProtect critical: [children := self allMyChildren asArray].
+	accessProtect critical: [children _ self allMyChildren asArray].
 	children do:
 		[:child |
 		child update: #accessibility.
@@ -11786,7 +11786,7 @@ closeXDisplay
 	"self thisOSProcess closeXDisplay"
 
 	| proc |
-	proc := self processAccessor primKillDisplay.
+	proc _ self processAccessor primKillDisplay.
 	proc ifNil: [self noAccessorAvailable].
 	^ proc
 ! !
@@ -11816,7 +11816,7 @@ disconnectXDisplay
 	"self thisOSProcess disconnectXDisplay"
 
 	| proc |
-	proc := self processAccessor primDisconnectDisplay.
+	proc _ self processAccessor primDisconnectDisplay.
 	proc ifNil: [self noAccessorAvailable].
 	^ proc
 ! !
@@ -11839,7 +11839,7 @@ displayOnXServer: xDisplayName
 	| previousDisplayName |
 	(xDisplayName isKindOf: String)
 		ifFalse: [^ 'expected display name string'].
-	previousDisplayName := self currentXDisplayName.
+	previousDisplayName _ self currentXDisplayName.
 	(self canConnectToXDisplay: xDisplayName)
 		ifTrue:
 			[self decapitate.
@@ -11877,7 +11877,7 @@ openXDisplay
 	"self thisOSProcess closeXDisplay. (Delay forSeconds: 5) wait. self thisOSProcess openXDisplay."
 
 	| proc |
-	proc := self processAccessor primOpenXDisplay.
+	proc _ self processAccessor primOpenXDisplay.
 	proc ifNil: [self noAccessorAvailable].
 	^ proc
 ! !
@@ -11926,7 +11926,7 @@ finalize
 		ifNotNil: 
 			[processAccessor removeDependent: self.
 			processAccessor finalize].
-	processAccessor := nil! !
+	processAccessor _ nil! !
 
 !ThisOSProcess methodsFor: 'environment' stamp: 'dtl 10/18/2001 20:10'!
 getCwd
@@ -11957,7 +11957,7 @@ isStdErr: anIOHandle
 
 	| realHandle |
 	anIOHandle ifNil: [^ false].
-	realHandle := self processAccessor getStdErrHandle.
+	realHandle _ self processAccessor getStdErrHandle.
 	realHandle ifNil: [^ false].
 	UseIOHandle
 		ifTrue: [^ anIOHandle handle = realHandle handle]
@@ -11970,7 +11970,7 @@ isStdIn: anIOHandle
 
 	| realHandle |
 	anIOHandle ifNil: [^ false].
-	realHandle := self processAccessor getStdInHandle.
+	realHandle _ self processAccessor getStdInHandle.
 	realHandle ifNil: [^ false].
 	UseIOHandle
 		ifTrue: [^ anIOHandle handle = realHandle handle]
@@ -11983,7 +11983,7 @@ isStdOut: anIOHandle
 
 	| realHandle |
 	anIOHandle ifNil: [^ false].
-	realHandle := self processAccessor getStdOutHandle.
+	realHandle _ self processAccessor getStdOutHandle.
 	realHandle ifNil: [^ false].
 	UseIOHandle
 		ifTrue: [^ anIOHandle handle = realHandle handle]
@@ -11995,11 +11995,11 @@ initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is. executing."
 
-	accessProtect := Semaphore forMutualExclusion.
+	accessProtect _ Semaphore forMutualExclusion.
 	self initializeAllMyChildren.
 	processAccessor ifNotNil:
 		[processAccessor breakDependents.
-		processAccessor := nil].
+		processAccessor _ nil].
 	((self processAccessor notNil
 		and: [processAccessor canAccessSystem])
 			and: [pid ~= processAccessor primGetPid])
@@ -12011,7 +12011,7 @@ initializeAllMyChildren
 	"Use a Dictionary if process identifiers are unique. On Windows, the
 	process ID is not unique, so use an OrderedCollection instead."
 
-	^ childProcessList := OrderedCollection new
+	^ childProcessList _ OrderedCollection new
 ! !
 
 !ThisOSProcess methodsFor: 'platform identification' stamp: 'dtl 10/10/2001 21:24'!
@@ -12048,7 +12048,7 @@ resetChildProcessDictionary
 !ThisOSProcess methodsFor: 'updating' stamp: 'dtl 10/15/2001 21:27'!
 update: aParameter
 
-	aParameter == #invalidProcessAccessor ifTrue: [processAccessor := nil].
+	aParameter == #invalidProcessAccessor ifTrue: [processAccessor _ nil].
 	^ super update: aParameter! !
 
 !ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 13:30'!
@@ -12057,9 +12057,9 @@ processAccessor
 	| a |
 	processAccessor
 		ifNil: 
-			[a := OSProcessAccessor forThisOSProcess.
+			[a _ OSProcessAccessor forThisOSProcess.
 			a isResponsibleForThisPlatform ifTrue:
-				[processAccessor := a.
+				[processAccessor _ a.
 				processAccessor addDependent: self]].
 	^ processAccessor! !
 
@@ -12095,9 +12095,9 @@ setStdErr
 	| stdErrHandle |
 	stdErr ifNotNil:
 			[(self isStdErr: stdErr ioHandle) ifTrue: [^ stdErr]].
-	stdErrHandle := self processAccessor getStdErrHandle.
+	stdErrHandle _ self processAccessor getStdErrHandle.
 	stdErrHandle ifNotNil:
-			[stdErr := AttachableFileStream name: 'stderr' attachTo: stdErrHandle writable: true].
+			[stdErr _ AttachableFileStream name: 'stderr' attachTo: stdErrHandle writable: true].
 	^ stdErr
 ! !
 
@@ -12113,9 +12113,9 @@ setStdIn
 	| stdInHandle |
 	stdIn ifNotNil:
 			[(self isStdIn: stdIn ioHandle) ifTrue: [^ stdIn]].
-	stdInHandle := self processAccessor getStdInHandle.
+	stdInHandle _ self processAccessor getStdInHandle.
 	stdInHandle ifNotNil:
-			[stdIn := AttachableFileStream name: 'stdin' attachTo: stdInHandle writable: false].
+			[stdIn _ AttachableFileStream name: 'stdin' attachTo: stdInHandle writable: false].
 	^ stdIn
 
 ! !
@@ -12132,9 +12132,9 @@ setStdOut
 	| stdOutHandle |
 	stdOut ifNotNil:
 			[(self isStdOut: stdOut ioHandle) ifTrue: [^ stdOut]].
-	stdOutHandle := self processAccessor getStdOutHandle.
+	stdOutHandle _ self processAccessor getStdOutHandle.
 	stdOutHandle ifNotNil:
-			[stdOut := AttachableFileStream name: 'stdout' attachTo: stdOutHandle writable: true].
+			[stdOut _ AttachableFileStream name: 'stdout' attachTo: stdOutHandle writable: true].
 	^ stdOut
 ! !
 
@@ -12170,7 +12170,7 @@ initialize
 	OSProcess initialize.	"required to ensure the change sets file in smoothly"
 	AttachableFileStream initialize.
 	OSProcessAccessor initialize.
-	ChildListSize := 20.	"list will be pruned to this size, except for any children still running"
+	ChildListSize _ 20.	"list will be pruned to this size, except for any children still running"
 	self initializeThisOSProcess.
 	self isPharo5Update50558AndLater
 		ifFalse: [ Smalltalk addToStartUpList: ThisOSProcess.
@@ -12189,9 +12189,9 @@ initializeThisOSProcess
 
 	(ThisInstance isNil or: [ThisInstance isResponsibleForThisPlatform not])
 		ifTrue: [ | cls |
-			(cls := self concreteClassOrNil)
-				ifNil: [ThisInstance := nil "no concrete class for this platform"]
-				ifNotNil: [ThisInstance := cls basicNew]].
+			(cls _ self concreteClassOrNil)
+				ifNil: [ThisInstance _ nil "no concrete class for this platform"]
+				ifNotNil: [ThisInstance _ cls basicNew]].
 	ThisInstance initialize! !
 
 !ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 7/5/2010 11:56'!
@@ -12201,7 +12201,7 @@ initializeThisOSProcessWithNotifier
 	type of computer). Warn if no implementation is available for this platform."
 
 	(ThisInstance isNil or: [ThisInstance isResponsibleForThisPlatform not])
-		ifTrue: [ThisInstance := self concreteClass basicNew].
+		ifTrue: [ThisInstance _ self concreteClass basicNew].
 	ThisInstance initialize! !
 
 !ThisOSProcess class methodsFor: 'testing' stamp: 'dtl 8/18/2014 20:08'!
@@ -12388,19 +12388,19 @@ arguments
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
 path
 
-	^ path := self pathString
+	^ path _ self pathString
 ! !
 
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
 path: aPathString
 
 	self environmentAt: #PATH put: aPathString.
-	path := self pathString! !
+	path _ self pathString! !
 
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 10/18/2001 20:01'!
 pid
 
-	^ pid := self processAccessor primGetPid
+	^ pid _ self processAccessor primGetPid
 ! !
 
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
@@ -12409,7 +12409,7 @@ ppid
 	to be reparented when the parent exits. The child does not know about this, so
 	we refresh ppid on every access."
 
-	^ ppid := processAccessor primGetPPid
+	^ ppid _ processAccessor primGetPPid
 ! !
 
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
@@ -12425,7 +12425,7 @@ pthread
 	to be reparented when the parent exits. The child does not know about this, so
 	we refresh pthread on every access."
 
-	^ pthread := processAccessor getThreadID
+	^ pthread _ processAccessor getThreadID
 ! !
 
 !UnixProcess methodsFor: 'private' stamp: 'djr 4/6/2009 14:31'!
@@ -12443,21 +12443,21 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 
 	| offset arraySize flatStringArray ws addresses |
 	"Preserve offset space to hold address pointers."
-	offset := (anArrayOfNullTerminatedStrings size + 1) * self processAccessor sizeOfPointer.
+	offset _ (anArrayOfNullTerminatedStrings size + 1) * self processAccessor sizeOfPointer.
 	"Allocate flat strings buffer"
-	arraySize := (anArrayOfNullTerminatedStrings collect: [:e | e size]) sum
+	arraySize _ (anArrayOfNullTerminatedStrings collect: [:e | e size]) sum
 		+ ((anArrayOfNullTerminatedStrings size + 1) * self processAccessor sizeOfPointer).
 	"Flatten the strings out into a buffer, leaving room at the
 	beginning of the buffer for an array of addresses."
-	flatStringArray := String new: arraySize.
-	ws := WriteStream on: flatStringArray.
+	flatStringArray _ String new: arraySize.
+	ws _ WriteStream on: flatStringArray.
 	offset timesRepeat: [ws nextPut: (Character value: 0)].
 	anArrayOfNullTerminatedStrings do: [:e | ws nextPutAll: e].
 	"Find address offsets to be used in creating the addresses for the strings."
-	ws := WriteStream on: (Array new: anArrayOfNullTerminatedStrings size).
+	ws _ WriteStream on: (Array new: anArrayOfNullTerminatedStrings size).
 	(anArrayOfNullTerminatedStrings collect: [:e | e size])
 		inject: offset into: [:p :e | ws nextPut: p. p + e].
-	addresses := ws contents.
+	addresses _ ws contents.
 	"Results"
 	^ Array with: flatStringArray with: addresses
 ! !
@@ -12475,23 +12475,23 @@ envAsFlatArrayAndOffsets: anEnvironmentDictionary
 
 	| offset envArray arraySize flatStringArray ws addresses |
 	"Preserve offset space to hold address pointers."
-	offset := (anEnvironmentDictionary size + 1) * self processAccessor sizeOfPointer.
+	offset _ (anEnvironmentDictionary size + 1) * self processAccessor sizeOfPointer.
 	"Build collection of environment strings"
-	envArray := OrderedCollection new.
+	envArray _ OrderedCollection new.
 	anEnvironmentDictionary keysAndValuesDo: [:k :v | envArray add: (k, '=', v)].
 	"Allocate flat strings buffer"
-	arraySize := ((envArray collect: [:e | e size + 1]) sum) + offset.
+	arraySize _ ((envArray collect: [:e | e size + 1]) sum) + offset.
 	"Flatten the strings out into a buffer, leaving room at the beginning of
 	the buffer for an array of addresses."
-	flatStringArray := String new: arraySize.
-	ws := WriteStream on: flatStringArray.
+	flatStringArray _ String new: arraySize.
+	ws _ WriteStream on: flatStringArray.
 	offset timesRepeat: [ws nextPut: (Character value: 0)].
 	envArray do: [:e | ws nextPutAll: e; nextPut: (Character value: 0)].
 	"Find address offsets to be used in creating the addresses for the strings."
-	ws := WriteStream on: (Array new: anEnvironmentDictionary size).
+	ws _ WriteStream on: (Array new: anEnvironmentDictionary size).
 	(envArray collect: [:e | e size + 1])
 		inject: offset into: [:p :e | ws nextPut: p. p + e].
-	addresses := ws contents.
+	addresses _ ws contents.
 	"Results"
 	^ Array with: flatStringArray with: addresses
 ! !
@@ -12503,11 +12503,11 @@ getArgumentList
 	stored as the programName instance variable."
 
 	| index val list |
-	list := OrderedCollection new.
-	index := 2.
-	[(val := processAccessor primArgumentAt: index) notNil] whileTrue: [
+	list _ OrderedCollection new.
+	index _ 2.
+	[(val _ processAccessor primArgumentAt: index) notNil] whileTrue: [
 		list add: val.
-		index := index + 1].
+		index _ index + 1].
 	^ list asArray
 
 ! !
@@ -12517,13 +12517,13 @@ getEnvironmentDictionary
 	"Answer an environment dictionary using an OSProcessAccessor."
 
 	| index str key val env |
-	env := Dictionary new.
-	index := 1.
-	[(str := processAccessor primEnvironmentAt: index) notNil] whileTrue: [
-		key := (str copyUpTo: $=) asSymbol.
-		val := (str copyFrom: ((str indexOf: $=) + 1) to: (str size)).
+	env _ Dictionary new.
+	index _ 1.
+	[(str _ processAccessor primEnvironmentAt: index) notNil] whileTrue: [
+		key _ (str copyUpTo: $=) asSymbol.
+		val _ (str copyFrom: ((str indexOf: $=) + 1) to: (str size)).
 		env at: key put: val.
-		index := index + 1].
+		index _ index + 1].
 	^ env
 
 
@@ -12534,7 +12534,7 @@ getProgramName
 	"Answer the name of the program which is being run by this OS process. Assume the
 	Unix convention where the first element of (char **)argv is the program name."
 
-	^ programName := processAccessor primArgumentAt: 1
+	^ programName _ processAccessor primArgumentAt: 1
 ! !
 
 !UnixProcess methodsFor: 'private' stamp: 'dtl 11/7/2000 09:26'!
@@ -12561,9 +12561,9 @@ chDir: pathString
 	"OSProcess thisOSProcess chDir: OSProcess defaultPathString"
 
 	| realPath result |
-	realPath := self processAccessor realpath: pathString.
-	realPath ifNil: [realPath := pathString].
-	result := self processAccessor chDir: realPath.
+	realPath _ self processAccessor realpath: pathString.
+	realPath ifNil: [realPath _ pathString].
+	result _ self processAccessor chDir: realPath.
 	result isNil
 		ifTrue:
 			[(self environmentAt: #PWD)
@@ -12589,7 +12589,7 @@ environmentAt: aSymbol put: aString
 
 	| s |
 	self initialize.
-	s := self processAccessor environmentAt: aSymbol put: aString.
+	s _ self processAccessor environmentAt: aSymbol put: aString.
 	s ifNotNil: [ self environment at: aSymbol asSymbol put: aString ].
 	^ s
 
@@ -12620,7 +12620,7 @@ command: aCommandString
 		ifTrue:
 			[self class noAccessorAvailable. ^nil]
 		ifFalse:
-			[proc := self
+			[proc _ self
 					forkJob: ExternalUnixOSProcess defaultShellPath
 					arguments: (Array with: '-c' with: aCommandString)
 					environment: nil
@@ -12645,7 +12645,7 @@ command: aCommandString input: aStreamOrString
 	| proc |
 	(Smalltalk hasClassNamed: #PipeableOSProcess)
 		ifTrue:
-			[proc := (Smalltalk at: #PipeableOSProcess) command: aCommandString.
+			[proc _ (Smalltalk at: #PipeableOSProcess) command: aCommandString.
 			proc ifNil: [^ nil].
 			proc nextPutAll: aStreamOrString contents.
 			(proc perform: #pipeToInput) close.
@@ -12665,8 +12665,8 @@ waitForCommand: aCommandString
 	"OSProcess thisOSProcess waitForCommand: 'echo sleeping...; sleep 3; echo I just slept for three seconds'"
 
 	| proc d |
-	d := Delay forMilliseconds: 50.
-	proc := self
+	d _ Delay forMilliseconds: 50.
+	proc _ self
 		forkJob: ExternalUnixOSProcess defaultShellPath
 		arguments: (Array with: '-c' with: aCommandString)
 		environment: nil
@@ -12705,7 +12705,7 @@ waitForCommandOutputArray: aCommandString
 	| proc |
 	(Smalltalk hasClassNamed: #PipeableOSProcess)
 		ifTrue:
-			[proc := (Smalltalk at: #PipeableOSProcess) command: aCommandString.
+			[proc _ (Smalltalk at: #PipeableOSProcess) command: aCommandString.
 			^ Array
 				with: (proc perform: #output)
 				with: (proc perform: #errorUpToEnd)
@@ -12720,27 +12720,27 @@ finalize
 	"Use this to release any external resources prior to reinitializing."
 
 	super finalize.
-	stdIn := stdIn ifNotNil:
+	stdIn _ stdIn ifNotNil:
 		[[stdIn close] on: Error do: [:ex | ].
 		nil].
-	stdIn := stdOut ifNotNil:
+	stdIn _ stdOut ifNotNil:
 		[[stdOut close] on: Error do: [:ex | ].
 		nil].
-	stdIn := stdErr ifNotNil:
+	stdIn _ stdErr ifNotNil:
 		[[stdErr close] on: Error do: [:ex | ].
 		nil].
-	sessionID := nil.
-	ppid := nil.
-	programName := nil.
-	arguments := nil.
-	path := nil.
-	environment := nil.
+	sessionID _ nil.
+	ppid _ nil.
+	programName _ nil.
+	arguments _ nil.
+	path _ nil.
+	environment _ nil.
 	self updateAllMyChildren.
-	childProcessList := nil.
+	childProcessList _ nil.
 	processAccessor
 		ifNotNil: 
 			[processAccessor removeDependent: self.
-			processAccessor := nil]
+			processAccessor _ nil]
 ! !
 
 !UnixProcess methodsFor: 'child process creation' stamp: 'dtl 2/27/2002 15:24'!
@@ -12763,10 +12763,10 @@ forkHeadlessSqueak
 	stdOut ifNil: [^ nil].
 	self stdOut flush.
 	self stdErr flush.
-	thisPid := self pid.
-	connected := self processAccessor canControlXDisplay
+	thisPid _ self pid.
+	connected _ self processAccessor canControlXDisplay
 					and: [self flushXDisplay notNil].
-	childPid := self processAccessor forkSqueak.
+	childPid _ self processAccessor forkSqueak.
 	^ childPid ifNotNil: [
 		childPid == 0
 			ifTrue:
@@ -12774,7 +12774,7 @@ forkHeadlessSqueak
 				OSProcess thisOSProcess processAccessor newPid.
 				^ self]
 			ifFalse:
-				[child := ExternalUnixOSProcess new.
+				[child _ ExternalUnixOSProcess new.
 				child pid: childPid.
 				child ppid: thisPid.
 				child programName: self programName.
@@ -12802,7 +12802,7 @@ forkHeadlessSqueakAndDo: aBlock
 	stdout, and stderr after its parent exits."
 
 	| childOrThisProc |
-	childOrThisProc := self forkHeadlessSqueak.
+	childOrThisProc _ self forkHeadlessSqueak.
 	childOrThisProc
 		ifNil: 
 			[self class noAccessorAvailable.
@@ -12831,7 +12831,7 @@ forkHeadlessSqueakAndDoThenQuit: aBlock
 	"self thisOSProcess forkHeadlessSqueakAndDoThenQuit: [OSProcess thisOSProcess command: 'xeyes']"
 
 	| childOrThisProc |
-	childOrThisProc := self forkHeadlessSqueak.
+	childOrThisProc _ self forkHeadlessSqueak.
 	childOrThisProc
 		ifNil: 
 			[self class noAccessorAvailable.
@@ -12876,10 +12876,10 @@ forkSqueak
 	stdOut ifNil: [^ nil].
 	self stdOut flush.
 	self stdErr flush.
-	thisPid := self pid.
-	connected := self processAccessor canControlXDisplay
+	thisPid _ self pid.
+	connected _ self processAccessor canControlXDisplay
 					and: [self flushXDisplay notNil].
-	childPid := self processAccessor forkSqueak.
+	childPid _ self processAccessor forkSqueak.
 	^ childPid ifNotNil: [
 		childPid == 0
 			ifTrue:
@@ -12887,7 +12887,7 @@ forkSqueak
 				OSProcess thisOSProcess processAccessor newPid.
 				^ self]
 			ifFalse:
-				[child := ExternalUnixOSProcess new.
+				[child _ ExternalUnixOSProcess new.
 				child pid: childPid.
 				child ppid: thisPid.
 				child programName: self programName.
@@ -12916,7 +12916,7 @@ forkSqueakAndDo: aBlock
 		[Object inform: 'Hi, I am the child Squeak process.']"
 
 	| childOrThisProc |
-	childOrThisProc := self forkSqueak.
+	childOrThisProc _ self forkSqueak.
 	(childOrThisProc == self) ifTrue: [aBlock value]. "Child process"
 	^ childOrThisProc! !
 
@@ -12934,7 +12934,7 @@ forkSqueakAndDoThenQuit: aBlock
 		[Object inform: 'Hi, I am the child Squeak process.']"
 
 	| childOrThisProc |
-	childOrThisProc := self forkSqueak.
+	childOrThisProc _ self forkSqueak.
 	(childOrThisProc == self)
 		ifTrue:
 			[ aBlock value.
@@ -12951,51 +12951,51 @@ processProxy: anExternalProcess forkAndExec: executableFile arguments: arrayOfSt
 	| nullString progName args argVecAndOffsets argVec argOffsets
 	envVecAndOffsets envVec envOffsets in out err childPid pwd |
 	stdOut ifNil: [^ nil].
-	nullString := (Character value: 0) asString.
-	progName := executableFile, nullString.		"Null terminated string"
+	nullString _ (Character value: 0) asString.
+	progName _ executableFile, nullString.		"Null terminated string"
 	arrayOfStrings isNil							"Should be a (possibly empty) array"
 		ifTrue:
-			[args := Array with: progName]		"First argument is the program name (Unix convention)"
+			[args _ Array with: progName]		"First argument is the program name (Unix convention)"
 		ifFalse:
-			[args := (OrderedCollection new: arrayOfStrings size + 2)
+			[args _ (OrderedCollection new: arrayOfStrings size + 2)
 						add: progName;
 						addAll: (arrayOfStrings collect: [:e | e, nullString ]);	"Null terminate each string"
 						yourself;
 						asArray].
-	argVecAndOffsets := self argsAsFlatArrayAndOffsets: args.
-	argVec := argVecAndOffsets at: 1.
-	argOffsets := argVecAndOffsets at: 2.
+	argVecAndOffsets _ self argsAsFlatArrayAndOffsets: args.
+	argVec _ argVecAndOffsets at: 1.
+	argOffsets _ argVecAndOffsets at: 2.
 	(stringDictionary notNil and: [stringDictionary ~= (self environment)])
 		ifTrue:
-			[envVecAndOffsets := self envAsFlatArrayAndOffsets: stringDictionary.
-			envVec := envVecAndOffsets at: 1.
-			envOffsets := envVecAndOffsets at: 2]
+			[envVecAndOffsets _ self envAsFlatArrayAndOffsets: stringDictionary.
+			envVec _ envVecAndOffsets at: 1.
+			envOffsets _ envVecAndOffsets at: 2]
 		ifFalse:
-			[envVec := nil.
-			envOffsets := nil].	"Same as current environment, so just pass nil."
+			[envVec _ nil.
+			envOffsets _ nil].	"Same as current environment, so just pass nil."
 	arrayOf3Streams isNil
 		ifTrue:
-			[in := self handleFromAccessor: (self stdIn ioHandle).
-			out := self handleFromAccessor: (self stdOut ioHandle).
-			err := self handleFromAccessor: (self stdIn ioHandle)]
+			[in _ self handleFromAccessor: (self stdIn ioHandle).
+			out _ self handleFromAccessor: (self stdOut ioHandle).
+			err _ self handleFromAccessor: (self stdIn ioHandle)]
 		ifFalse:
 			[(arrayOf3Streams at: 1)
 				isNil
-					ifTrue: [in := self handleFromAccessor: (self stdIn ioHandle)]
-					ifFalse: [in := self handleFromFileStream: (arrayOf3Streams at: 1)].			
+					ifTrue: [in _ self handleFromAccessor: (self stdIn ioHandle)]
+					ifFalse: [in _ self handleFromFileStream: (arrayOf3Streams at: 1)].			
 			(arrayOf3Streams at: 2)
 				isNil
-					ifTrue: [ out := self handleFromAccessor: (self stdOut ioHandle)]
-					ifFalse: [ out := self handleFromFileStream: (arrayOf3Streams at: 2)].
+					ifTrue: [ out _ self handleFromAccessor: (self stdOut ioHandle)]
+					ifFalse: [ out _ self handleFromFileStream: (arrayOf3Streams at: 2)].
 			(arrayOf3Streams at: 3)
 				isNil
-					ifTrue: [ err := self handleFromAccessor: (self stdErr ioHandle)]
-					ifFalse: [ err := self handleFromFileStream: (arrayOf3Streams at: 3)]].
-	pwd := anExternalProcess pwd.
+					ifTrue: [ err _ self handleFromAccessor: (self stdErr ioHandle)]
+					ifFalse: [ err _ self handleFromFileStream: (arrayOf3Streams at: 3)]].
+	pwd _ anExternalProcess pwd.
 	(pwd = self getCwd)
-		ifTrue: [pwd := nil]
-		ifFalse: [pwd := pwd, nullString].
-	childPid := self processAccessor
+		ifTrue: [pwd _ nil]
+		ifFalse: [pwd _ pwd, nullString].
+	childPid _ self processAccessor
 				forkAndExec: progName
 				stdIn: in
 				stdOut: out
@@ -13040,9 +13040,9 @@ initialize
 		ifTrue: 
 			[self refreshFromProcessAccessor]
 		ifFalse: 
-			[stdIn := nil.
-			stdOut := nil.
-			stdErr := nil].
+			[stdIn _ nil.
+			stdOut _ nil.
+			stdErr _ nil].
 	processAccessor restartChildWatcherProcess
 ! !
 
@@ -13070,8 +13070,8 @@ killCurrentChildrenAtExit
 redirect: aFileStream to: newFileStream
 
 	| oldfd newfd |
-	oldfd := self processAccessor unixFileNumber: aFileStream fileID.
-	newfd := self processAccessor unixFileNumber: newFileStream fileID.
+	oldfd _ self processAccessor unixFileNumber: aFileStream fileID.
+	newfd _ self processAccessor unixFileNumber: newFileStream fileID.
 	self processAccessor primUnixFileClose: oldfd.
 	^ self processAccessor primDup: newfd to: oldfd
 ! !
@@ -13095,7 +13095,7 @@ redirectStdOutTo: fileStream
 	"Redirect the standard output stream to another output stream."
 
 	"| pipe |
-	pipe := OSPipe nonBlockingPipe.
+	pipe _ OSPipe nonBlockingPipe.
 	OSProcess thisOSProcess redirectStdOutTo: pipe writer.
 	pipe"
 	
@@ -13108,17 +13108,17 @@ refreshFromProcessAccessor
 	virtual machine is executing."
 
 	self needsRefresh ifTrue: [
-		sessionID := self processAccessor getSessionIdentifier.
-		pid := processAccessor primGetPid.
-		ppid := processAccessor primGetPPid.
-		pthread := processAccessor getThreadID.
+		sessionID _ self processAccessor getSessionIdentifier.
+		pid _ processAccessor primGetPid.
+		ppid _ processAccessor primGetPPid.
+		pthread _ processAccessor getThreadID.
 		self setStdIn.
 		self setStdOut.
 		self setStdErr.
-		programName := self getProgramName.
-		arguments := self getArgumentList.
-		environment := self getEnvironmentDictionary.
-		path := self pathString.
+		programName _ self getProgramName.
+		arguments _ self getArgumentList.
+		environment _ self getEnvironmentDictionary.
+		path _ self pathString.
 		self updateAllMyChildren]
 ! !
 
@@ -13136,7 +13136,7 @@ update: aParameter
 	(aParameter == #startUp) ifTrue:
 		[^ self update: #pid].
 	aParameter == #invalidProcessAccessor ifTrue:
-		[processAccessor := processAccessor ifNotNil: [processAccessor removeDependent: self. nil].
+		[processAccessor _ processAccessor ifNotNil: [processAccessor removeDependent: self. nil].
 		^ self].
 	self error: 'Unexpected update parameter'! !
 
@@ -13267,7 +13267,7 @@ restartVirtualMachine
 	"UnixProcess restartVirtualMachine"
 
 	| proc |
-	proc := self forkSqueak.
+	proc _ self forkSqueak.
 	proc isNil
 		ifTrue: 
 			[self noAccessorAvailable.
@@ -13296,7 +13296,7 @@ startSwiki: aSwiki onPort: num loggingTo: aFileName
 	| proc |
 	(Smalltalk hasClassNamed: #SwikiAction)
 		ifTrue:
-			[proc := self forkSqueakAndDo:
+			[proc _ self forkSqueakAndDo:
 				[(Smalltalk at: #SwikiAction) new restore: 'myswiki'.
 				(Smalltalk at: #PWS) serveOnPort: num loggingTo: aFileName.
 				UnixProcess decapitate].
@@ -13341,11 +13341,11 @@ backgroundProcessInHeadlessSqueak
 	"UnixProcess backgroundProcessInHeadlessSqueak"
 
 	^ [[| pipe backgroundJob ws s | 
-	pipe := OSPipe new.
-	backgroundJob := OSProcess thisOSProcess
+	pipe _ OSPipe new.
+	backgroundJob _ OSProcess thisOSProcess
 	forkHeadlessSqueakAndDoThenQuit: [| beers | 
 		OSProcess accessor nice: 1. "lower priority of background OS process"
-		beers := [:i | (i < 1 ifTrue: ['no more'] ifFalse: [i asString])
+		beers _ [:i | (i < 1 ifTrue: ['no more'] ifFalse: [i asString])
 					, ' bottle' , (i = 1 ifTrue: [''] ifFalse: ['s'])].
 		(99 to: 1 by: -1) do: [:count | pipe nextPutAll:
 			(beers value: count) , ' of beer on the wall, '
@@ -13357,10 +13357,10 @@ backgroundProcessInHeadlessSqueak
 		[Transcript show: backgroundJob asString , ' started'; cr].
 	pipe closeWriter. "don't need writer end, close it before the #upToEnd"
 	"pipe writer blocks when pipe full, so we need to loop while reading to end "
-	ws := WriteStream on: String new.
+	ws _ WriteStream on: String new.
 	[backgroundJob isComplete] whileFalse:
 		[(Delay forMilliseconds: 200) wait.
-		(s := pipe upToEnd) ifNotNil: [ws nextPutAll: s]].
+		(s _ pipe upToEnd) ifNotNil: [ws nextPutAll: s]].
 	pipe close.
 	WorldState addDeferredUIMessage:
 		[Transcript show: backgroundJob asString
@@ -13379,8 +13379,8 @@ catAFile
 	"UnixProcess catAFile"
 
 	| in proc |
-	in := OSProcess readOnlyFileNamed: '/etc/hosts'.
-	proc := self forkJob: '/bin/cat'
+	in _ OSProcess readOnlyFileNamed: '/etc/hosts'.
+	proc _ self forkJob: '/bin/cat'
 			arguments: nil
 			environment: nil
 			descriptors: (Array with: in with: nil with: nil).
@@ -13396,10 +13396,10 @@ catFromFileToFiles
 	"UnixProcess catFromFileToFiles"
 
 	| in out err proc |
-	in := OSProcess readOnlyFileNamed: '/etc/hosts'.
-	out := OSProcess newFileNamed: '/tmp/deleteMe.out'.
-	err := OSProcess newFileNamed: '/tmp/deleteMe.err'.
-	proc := UnixProcess
+	in _ OSProcess readOnlyFileNamed: '/etc/hosts'.
+	out _ OSProcess newFileNamed: '/tmp/deleteMe.out'.
+	err _ OSProcess newFileNamed: '/tmp/deleteMe.err'.
+	proc _ UnixProcess
 				forkJob: '/bin/cat'
 				arguments: nil
 				environment: nil
@@ -13425,7 +13425,7 @@ clientServerDemo
 	"UnixProcess clientServerDemo"
 
 	| proc |
-	proc := self forkHeadlessSqueakAndDoThenQuit: [Socket remoteTestServerTCP].
+	proc _ self forkHeadlessSqueakAndDoThenQuit: [Socket remoteTestServerTCP].
 	proc ifNotNil: [Socket remoteTestClientTCP].
 	^ proc
 
@@ -13443,19 +13443,19 @@ clientServerDemo2
 	| remotePort remoteHost serverBlock socket buffer n bytesToSend sendBuf
 	receiveBuf done bytesSent bytesReceived packetsSent packetsReceived t |
 
-	remotePort := 54321.
-	remoteHost := 'localhost'.
-	serverBlock := 
+	remotePort _ 54321.
+	remoteHost _ 'localhost'.
+	serverBlock _ 
 			[Transcript clear; cr; show: 'This is the server Squeak session'; cr.
 			Socket initializeNetworkIfFail: [^ nil].
-			socket := Socket newTCP.
+			socket _ Socket newTCP.
 			socket listenOn: remotePort.
-			buffer := String new: 4000.
+			buffer _ String new: 4000.
 			socket waitForConnectionUntil: Socket standardDeadline.
 			[socket isConnected]
 				whileTrue: [socket dataAvailable
 						ifTrue: 
-							[n := socket receiveDataInto: buffer.
+							[n _ socket receiveDataInto: buffer.
 							socket sendData: buffer count: n]].
 			socket closeAndDestroy].
 
@@ -13466,33 +13466,33 @@ clientServerDemo2
 	Transcript show: 'initializing network ... '.
 	Socket initializeNetworkIfFail: [^ Transcript show: 'failed'].
 	Transcript show: 'ok'; cr.
-	socket := Socket newTCP.
+	socket _ Socket newTCP.
 	socket connectTo: (NetNameResolver addressForName: remoteHost) port: remotePort.
 	socket waitForConnectionUntil: Socket standardDeadline.
 	Transcript show: 'client endpoint created'; cr.
-	bytesToSend := 1000000.
-	sendBuf := String new: 4000 withAll: $x.
-	receiveBuf := String new: 50000.
-	done := false.
-	bytesSent := bytesReceived := packetsSent := packetsReceived := 0.
-	t := Time
+	bytesToSend _ 1000000.
+	sendBuf _ String new: 4000 withAll: $x.
+	receiveBuf _ String new: 50000.
+	done _ false.
+	bytesSent _ bytesReceived := packetsSent := packetsReceived := 0.
+	t _ Time
 				millisecondsToRun: 
 					[[done]
 						whileFalse: 
 							[(socket sendDone and: [bytesSent < bytesToSend])
 								ifTrue: 
-									[packetsSent := packetsSent + 1.
-									bytesSent := bytesSent + (socket sendData: sendBuf)].
+									[packetsSent _ packetsSent + 1.
+									bytesSent _ bytesSent + (socket sendData: sendBuf)].
 							socket dataAvailable
 								ifTrue: 
-									[packetsReceived := packetsReceived + 1.
-									bytesReceived := bytesReceived + (socket receiveDataInto: receiveBuf)].
-							done := bytesSent >= bytesToSend].
+									[packetsReceived _ packetsReceived + 1.
+									bytesReceived _ bytesReceived + (socket receiveDataInto: receiveBuf)].
+							done _ bytesSent >= bytesToSend].
 					[bytesReceived < bytesToSend]
 						whileTrue: [socket dataAvailable
 								ifTrue: 
-									[packetsReceived := packetsReceived + 1.
-									bytesReceived := bytesReceived + (socket receiveDataInto: receiveBuf)]]].
+									[packetsReceived _ packetsReceived + 1.
+									bytesReceived _ bytesReceived + (socket receiveDataInto: receiveBuf)]]].
 	socket closeAndDestroy.
 	Transcript show: 'remoteClient TCP test done; time = ' , t printString; cr.
 	Transcript show: packetsSent printString , ' packets, ' , bytesSent printString ,
@@ -13510,7 +13510,7 @@ cloneSqueak
 	"UnixProcess cloneSqueak"
 
 	| proc |
-	proc := self forkSqueak.
+	proc _ self forkSqueak.
 	proc ifNil: [self noAccessorAvailable].
 	^ proc
 ! !
@@ -13535,15 +13535,15 @@ eightLeafSqueakTree
 	"UnixProcess eightLeafSqueakTree inspect"
 
 	| depth this pidArray debugString |
-	depth := 3.
-	this := OSProcess thisOSProcess.
+	depth _ 3.
+	this _ OSProcess thisOSProcess.
 	this stdOut ifNil: [self noAccessorAvailable. ^ nil].
-	pidArray := Array new: depth.
+	pidArray _ Array new: depth.
 	(1 to: depth) do: [ :e | | p pid |
-		p := this forkSqueak.
-		pid := (p == this) ifTrue: [0] ifFalse: [p pid].	"Use Unix fork(2) convention"
+		p _ this forkSqueak.
+		pid _ (p == this) ifTrue: [0] ifFalse: [p pid].	"Use Unix fork(2) convention"
 		pidArray at: e put: pid].
-	debugString := 'pid ', (this pid printString), ' ppid ', (this ppid printString), ' ',
+	debugString _ 'pid ', (this pid printString), ' ppid ', (this ppid printString), ' ',
 		(pidArray printString), (Character lf asString).
 	this stdOut nextPutAll: debugString.
 	^ pidArray! !
@@ -13559,8 +13559,8 @@ headlessChild
 	"UnixProcess headlessChild"
 
 	| this childBlock |
-	this := OSProcess thisOSProcess.
-	childBlock :=
+	this _ OSProcess thisOSProcess.
+	childBlock _
 		[this stdOut nextPutAll: 'hello world from child process '.
 		this pid printOn: OSProcess thisOSProcess stdOut.
 		this stdOut nextPut: Character lf ].
@@ -13575,7 +13575,7 @@ listDirectory
 	"UnixProcess listDirectory"
 
 	| proc |
-	proc := self
+	proc _ self
 			forkJob: '/bin/ls'
 			arguments: nil
 			environment: nil
@@ -13592,11 +13592,11 @@ spawnTenHeadlessChildren
 	"UnixProcess spawnTenHeadlessChildren"
 
 	| childBlock count children this |
-	this := OSProcess thisOSProcess.
+	this _ OSProcess thisOSProcess.
 	this stdOut ifNil: [self noAccessorAvailable. ^ nil].
-	count := 10.
-	children := Array new: count.
-	childBlock := 
+	count _ 10.
+	children _ Array new: count.
+	childBlock _ 
 			[this stdOut nextPutAll: 'hello world from child process '.
 			this pid printOn: this stdOut.
 			this stdOut nextPut: Character lf.
@@ -13618,7 +13618,7 @@ squeakSqueak
 	"UnixProcess squeakSqueak"
 
 	| proc |
-	proc := self squeak.
+	proc _ self squeak.
 	proc ifNil: [self noAccessorAvailable].
 	^ proc
 ! !
@@ -13633,11 +13633,11 @@ testEnvSet
 	"UnixProcess testEnvSet"
 
 	| e proc |
-	e := Dictionary new.
+	e _ Dictionary new.
 	e at: #KEY1 put: 'value1';
 	 at: #KEY2 put: 'value2';
 	 at: #KEY3 put: 'value3'.
-	proc := self
+	proc _ self
 			forkJob: '/bin/sh'
 			arguments: #('-c' 'env' )
 			environment: e
@@ -13653,14 +13653,14 @@ testPipe
 	"UnixProcess testPipe inspect"
 
 	| s p r |
-	s := 'this is some text to write into the pipe'.
-	p := OSPipe new.
+	s _ 'this is some text to write into the pipe'.
+	p _ OSPipe new.
 	p ifNil: 
 		[self noAccessorAvailable.
 		^ p].
 	p writer nextPutAll: s.
 	p writer close.
-	r := p reader next: s size.
+	r _ p reader next: s size.
 	p reader close.
 	^ r! !
 
@@ -13680,18 +13680,18 @@ testPipeLine
 
 	| testString pipe1 pipe2 input output src dest desc result child |
 	OSProcess accessor canAccessSystem ifFalse: [^ nil].
-	testString := 'This is the text to write out through one pipe, copy through an external cat command, and then read back in through another pipe.'.
-	pipe1 := OSPipe blockingPipe.
-	pipe2 := OSPipe nonBlockingPipe.
-	input := pipe1 reader.
-	output := pipe2 writer.
-	src := pipe1 writer.
-	dest := pipe2 reader.
-	desc := Array
+	testString _ 'This is the text to write out through one pipe, copy through an external cat command, and then read back in through another pipe.'.
+	pipe1 _ OSPipe blockingPipe.
+	pipe2 _ OSPipe nonBlockingPipe.
+	input _ pipe1 reader.
+	output _ pipe2 writer.
+	src _ pipe1 writer.
+	dest _ pipe2 reader.
+	desc _ Array
 				with: input
 				with: output
 				with: nil.
-	child := self
+	child _ self
 				forkJob: '/bin/cat'
 				arguments: nil
 				environment: nil
@@ -13701,7 +13701,7 @@ testPipeLine
 	src nextPutAll: testString.
 	src close.
 	(Delay forSeconds: 1) wait.
-	result := dest next: testString size.
+	result _ dest next: testString size.
 	dest close.
 	child sigterm. "Tell the child to exit"
 	^ result
@@ -13716,18 +13716,18 @@ testRunCommand
 	"UnixProcess testRunCommand"
 
 	| out err desc args proc |
-	out := OSProcess newFileNamed: '/tmp/deleteMe.out'.
-	err := OSProcess newFileNamed: '/tmp/deleteMe.err'.
-	desc := Array
+	out _ OSProcess newFileNamed: '/tmp/deleteMe.out'.
+	err _ OSProcess newFileNamed: '/tmp/deleteMe.err'.
+	desc _ Array
 				with: nil
 				with: out
 				with: err.
-	args := Array
+	args _ Array
 				with: '-l'
 				with: '/etc'
 				with: '/etc/noSuchFile'
 				with: '/etc/anotherNonexistentFile'.
-	proc := self
+	proc _ self
 				forkJob: '/bin/ls'
 				arguments: args
 				environment: nil
@@ -13920,9 +13920,9 @@ makeVmIn: buildDirectoryPathName interactive: aBoolean
 	"UnixProcess makeVmIn: '/usr/local/squeak/Squeak-2.8/build' interactive: true"
 
 	| commandString result |
-	commandString := 'cd ', buildDirectoryPathName, '; make'.
+	commandString _ 'cd ', buildDirectoryPathName, '; make'.
 	Transcript cr; show: 'running external command "', commandString, '"'; cr.
-	result := self waitForCommandOutputArray: commandString.
+	result _ self waitForCommandOutputArray: commandString.
 	((result at: 3) == 0 and: [(result at: 2) isEmpty])
 		ifTrue:
 			[Transcript show: 'make completed successfully, restarting VM'; cr.
@@ -13963,69 +13963,69 @@ runTests
 	"UnixProcess runTests"
 
 	| this s p failures result a |
-	failures := 0.
+	failures _ 0.
 	Transcript show: 'Begin OSProcess tests'; cr.
 	Transcript show: 'Test for working ProcessAccessor ... '.
-	this := OSProcess thisOSProcess.
+	this _ OSProcess thisOSProcess.
 	(this pid isKindOf: Integer)
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'Echo one line of text previously entered from stdin ... '.
-	s := OSProcess readFromStdIn.
+	s _ OSProcess readFromStdIn.
 	s size > 0
 		ifTrue: [Transcript show: 'OK'; cr; show: s; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'Message to stdout ... '.
 	(OSProcess helloWorld isKindOf: AttachableFileStream)
 		ifTrue: [Transcript show: 'OK'; cr; show: s; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'Message to stderr ... '.
 	(OSProcess helloStdErr isKindOf: AttachableFileStream)
 		ifTrue: [Transcript show: 'OK'; cr; show: s; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess cataFile ... '.
-	p := UnixProcess catAFile.
+	p _ UnixProcess catAFile.
 	(Delay forSeconds: 1) wait.
 	p exitStatus == 0
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess testEnvSet ... '.
-	p := UnixProcess testEnvSet.
+	p _ UnixProcess testEnvSet.
 	(Delay forSeconds: 1) wait.
 	p exitStatus == 0
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess catFromFileToFiles ... '.
 	OSProcess command: 'rm /tmp/deleteMe.out'.
 	OSProcess command: 'rm /tmp/deleteMe.err'.
-	p := UnixProcess catFromFileToFiles.
+	p _ UnixProcess catFromFileToFiles.
 	(Delay forSeconds: 1) wait.
 	p exitStatus == 0
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess testRunCommand ... '.
 	OSProcess command: 'rm /tmp/deleteMe.out'.
 	OSProcess command: 'rm /tmp/deleteMe.err'.
-	p := UnixProcess testRunCommand.
+	p _ UnixProcess testRunCommand.
 	(Delay forSeconds: 1) wait.
 	p exitStatus == 256
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess testPipe ... '.
 	UnixProcess testPipe = 'this is some text to write into the pipe'
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess testPipeLine ... '.
 	UnixProcess testPipeLine = 'This is the text to write out through one pipe, copy through an external cat command, and then read back in through another pipe.'
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess spawnTenHeadlessChildren ... '.
-	p := UnixProcess spawnTenHeadlessChildren.
+	p _ UnixProcess spawnTenHeadlessChildren.
 	(p size == 10 and: [(p select: [:e | (e runState == #running) | (e exitStatus == 0)]) size == 10])
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess cloneSqueak ... '.
-	p := UnixProcess cloneSqueak.
+	p _ UnixProcess cloneSqueak.
 	(p isKindOf: UnixProcess)
 		ifTrue: 
 			[(Delay forSeconds: 1) wait.
@@ -14033,43 +14033,43 @@ runTests
 	(Delay forSeconds: 5) wait.
 	p exitStatus == 0
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess squeakSqueak ... '.
-	p := UnixProcess squeakSqueak.
+	p _ UnixProcess squeakSqueak.
 	(Delay forSeconds: 5) wait.
 	OSProcess thisOSProcess sigkill: p.
 	(Delay forSeconds: 1) wait.
 	p exitStatus == 9
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess restartVirtualMachine ... '.
-	p := UnixProcess restartVirtualMachine.
+	p _ UnixProcess restartVirtualMachine.
 	p pid == OSProcess thisOSProcess pid
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess command: ''cat'' input: ''this is some test data'' ... '.
-	p := (OSProcess thisOSProcess
+	p _ (OSProcess thisOSProcess
 		command: 'cat'
 		input: 'this is some test data').
 	(Delay forSeconds: 1) wait.
 	p upToEnd = 'this is some test data'
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'UnixProcess waitForCommandOutput: ''echo sleeping...; sleep 1; echo I just slept for one second'' ... '.
 	('*I just slept for one second*' match:
 		(OSProcess thisOSProcess
 			waitForCommandOutput: 'echo sleeping...; sleep 1; echo I just slept for one second'))
 		ifTrue: [Transcript show: 'OK'; cr]
-		ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1].
+		ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1].
 	Transcript show: 'Unix command pipeline with output and error returned in an array ... '.
 	(Smalltalk hasClassNamed: #PipeableOSProcess)
 		ifTrue:
-			[a := (((Smalltalk at: #PipeableOSProcess) command: 'echo this is a test; BOGUS') | 'cut -c11-14') outputAndError.
+			[a _ (((Smalltalk at: #PipeableOSProcess) command: 'echo this is a test; BOGUS') | 'cut -c11-14') outputAndError.
 			(((a isKindOf: Array)
 				and: ['test*' match: (a at: 1)])
 					and: ['*BOGUS*' match: (a at: 2)])
 						ifTrue: [Transcript show: 'OK'; cr]
-						ifFalse: [Transcript show: 'NFG'; cr. failures := failures + 1]]
+						ifFalse: [Transcript show: 'NFG'; cr. failures _ failures + 1]]
 		ifFalse:
 			[Transcript show: 'skipping PipeableOSProcess test (requires CommandShell)'; cr].
 
@@ -14079,8 +14079,8 @@ runTests
 		UnixProcess recapitate].
 
 	failures == 1
-		ifTrue: [result := 'OSProcess tests completed with ', failures printString, ' failure']
-		ifFalse: [result := 'OSProcess tests completed with ', failures printString, ' failures'].
+		ifTrue: [result _ 'OSProcess tests completed with ', failures printString, ' failure']
+		ifFalse: [result _ 'OSProcess tests completed with ', failures printString, ' failures'].
 	Transcript show: result; cr.
 
 	^ result
@@ -14114,7 +14114,7 @@ saveImageInBackground: savedImageName nice: niceFlag
 		(niceFlag notNil and: [niceFlag]) ifTrue:
 			["lower priority of background OS process"
 			OSProcess accessor nice: 1].
-		st := SmalltalkImage current.
+		st _ SmalltalkImage current.
 		(SourceFiles at: 2) ifNotNil:
 			["ensure that copying the changes file will always work"
 			st closeSourceFiles.
@@ -14142,12 +14142,12 @@ uniqueNameForSavedImage
 	"UnixProcess uniqueNameForSavedImage"
 
 	| now month day hour minute second |
-	now := DateAndTime now.
-	month := now month asString.
-	day := now dayOfMonth asString.
-	hour := now hour24 asString.
-	minute := now minute asString.
-	second := now second asString.
+	now _ DateAndTime now.
+	month _ now month asString.
+	day _ now dayOfMonth asString.
+	hour _ now hour24 asString.
+	minute _ now minute asString.
+	second _ now second asString.
 	^ 'squeak-',
 		now year asString,
 		(month size < 2 ifTrue: ['0', month] ifFalse: [month]),
@@ -14183,12 +14183,12 @@ mainThread
 	"The main thread for this OS process. The handle for this thread is a
 	pseudo-handle, and cannot be used to close the main thread."
 
-	^ mainThread ifNil: [mainThread := processAccessor getMainThread]! !
+	^ mainThread ifNil: [mainThread _ processAccessor getMainThread]! !
 
 !WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 16:43'!
 pid
 
-	^ pid := self processAccessor primGetPid
+	^ pid _ self processAccessor primGetPid
 ! !
 
 !WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:26'!
@@ -14197,7 +14197,7 @@ processHandle
 	by Windows to represent the process. Note that the main thread handle is also
 	represented by a pseudo-handle."
 
-	^ processHandle ifNil: [processHandle := self processAccessor primGetPidHandle]
+	^ processHandle ifNil: [processHandle _ self processAccessor primGetPidHandle]
 ! !
 
 !WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 08:04'!
@@ -14207,7 +14207,7 @@ threads
 	included in this collection. Threads are created to wait for the exit of
 	child processes, so this collection grows as child processes are created."
 
-	^ threads ifNil: [threads := OrderedCollection new]
+	^ threads ifNil: [threads _ OrderedCollection new]
 ! !
 
 !WindowsProcess methodsFor: 'child process management' stamp: 'dtl 2/26/2002 16:08'!
@@ -14290,8 +14290,8 @@ waitForCommand: aCommandString
 	uses a simple polling loop, which is not very elegant but works well enough for most purposes."
 
 	| proc d |
-	d := Delay forMilliseconds: 50.
-	proc := self command: aCommandString.
+	d _ Delay forMilliseconds: 50.
+	proc _ self command: aCommandString.
 	
 	proc ifNil: [self class noAccessorAvailable].
 	[proc runState == #complete] whileFalse: [d wait].
@@ -14313,7 +14313,7 @@ environmentAt: aSymbol put: aString
 
 	| s |
 	self initialize.
-	s := self processAccessor environmentAt: aSymbol put: aString.
+	s _ self processAccessor environmentAt: aSymbol put: aString.
 	s ifNotNil: [ self environment at: aSymbol asSymbol put: aString ].
 	^ s
 
@@ -14349,12 +14349,12 @@ getEnvironmentDictionary
 	"OSProcess thisOSProcess getEnvironmentDictionary"
 
 	| strings env |
-	strings := processAccessor primGetEnvironmentStrings.
+	strings _ processAccessor primGetEnvironmentStrings.
 	strings isNil
 		ifTrue:
 			[^ nil]
 		ifFalse:
-			[env := Dictionary new.
+			[env _ Dictionary new.
 			strings do: [:s |
 				env at: (s copyUpTo: $=) asSymbol put: (s copyAfterLast: $=)].
 			^ env]
@@ -14365,7 +14365,7 @@ setStdErr
 	"Reset to nil if the console has been closed"
 
 	^ self processAccessor getStdErr isNil
-		ifTrue: [stdErr := nil]
+		ifTrue: [stdErr _ nil]
 		ifFalse: [super setStdErr]
 ! !
 
@@ -14374,7 +14374,7 @@ setStdIn
 	"Reset to nil if the console has been closed"
 
 	^ self processAccessor getStdIn isNil
-		ifTrue: [stdIn := nil]
+		ifTrue: [stdIn _ nil]
 		ifFalse: [super setStdIn]
 ! !
 
@@ -14383,7 +14383,7 @@ setStdOut
 	"Reset to nil if the console has been closed"
 
 	^ self processAccessor getStdOut isNil
-		ifTrue: [stdOut := nil]
+		ifTrue: [stdOut _ nil]
 		ifFalse: [super setStdOut]
 ! !
 
@@ -14400,7 +14400,7 @@ initialize
 		["Restarting the VM in a new process"
 		self resetThreads.
 		self threads; mainThread.
-		processHandle := nil.
+		processHandle _ nil.
 		self processHandle].
 	self refreshFromProcessAccessor
 ! !
@@ -14409,8 +14409,8 @@ initialize
 resetThreads
 	"If any cleanup is required, do it here."
 
-	threads := nil.
-	mainThread := nil
+	threads _ nil.
+	mainThread _ nil
 ! !
 
 !WindowsProcess methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:50'!
@@ -14427,12 +14427,12 @@ refreshFromProcessAccessor
 	"Set my instance variables to reflect the state of the OS process in which this Smalltalk
 	virtual machine is executing."
 
-	sessionID := self processAccessor getSessionIdentifier.
-	pid := processAccessor primGetPid.
+	sessionID _ self processAccessor getSessionIdentifier.
+	pid _ processAccessor primGetPid.
 	self setStdIn.
 	self setStdOut.
 	self setStdErr.
-	environment := self getEnvironmentDictionary
+	environment _ self getEnvironmentDictionary
 ! !
 
 !WindowsProcess methodsFor: 'updating' stamp: 'dtl 2/25/2002 08:29'!
@@ -14449,7 +14449,7 @@ update: aParameter
 	(aParameter == #startUp) ifTrue:
 		[^ self update: #pid].
 	aParameter == #invalidProcessAccessor ifTrue:
-		[processAccessor := processAccessor ifNotNil: [processAccessor removeDependent: self. nil].
+		[processAccessor _ processAccessor ifNotNil: [processAccessor removeDependent: self. nil].
 		^ self].
 	self error: 'Unexpected update parameter'! !
 
@@ -14499,7 +14499,7 @@ value
 
 !UnixProcessExitStatus methodsFor: 'initialize-release' stamp: 'dtl 8/22/2012 23:10'!
 for: anInteger
-	intValue := anInteger! !
+	intValue _ anInteger! !
 
 !UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 8/22/2012 22:32'!
 isExited
@@ -14547,7 +14547,7 @@ closeHandle
 	"Clean up after thread exits."
 
 	OSProcess accessor primCloseHandle: handle.
-	handle := nil
+	handle _ nil
 ! !
 
 !WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 2/25/2002 07:03'!
@@ -14597,7 +14597,7 @@ handle
 handle: aHandleObject
 	"A Windows HANDLE represented as a ByteArray."
 
-	handle := aHandleObject! !
+	handle _ aHandleObject! !
 
 !WindowsThread methodsFor: 'accessing' stamp: 'dtl 1/25/2004 11:01'!
 runState
@@ -14608,7 +14608,7 @@ runState
 !WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:02'!
 runState: aSymbol
 
-	runState := aSymbol
+	runState _ aSymbol
 ! !
 
 !WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 06:40'!
@@ -14622,7 +14622,7 @@ threadID
 threadID: anInteger
 	"A unique identifier for the thread."
 
-	threadID := anInteger
+	threadID _ anInteger
 ! !
 
 !WindowsThread methodsFor: 'testing' stamp: 'dtl 2/25/2002 06:37'!
@@ -14645,7 +14645,7 @@ threadID: anInteger handle: aHandleObject
 threadID: anInteger handle: aHandleObject running: trueOrFalse
 
 	| thread |
-	thread := super new threadID: anInteger; handle: aHandleObject; initialize.
+	thread _ super new threadID: anInteger; handle: aHandleObject; initialize.
 	trueOrFalse ifTrue: [thread running].
 	^ thread
 ! !
@@ -14664,11 +14664,11 @@ getAvailableData
 	set for nonblocking input."
 
 	| ws c buffer n |
-	buffer := String new: 4000.
+	buffer _ String new: 4000.
 	(self ioStream isKindOf: FileStream)
 		ifTrue:
-			[ws := WriteStream on: String new.
-			[c := ioStream next.
+			[ws _ WriteStream on: String new.
+			[c _ ioStream next.
 			(c == Character lf)
 				ifTrue: [ws nextPut: Character cr]
 				ifFalse: [ws nextPut: c].
@@ -14677,7 +14677,7 @@ getAvailableData
 		ifFalse:
 			[ioStream dataAvailable
 				ifTrue:
-					[n := ioStream receiveDataInto: buffer.
+					[n _ ioStream receiveDataInto: buffer.
 					^ buffer copyFrom: 1 to: n]
 				ifFalse:
 					[^ '']]
@@ -14698,7 +14698,7 @@ handler
 !AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:40'!
 handler: anAioHandler
 
-	handler := anAioHandler! !
+	handler _ anAioHandler! !
 
 !AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:57'!
 ioStream
@@ -14708,7 +14708,7 @@ ioStream
 !AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:57'!
 ioStream: aFileStream
 
-	ioStream := aFileStream! !
+	ioStream _ aFileStream! !
 
 !AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 9/4/2003 06:22'!
 osPipeExample
@@ -14722,8 +14722,8 @@ osPipeExample
 		ifFalse:
 			[self notify: 'this example requires OSProcess']
 		ifTrue:
-			[pipe := (Smalltalk at: #OSPipe) new.
-			aio := super new handler: (AioEventHandler for: pipe reader); ioStream: pipe reader.
+			[pipe _ (Smalltalk at: #OSPipe) new.
+			aio _ super new handler: (AioEventHandler for: pipe reader); ioStream: pipe reader.
 			aio handler addDependent: aio.
 			(1 to: 10) do:
 				[:i |
@@ -14746,12 +14746,12 @@ showTtyOnTranscript: ttyName
 	"self showTtyOnTranscript: '/dev/tty'"
 
 	| inputStream handler example |
-	inputStream := FileStream readOnlyFileNamed: '/dev/tty'.
-	handler := AioEventHandler for: inputStream
+	inputStream _ FileStream readOnlyFileNamed: '/dev/tty'.
+	handler _ AioEventHandler for: inputStream
 				exceptions: true
 				readEvents: true
 				writeEvents: false.
-	example := super new handler: handler; ioStream: inputStream.
+	example _ super new handler: handler; ioStream: inputStream.
 	handler addDependent: example.
 	Transcript cr; show: ''.
 	self notify: 'Enter lines on ', ttyName, ', watch the Transcript, and select "Proceed" when done'.
@@ -14770,8 +14770,8 @@ standardInputExample
 			[self notify: 'this example requires OSProcess']
 		ifTrue:
 			[Transcript cr; show: ''.
-			stdin := (Smalltalk at: #OSProcess) thisOSProcess stdIn.
-			aio := super new handler: (AioEventHandler for: stdin); ioStream: stdin.
+			stdin _ (Smalltalk at: #OSProcess) thisOSProcess stdIn.
+			aio _ super new handler: (AioEventHandler for: stdin); ioStream: stdin.
 			aio handler addDependent: aio.
 			self notify: 'Enter lines on standard input, watch the Transcript, and select "Proceed" when done'.
 			^ aio handler close]
@@ -14784,11 +14784,11 @@ tcpSocketExample
 	"self tcpSocketExample"
 
 	| port serverTcpSocket serverName clientTcpSocket handler example useOldStyleSockets |
-	port := 8086.
-	serverName := '127.0.0.1'.
+	port _ 8086.
+	serverName _ '127.0.0.1'.
 
 	"The networking code was updated for Squeak 3.6. This checks for which version to use."
-	useOldStyleSockets := Socket respondsTo: #initializeNetworkIfFail:.
+	useOldStyleSockets _ Socket respondsTo: #initializeNetworkIfFail:.
 
 	Transcript show: 'initializing network ... '.
 
@@ -14802,7 +14802,7 @@ tcpSocketExample
 	Transcript show:'ok';cr.
 
 	"Create the server (reader) socket"
-	serverTcpSocket := Socket newTCP.
+	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
 	[Transcript show: 'server endpoint created on port ', port asString; cr.
 	useOldStyleSockets
@@ -14813,7 +14813,7 @@ tcpSocketExample
 	(Delay forMilliseconds: 1000) wait.
 
 	"Create the client (writer) socket"
-	clientTcpSocket := Socket newTCP.
+	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
 	useOldStyleSockets
 		ifTrue:
@@ -14823,11 +14823,11 @@ tcpSocketExample
 	Transcript show: 'client endpoint connected to ', serverName, ' port ', port asString; cr.
 
 	"Set up a read event handler on the server socket"
-	handler := AioEventHandler for: serverTcpSocket
+	handler _ AioEventHandler for: serverTcpSocket
 				exceptions: true
 				readEvents: true
 				writeEvents: false.
-	example := super new handler: handler; ioStream: serverTcpSocket.
+	example _ super new handler: handler; ioStream: serverTcpSocket.
 	handler addDependent: example.
 	Transcript show: 'event handler started'; cr.
 
