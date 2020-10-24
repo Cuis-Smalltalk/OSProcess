@@ -1,405 +1,405 @@
-'From Cuis 5.0 [latest update: #4117] on 18 April 2020 at 10:26:29 am'!
+'From Cuis 5.0 [latest update: #4425] on 24 October 2020 at 5:09:46 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 14!
-!requires: 'SqueakCompatibility' 1 4 nil!
+!provides: 'OSProcess' 1 15!
 !requires: 'Network-Kernel' 1 1 nil!
-SystemOrganization addCategory: #'OSProcess-Base'!
-SystemOrganization addCategory: #'OSProcess-Mac'!
-SystemOrganization addCategory: #'OSProcess-OS2'!
-SystemOrganization addCategory: #'OSProcess-RiscOS'!
-SystemOrganization addCategory: #'OSProcess-Unix'!
-SystemOrganization addCategory: #'OSProcess-Win32'!
-SystemOrganization addCategory: #'OSProcess-AIO'!
-SystemOrganization addCategory: #'OSProcess-Tests'!
+!requires: 'SqueakCompatibility' 1 4 nil!
+SystemOrganization addCategory: 'OSProcess-Base'!
+SystemOrganization addCategory: 'OSProcess-Mac'!
+SystemOrganization addCategory: 'OSProcess-OS2'!
+SystemOrganization addCategory: 'OSProcess-RiscOS'!
+SystemOrganization addCategory: 'OSProcess-Unix'!
+SystemOrganization addCategory: 'OSProcess-Win32'!
+SystemOrganization addCategory: 'OSProcess-AIO'!
+SystemOrganization addCategory: 'OSProcess-Tests'!
 
 
-!classDefinition: #OSProcessAccessor category: #'OSProcess-Base'!
+!classDefinition: #OSProcessAccessor category: 'OSProcess-Base'!
 Model subclass: #OSProcessAccessor
 	instanceVariableNames: 'sessionIdentifier grimReaper canObtainSessionIdentifierFromPlugin'
 	classVariableNames: 'EmulateWin32FileLocking FileLockRegistry ThisOSProcessAccessor UseIOHandle'
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'OSProcessAccessor class' category: #'OSProcess-Base'!
+!classDefinition: 'OSProcessAccessor class' category: 'OSProcess-Base'!
 OSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #MacOSProcessAccessor category: #'OSProcess-Mac'!
+!classDefinition: #MacOSProcessAccessor category: 'OSProcess-Mac'!
 OSProcessAccessor subclass: #MacOSProcessAccessor
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Mac'!
-!classDefinition: 'MacOSProcessAccessor class' category: #'OSProcess-Mac'!
+!classDefinition: 'MacOSProcessAccessor class' category: 'OSProcess-Mac'!
 MacOSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #OS2OSProcessAccessor category: #'OSProcess-OS2'!
+!classDefinition: #OS2OSProcessAccessor category: 'OSProcess-OS2'!
 OSProcessAccessor subclass: #OS2OSProcessAccessor
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-OS2'!
-!classDefinition: 'OS2OSProcessAccessor class' category: #'OSProcess-OS2'!
+!classDefinition: 'OS2OSProcessAccessor class' category: 'OSProcess-OS2'!
 OS2OSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #RiscOSProcessAccessor category: #'OSProcess-RiscOS'!
+!classDefinition: #RiscOSProcessAccessor category: 'OSProcess-RiscOS'!
 OSProcessAccessor subclass: #RiscOSProcessAccessor
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-RiscOS'!
-!classDefinition: 'RiscOSProcessAccessor class' category: #'OSProcess-RiscOS'!
+!classDefinition: 'RiscOSProcessAccessor class' category: 'OSProcess-RiscOS'!
 RiscOSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixOSProcessAccessor category: #'OSProcess-Unix'!
+!classDefinition: #UnixOSProcessAccessor category: 'OSProcess-Unix'!
 OSProcessAccessor subclass: #UnixOSProcessAccessor
 	instanceVariableNames: 'sigChldSemaphore'
 	classVariableNames: 'ThisProcessPid'
 	poolDictionaries: ''
 	category: 'OSProcess-Unix'!
-!classDefinition: 'UnixOSProcessAccessor class' category: #'OSProcess-Unix'!
+!classDefinition: 'UnixOSProcessAccessor class' category: 'OSProcess-Unix'!
 UnixOSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #WindowsOSProcessAccessor category: #'OSProcess-Win32'!
+!classDefinition: #WindowsOSProcessAccessor category: 'OSProcess-Win32'!
 OSProcessAccessor subclass: #WindowsOSProcessAccessor
 	instanceVariableNames: 'sigChldSemaphore semaIndex childWatcherThread'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Win32'!
-!classDefinition: 'WindowsOSProcessAccessor class' category: #'OSProcess-Win32'!
+!classDefinition: 'WindowsOSProcessAccessor class' category: 'OSProcess-Win32'!
 WindowsOSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #AioEventHandler category: #'OSProcess-AIO'!
+!classDefinition: #AioEventHandler category: 'OSProcess-AIO'!
 Model subclass: #AioEventHandler
 	instanceVariableNames: 'semaphore semaIndex handlerProc descriptor'
 	classVariableNames: 'AioPluginPresent'
 	poolDictionaries: ''
 	category: 'OSProcess-AIO'!
-!classDefinition: 'AioEventHandler class' category: #'OSProcess-AIO'!
+!classDefinition: 'AioEventHandler class' category: 'OSProcess-AIO'!
 AioEventHandler class
 	instanceVariableNames: ''!
 
-!classDefinition: #PseudoAioEventHandler category: #'OSProcess-AIO'!
+!classDefinition: #PseudoAioEventHandler category: 'OSProcess-AIO'!
 Model subclass: #PseudoAioEventHandler
 	instanceVariableNames: 'eventGenerator'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-AIO'!
-!classDefinition: 'PseudoAioEventHandler class' category: #'OSProcess-AIO'!
+!classDefinition: 'PseudoAioEventHandler class' category: 'OSProcess-AIO'!
 PseudoAioEventHandler class
 	instanceVariableNames: ''!
 
-!classDefinition: #AttachableFileStream category: #'OSProcess-Base'!
+!classDefinition: #AttachableFileStream category: 'OSProcess-Base'!
 StandardFileStream subclass: #AttachableFileStream
 	instanceVariableNames: 'autoClose'
 	classVariableNames: 'UseIOHandle'
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'AttachableFileStream class' category: #'OSProcess-Base'!
+!classDefinition: 'AttachableFileStream class' category: 'OSProcess-Base'!
 AttachableFileStream class
 	instanceVariableNames: ''!
 
-!classDefinition: #AsyncFileReadStream category: #'OSProcess-Base'!
+!classDefinition: #AsyncFileReadStream category: 'OSProcess-Base'!
 AttachableFileStream subclass: #AsyncFileReadStream
 	instanceVariableNames: 'eventHandler'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'AsyncFileReadStream class' category: #'OSProcess-Base'!
+!classDefinition: 'AsyncFileReadStream class' category: 'OSProcess-Base'!
 AsyncFileReadStream class
 	instanceVariableNames: ''!
 
-!classDefinition: #BufferedAsyncFileReadStream category: #'OSProcess-Base'!
+!classDefinition: #BufferedAsyncFileReadStream category: 'OSProcess-Base'!
 AsyncFileReadStream subclass: #BufferedAsyncFileReadStream
 	instanceVariableNames: 'nonBlockingMode readBuffer readSyncSemaphore dataAvailableSemaphore'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'BufferedAsyncFileReadStream class' category: #'OSProcess-Base'!
+!classDefinition: 'BufferedAsyncFileReadStream class' category: 'OSProcess-Base'!
 BufferedAsyncFileReadStream class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalPipe category: #'OSProcess-Base'!
+!classDefinition: #ExternalPipe category: 'OSProcess-Base'!
 Stream subclass: #ExternalPipe
 	instanceVariableNames: 'writer reader blocking'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'ExternalPipe class' category: #'OSProcess-Base'!
+!classDefinition: 'ExternalPipe class' category: 'OSProcess-Base'!
 ExternalPipe class
 	instanceVariableNames: ''!
 
-!classDefinition: #OSPipe category: #'OSProcess-Base'!
+!classDefinition: #OSPipe category: 'OSProcess-Base'!
 ExternalPipe subclass: #OSPipe
 	instanceVariableNames: 'nextChar'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'OSPipe class' category: #'OSProcess-Base'!
+!classDefinition: 'OSPipe class' category: 'OSProcess-Base'!
 OSPipe class
 	instanceVariableNames: ''!
 
-!classDefinition: #AbstractUnixProcessFileLockingTestCase category: #'OSProcess-Tests'!
+!classDefinition: #AbstractUnixProcessFileLockingTestCase category: 'OSProcess-Tests'!
 TestCase subclass: #AbstractUnixProcessFileLockingTestCase
 	instanceVariableNames: 'accessor fileStream delay remoteProcess initialCompatibilitySetting'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'AbstractUnixProcessFileLockingTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'AbstractUnixProcessFileLockingTestCase class' category: 'OSProcess-Tests'!
 AbstractUnixProcessFileLockingTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcessUnixFileLockingTestCase category: #'OSProcess-Tests'!
+!classDefinition: #UnixProcessUnixFileLockingTestCase category: 'OSProcess-Tests'!
 AbstractUnixProcessFileLockingTestCase subclass: #UnixProcessUnixFileLockingTestCase
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessUnixFileLockingTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'UnixProcessUnixFileLockingTestCase class' category: 'OSProcess-Tests'!
 UnixProcessUnixFileLockingTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcessWin32FileLockingTestCase category: #'OSProcess-Tests'!
+!classDefinition: #UnixProcessWin32FileLockingTestCase category: 'OSProcess-Tests'!
 AbstractUnixProcessFileLockingTestCase subclass: #UnixProcessWin32FileLockingTestCase
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessWin32FileLockingTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'UnixProcessWin32FileLockingTestCase class' category: 'OSProcess-Tests'!
 UnixProcessWin32FileLockingTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #AioEventHandlerTestCase category: #'OSProcess-Tests'!
+!classDefinition: #AioEventHandlerTestCase category: 'OSProcess-Tests'!
 TestCase subclass: #AioEventHandlerTestCase
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'AioEventHandlerTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'AioEventHandlerTestCase class' category: 'OSProcess-Tests'!
 AioEventHandlerTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #OSPipeTestCase category: #'OSProcess-Tests'!
+!classDefinition: #OSPipeTestCase category: 'OSProcess-Tests'!
 TestCase subclass: #OSPipeTestCase
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'OSPipeTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'OSPipeTestCase class' category: 'OSProcess-Tests'!
 OSPipeTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcessAccessorTestCase category: #'OSProcess-Tests'!
+!classDefinition: #UnixProcessAccessorTestCase category: 'OSProcess-Tests'!
 TestCase subclass: #UnixProcessAccessorTestCase
 	instanceVariableNames: 'accessor'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessAccessorTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'UnixProcessAccessorTestCase class' category: 'OSProcess-Tests'!
 UnixProcessAccessorTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcessFileLockTestCase category: #'OSProcess-Tests'!
+!classDefinition: #UnixProcessFileLockTestCase category: 'OSProcess-Tests'!
 TestCase subclass: #UnixProcessFileLockTestCase
 	instanceVariableNames: 'fileStream'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessFileLockTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'UnixProcessFileLockTestCase class' category: 'OSProcess-Tests'!
 UnixProcessFileLockTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcessTestCase category: #'OSProcess-Tests'!
+!classDefinition: #UnixProcessTestCase category: 'OSProcess-Tests'!
 TestCase subclass: #UnixProcessTestCase
 	instanceVariableNames: 'thisOSProcess'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessTestCase class' category: #'OSProcess-Tests'!
+!classDefinition: 'UnixProcessTestCase class' category: 'OSProcess-Tests'!
 UnixProcessTestCase class
 	instanceVariableNames: ''!
 
-!classDefinition: #OSFileLock category: #'OSProcess-Base'!
+!classDefinition: #OSFileLock category: 'OSProcess-Base'!
 Object subclass: #OSFileLock
 	instanceVariableNames: 'fileStream exclusive'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'OSFileLock class' category: #'OSProcess-Base'!
+!classDefinition: 'OSFileLock class' category: 'OSProcess-Base'!
 OSFileLock class
 	instanceVariableNames: ''!
 
-!classDefinition: #OSFileRegionLock category: #'OSProcess-Base'!
+!classDefinition: #OSFileRegionLock category: 'OSProcess-Base'!
 OSFileLock subclass: #OSFileRegionLock
 	instanceVariableNames: 'interval'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'OSFileRegionLock class' category: #'OSProcess-Base'!
+!classDefinition: 'OSFileRegionLock class' category: 'OSProcess-Base'!
 OSFileRegionLock class
 	instanceVariableNames: ''!
 
-!classDefinition: #OSProcess category: #'OSProcess-Base'!
+!classDefinition: #OSProcess category: 'OSProcess-Base'!
 Object subclass: #OSProcess
 	instanceVariableNames: 'pid'
 	classVariableNames: 'UseIOHandle'
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'OSProcess class' category: #'OSProcess-Base'!
+!classDefinition: 'OSProcess class' category: 'OSProcess-Base'!
 OSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalOSProcess category: #'OSProcess-Base'!
+!classDefinition: #ExternalOSProcess category: 'OSProcess-Base'!
 OSProcess subclass: #ExternalOSProcess
 	instanceVariableNames: 'runState initialStdIn initialStdOut initialStdErr'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'ExternalOSProcess class' category: #'OSProcess-Base'!
+!classDefinition: 'ExternalOSProcess class' category: 'OSProcess-Base'!
 ExternalOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalMacOSProcess category: #'OSProcess-Mac'!
+!classDefinition: #ExternalMacOSProcess category: 'OSProcess-Mac'!
 ExternalOSProcess subclass: #ExternalMacOSProcess
 	instanceVariableNames: 'ppid exitStatus'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Mac'!
-!classDefinition: 'ExternalMacOSProcess class' category: #'OSProcess-Mac'!
+!classDefinition: 'ExternalMacOSProcess class' category: 'OSProcess-Mac'!
 ExternalMacOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalOS2Process category: #'OSProcess-OS2'!
+!classDefinition: #ExternalOS2Process category: 'OSProcess-OS2'!
 ExternalOSProcess subclass: #ExternalOS2Process
 	instanceVariableNames: 'ppid exitStatus'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-OS2'!
-!classDefinition: 'ExternalOS2Process class' category: #'OSProcess-OS2'!
+!classDefinition: 'ExternalOS2Process class' category: 'OSProcess-OS2'!
 ExternalOS2Process class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalRiscOSProcess category: #'OSProcess-RiscOS'!
+!classDefinition: #ExternalRiscOSProcess category: 'OSProcess-RiscOS'!
 ExternalOSProcess subclass: #ExternalRiscOSProcess
 	instanceVariableNames: 'ppid exitStatus'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-RiscOS'!
-!classDefinition: 'ExternalRiscOSProcess class' category: #'OSProcess-RiscOS'!
+!classDefinition: 'ExternalRiscOSProcess class' category: 'OSProcess-RiscOS'!
 ExternalRiscOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalUnixOSProcess category: #'OSProcess-Unix'!
+!classDefinition: #ExternalUnixOSProcess category: 'OSProcess-Unix'!
 ExternalOSProcess subclass: #ExternalUnixOSProcess
 	instanceVariableNames: 'ppid pwd exitStatus programName arguments initialEnvironment'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Unix'!
-!classDefinition: 'ExternalUnixOSProcess class' category: #'OSProcess-Unix'!
+!classDefinition: 'ExternalUnixOSProcess class' category: 'OSProcess-Unix'!
 ExternalUnixOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExternalWindowsOSProcess category: #'OSProcess-Win32'!
+!classDefinition: #ExternalWindowsOSProcess category: 'OSProcess-Win32'!
 ExternalOSProcess subclass: #ExternalWindowsOSProcess
 	instanceVariableNames: 'ppid exitStatus handle threads commandLine pwd'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Win32'!
-!classDefinition: 'ExternalWindowsOSProcess class' category: #'OSProcess-Win32'!
+!classDefinition: 'ExternalWindowsOSProcess class' category: 'OSProcess-Win32'!
 ExternalWindowsOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #ThisOSProcess category: #'OSProcess-Base'!
+!classDefinition: #ThisOSProcess category: 'OSProcess-Base'!
 OSProcess subclass: #ThisOSProcess
 	instanceVariableNames: 'sessionID stdIn stdOut stdErr processAccessor childProcessList accessProtect'
 	classVariableNames: 'ChildListSize ThisInstance'
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
-!classDefinition: 'ThisOSProcess class' category: #'OSProcess-Base'!
+!classDefinition: 'ThisOSProcess class' category: 'OSProcess-Base'!
 ThisOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #MacProcess category: #'OSProcess-Mac'!
+!classDefinition: #MacProcess category: 'OSProcess-Mac'!
 ThisOSProcess subclass: #MacProcess
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Mac'!
-!classDefinition: 'MacProcess class' category: #'OSProcess-Mac'!
+!classDefinition: 'MacProcess class' category: 'OSProcess-Mac'!
 MacProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #OS2Process category: #'OSProcess-OS2'!
+!classDefinition: #OS2Process category: 'OSProcess-OS2'!
 ThisOSProcess subclass: #OS2Process
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-OS2'!
-!classDefinition: 'OS2Process class' category: #'OSProcess-OS2'!
+!classDefinition: 'OS2Process class' category: 'OSProcess-OS2'!
 OS2Process class
 	instanceVariableNames: ''!
 
-!classDefinition: #RiscOSProcess category: #'OSProcess-RiscOS'!
+!classDefinition: #RiscOSProcess category: 'OSProcess-RiscOS'!
 ThisOSProcess subclass: #RiscOSProcess
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-RiscOS'!
-!classDefinition: 'RiscOSProcess class' category: #'OSProcess-RiscOS'!
+!classDefinition: 'RiscOSProcess class' category: 'OSProcess-RiscOS'!
 RiscOSProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcess category: #'OSProcess-Unix'!
+!classDefinition: #UnixProcess category: 'OSProcess-Unix'!
 ThisOSProcess subclass: #UnixProcess
 	instanceVariableNames: 'ppid pthread path programName arguments environment'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Unix'!
-!classDefinition: 'UnixProcess class' category: #'OSProcess-Unix'!
+!classDefinition: 'UnixProcess class' category: 'OSProcess-Unix'!
 UnixProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #WindowsProcess category: #'OSProcess-Win32'!
+!classDefinition: #WindowsProcess category: 'OSProcess-Win32'!
 ThisOSProcess subclass: #WindowsProcess
 	instanceVariableNames: 'processHandle environment mainThread threads'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Win32'!
-!classDefinition: 'WindowsProcess class' category: #'OSProcess-Win32'!
+!classDefinition: 'WindowsProcess class' category: 'OSProcess-Win32'!
 WindowsProcess class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnixProcessExitStatus category: #'OSProcess-Unix'!
+!classDefinition: #UnixProcessExitStatus category: 'OSProcess-Unix'!
 Object subclass: #UnixProcessExitStatus
 	instanceVariableNames: 'intValue'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Unix'!
-!classDefinition: 'UnixProcessExitStatus class' category: #'OSProcess-Unix'!
+!classDefinition: 'UnixProcessExitStatus class' category: 'OSProcess-Unix'!
 UnixProcessExitStatus class
 	instanceVariableNames: ''!
 
-!classDefinition: #WindowsThread category: #'OSProcess-Win32'!
+!classDefinition: #WindowsThread category: 'OSProcess-Win32'!
 Object subclass: #WindowsThread
 	instanceVariableNames: 'threadID handle runState'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-Win32'!
-!classDefinition: 'WindowsThread class' category: #'OSProcess-Win32'!
+!classDefinition: 'WindowsThread class' category: 'OSProcess-Win32'!
 WindowsThread class
 	instanceVariableNames: ''!
 
-!classDefinition: #AioEventHandlerExample category: #'OSProcess-AIO'!
+!classDefinition: #AioEventHandlerExample category: 'OSProcess-AIO'!
 Object subclass: #AioEventHandlerExample
 	instanceVariableNames: 'handler ioStream'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-AIO'!
-!classDefinition: 'AioEventHandlerExample class' category: #'OSProcess-AIO'!
+!classDefinition: 'AioEventHandlerExample class' category: 'OSProcess-AIO'!
 AioEventHandlerExample class
 	instanceVariableNames: ''!
 
@@ -13327,7 +13327,7 @@ stdOut
 	^ self thisOSProcess stdOut
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 2/24/2013 10:26'!
+!UnixProcess class methodsFor: 'examples' stamp: 'jmv 10/24/2020 15:57:51'!
 backgroundProcessInHeadlessSqueak
 	"Demonstrate running a ''batch job'' in a low priority background Squeak,
 	with output written to an OSPipe. This Squeak image reads data from the
@@ -13353,7 +13353,7 @@ backgroundProcessInHeadlessSqueak
 			, 'take one down and pass it around, '
 			, (beers value: count - 1) , ' of beer on the wall'; cr].
 		pipe close].
-	WorldState addDeferredUIMessage:
+	UISupervisor whenUIinSafeState:
 		[Transcript show: backgroundJob asString , ' started'; cr].
 	pipe closeWriter. "don't need writer end, close it before the #upToEnd"
 	"pipe writer blocks when pipe full, so we need to loop while reading to end "
@@ -13362,11 +13362,11 @@ backgroundProcessInHeadlessSqueak
 		[(Delay forMilliseconds: 200) wait.
 		(s _ pipe upToEnd) ifNotNil: [ws nextPutAll: s]].
 	pipe close.
-	WorldState addDeferredUIMessage:
+	UISupervisor whenUIinSafeState:
 		[Transcript show: backgroundJob asString
 			, ' completed, display results in 2 seconds'; cr].
 	(Delay forSeconds: 2) wait.
-	WorldState addDeferredUIMessage:
+	UISupervisor whenUIinSafeState:
 		[Transcript show: ws contents.
 		Transcript cr; show: 'delay 5 seconds before forking next Squeak job'; cr].
 	(Delay forSeconds: 5) wait] repeat]
