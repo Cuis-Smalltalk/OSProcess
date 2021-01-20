@@ -1,4 +1,4 @@
-'From Cuis 5.0 [latest update: #4425] on 24 October 2020 at 5:09:46 pm'!
+'From Cuis 5.0 [latest update: #4526] on 19 January 2021 at 10:25:14 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
 !provides: 'OSProcess' 1 15!
 !requires: 'Network-Kernel' 1 1 nil!
@@ -666,7 +666,7 @@ printOn: aStream
 
 ! !
 
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'ThierryGoubier 7/27/2017 22:32'!
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 6/25/2020 10:26'!
 shutDown: quitting
 	"Break dependency on my OSProcessAccessor. This is done explicitly at
 	shutDown time in order to prevent possible problems when an image is
@@ -675,11 +675,10 @@ shutDown: quitting
 	dependency on an OSProcessAccessor."
 
 	quitting
-		ifTrue: [ | osp |
-			(osp _ OSProcess thisOSProcess) notNil
-				ifTrue: [ | acc |
-					(acc _ osp processAccessor) notNil
-						ifTrue: [ acc breakDependents ] ] ]! !
+		ifTrue: [ self thisOSProcess ifNotNil: [ :osp |
+			osp processAccessor ifNotNil: [ :acc |
+				acc breakDependents ] ] ]
+! !
 
 !ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
 startUp: resuming
@@ -1074,6 +1073,50 @@ setNonBlocking: anIOHandle
 	"Convert anIOHandle to an SQFile data structure and call primitive to set it non-blocking."
 
 	^ self subclassResponsibility
+! !
+
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/17/2020 16:56'!
+confstr: optionIndex
+	"Answer the string result of confstr() for the supplied option index, an
+	integer value defined in unistd.h. On some platforms, the available index
+	values are defined in /usr/include/bits/confname.h"
+
+	"OSProcess accessor confstr: 0"
+
+	^self primConfstr: optionIndex! !
+
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/17/2020 23:44'!
+fpathconf: fileStream index: optionIndex
+	"Answer the result of fpathconf() for the file descriptor fo a FileStream,
+	and the supplied option index, an integer value defined in unistd.h.
+	On some platforms, the available index values are defined in
+	/usr/include/bits/confname.h"
+
+	"OSProcess accessor fpathconf: SourceFiles first index: 0"
+
+	^self primFpathconf: fileStream fileID index: optionIndex
+! !
+
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/18/2020 11:33'!
+pathconf: path index: optionIndex
+	"Answer the result of pathconf() for file path string and the
+	supplied option index, an integer value defined in unistd.h. On
+	some platforms, the available index values are defined in
+	/usr/include/bits/confname.h"
+
+	"OSProcess accessor pathconf: '/bin/bash' index: 0"
+
+	^self primPathconf: path index: optionIndex
+! !
+
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/17/2020 16:32'!
+sysconf: optionIndex
+	"Answer the result of sysconf() for the supplied option index, and integer
+	value typically defined in unistd.h or limits.h"
+
+	"OSProcess accessor sysconf: 0"
+
+	^self primSysconf: optionIndex
 ! !
 
 !OSProcessAccessor class methodsFor: 'concrete subclasses' stamp: 'dtl 3/5/2005 12:04'!
@@ -1715,6 +1758,15 @@ primChdir: pathString
 	<primitive: 'primitiveChdir' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 16:56'!
+primConfstr: optionIndex
+	"Answer the result of confstr() for the supplied option index, and integer
+	value typically defined in unistd.h or limits.h"
+
+	<primitive: 'primitiveConfstr' module: 'UnixOSProcessPlugin'>
+	^ self primitiveFailed
+! !
+
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/28/2010 12:31'!
 primCreatePipe
 	"Create a pipe, and answer an array of two file handles (SQFile data structures in interp.c)
@@ -1794,6 +1846,17 @@ primFileStat: aPathString
 
 	<primitive: 'primitiveFileStat' module: 'UnixOSProcessPlugin'>
 	^ nil
+! !
+
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 23:28'!
+primFpathconf: fileID index: optionIndex
+	"Answer the result of pathconf() for fileID, the fileID of a FileStream,
+	and the supplied option index, an integer value defined in unistd.h.
+	On some platforms, the available index values are defined in
+	/usr/include/bits/confname.h"
+
+	<primitive: 'primitiveFpathconf' module: 'UnixOSProcessPlugin'>
+	^ self primitiveFailed
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
@@ -1901,6 +1964,17 @@ primOSProcessPluginModuleVersionString
 	^ nil
 ! !
 
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 17:12'!
+primPathconf: path index: optionIndex
+	"Answer the result of pathconf() for file path string and the
+	supplied option index, an integer value defined in unistd.h. On
+	some platforms, the available index values are defined in
+	/usr/include/bits/confname.h"
+
+	<primitive: 'primitivePathconf' module: 'UnixOSProcessPlugin'>
+	^ self primitiveFailed
+! !
+
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
 primPutEnv: aString
 	"Add or update an environment variable in the external OS process using a 'KEY=value'
@@ -1976,6 +2050,15 @@ primSpaceFor: byteSize InDirectoryPath: dirPath
 
 	<primitive: 'primitiveSpaceForByteSizeInDirectoryPath' module: 'UnixOSProcessPlugin'>
 	^ self primitiveFailed! !
+
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 16:57'!
+primSysconf: optionIndex
+	"Answer the result of sysconf() for the supplied option index, and integer
+	value typically defined in unistd.h or limits.h"
+
+	<primitive: 'primitiveSysconf' module: 'UnixOSProcessPlugin'>
+	^ self primitiveFailed
+! !
 
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/28/2010 14:06'!
 primTestEndOfFileFlag: aSqFileStruct
@@ -7255,12 +7338,12 @@ isAbstract
 	^self name = #TestCase
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/7/2005 13:02'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 6/27/2020 20:05'!
 testEnableHandleAndDisable
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult aioDisableResult |
 	eventHandler _ AioEventHandler new.
-	anOpenFile _ SourceFiles at: 1.
+	anOpenFile _ OSProcess fileNamed: 'delete.me'.
 	fileHandle _ eventHandler handleForFile: anOpenFile.
 	sema _ Semaphore new.
 	[semaIndex _ Smalltalk registerExternalObject: sema.
@@ -7305,7 +7388,10 @@ testEnableHandleAndDisable
 	self assert: aioDisableResult == fileHandle]
 		ensure:
 			[Smalltalk unregisterExternalObject: sema.
-			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
+			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]].
+	anOpenFile close.
+	OSProcess deleteFileNamed: 'delete.me'.
+! !
 
 !AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:56:54'!
 testFileReadableEvent
@@ -7469,13 +7555,15 @@ testFileWritableEvent
 			Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 7/9/2005 17:10'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 6/27/2020 20:06'!
 testHandleForFile
 
 	| eventHandler anOpenFile fileHandle |
 	eventHandler _ AioEventHandler new.
-	anOpenFile _ SourceFiles at: 1.
+	anOpenFile _ OSProcess fileNamed: 'delete.me'.
 	fileHandle _ eventHandler handleForFile: anOpenFile.
+	anOpenFile close.
+	OSProcess deleteFileNamed: 'delete.me'.
 	self assert: fileHandle notNil.
 	self assert: (fileHandle isKindOf: Integer)
 ! !
@@ -8194,7 +8282,7 @@ primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: co
 	<primitive: 'primitiveFixPointersInArrayOfStrings' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 9/10/2011 14:17'!
+!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 5/26/2020 14:35'!
 testArgsAsFlatArrayAndOffsets
 	"Test conversion of an array of strings into the form used to create a C **char
 	in UnixOSProcessPlugin."
@@ -8203,8 +8291,7 @@ testArgsAsFlatArrayAndOffsets
 
 	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
 	pointerSize _ OSProcess accessor sizeOfPointer.
-	a _ { 'one ' . 'two ' . 'three ' }.
-	a do: [:e | e at: e size put: (Character value: 0)].
+	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character value: 0) ].
 	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
 	self assert: stringsAndOffsets size == 2.
 	self assert: stringsAndOffsets second size == 3.
@@ -8624,7 +8711,7 @@ testRedirectStdOutTo
 
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/1/2005 10:33'!
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/19/2021 21:32'!
 testSessionIdentifier
 	"This is an indirect way to make sure that the primitive for obtaining the session ID does
 	not get out of kilter with respect to the method for obtaining session ID from an existing
@@ -8641,8 +8728,8 @@ testSessionIdentifier
 
 	| installedOSPPMajorVersion |
 	self should: [accessor getSessionIdentifier isKindOf: ByteArray].
-	installedOSPPMajorVersion _ (OSProcess accessor osppModuleVersionString
-		ifNil: [-1]) asInteger.
+	installedOSPPMajorVersion _ Integer readFrom:
+		(OSProcess accessor osppModuleVersionString ifNil: ['-1']) readStream.
 	(installedOSPPMajorVersion >= 4)
 		ifTrue: ["ignore this test"]
 		ifFalse: [self should:
@@ -9883,6 +9970,13 @@ testForkSqueakAndDoThenQuit
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
+!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 12/5/2020 11:33'!
+testIsExternalProcess
+	self deny: ThisOSProcess thisOSProcess isExternalProcess.
+	self deny: OSProcess thisOSProcess isExternalProcess.
+	self assert: ExternalOSProcess new isExternalProcess.
+	self assert: (ExternalOSProcess command: 'pwd') isExternalProcess.! !
+
 !UnixProcessTestCase class methodsFor: 'failures' stamp: 'eem 3/27/2014 11:20'!
 expectedFailures
 	^UnixOSProcessAccessor basicNew safeToForkSqueak
@@ -10129,11 +10223,11 @@ pid: processIdentifier
 	pid _ processIdentifier
 ! !
 
-!OSProcess class methodsFor: 'external process access' stamp: 'dtl 11/8/2000 22:04'!
+!OSProcess class methodsFor: 'external process access' stamp: 'dtl 6/27/2020 16:00'!
 accessor
 	"Answer an OSProcessAccessor for this OS process."
 
-	^ self thisOSProcess processAccessor
+	^ self thisOSProcess ifNotNil: [ :osp | osp processAccessor ]
 ! !
 
 !OSProcess class methodsFor: 'sUnit' stamp: 'dtl 1/15/2018 22:08:41'!
@@ -10244,6 +10338,15 @@ command: aCommandString
 
 	^ self thisOSProcess command: aCommandString
 ! !
+
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 5/3/2020 12:51'!
+editOutputOf: aCommandString
+	"Evaluate aCommandString and display the output in an editor"
+
+	"OSProcess editOutputOf: 'ls -l' "
+	"OSProcess editOutputOf: 'ps -axjf' "
+ 
+	^ self outputOf: aCommandString, ' | edit'! !
 
 !OSProcess class methodsFor: 'external command processing' stamp: 'dtl 2/8/2020 15:35'!
 evaluate: aCommandString
@@ -10547,14 +10650,14 @@ initialize
 	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle)
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:41'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 1/19/2021 21:39'!
 isNonUnixMac
 	"True if the platform is Mac OS prior to OSX"
 
 	"OSProcess isNonUnixMac"
 
 	| numericOsVersion |
-	numericOsVersion _ self osVersion asInteger ifNil: [0].
+	numericOsVersion _ [Integer readFrom: self osVersion readStream] on: Error do: [ 0 ].
 	^ (self platformName = 'Mac OS') and: [numericOsVersion < 1000]
 ! !
 
@@ -10583,7 +10686,7 @@ isRiscOS
 
 	^ self platformName = 'RiscOS'! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:43'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 1/19/2021 21:42'!
 isUnix
 	"True if the platform is Unix (including Linux, Mac OS X, or other unix-like OS).
 	Note: Keep this method in sync with UnixOSProcessPlugin>>isResponsibleForThisPlatform."
@@ -10593,11 +10696,11 @@ isUnix
 	| numericOsVersion |
 
 	^ (self platformName = 'unix') or:
-		[numericOsVersion _ self osVersion asInteger ifNil: [0].
+		[numericOsVersion _ [Integer readFrom: self osVersion readStream] on: Error do: [ 0 ].
 		(self platformName = 'Mac OS') and: [numericOsVersion >= 1000]]
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:46'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 1/19/2021 21:43'!
 isUnixMac
 	"True if the platform is Mac OS on OSX"
 
@@ -10606,7 +10709,7 @@ isUnixMac
 	| osVersion numericOsVersion |
 	osVersion _ self osVersion.
 	^ ('darwin*' match: osVersion "Ian's VM")
-		or: [numericOsVersion _ osVersion asInteger ifNil: [0].
+		or: [numericOsVersion _ [Integer readFrom: osVersion readStream] on: Error do: [ 0 ].
 			(self platformName = 'Mac OS') and: [numericOsVersion >= 1000] "John's VM"]
 ! !
 
@@ -10733,12 +10836,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 3/21/2020 14:18'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/19/2021 21:50'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.6.19'! !
+	^ '4.6.24'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -10851,6 +10954,90 @@ saveChangesInFileNamed: aString
 			[(Smalltalk respondsTo: #saveChangesInFileNamed:)
 				ifTrue: [Smalltalk saveChangesInFileNamed: aString].
 			(Smalltalk classNamed: #SmalltalkImage) current perform: #saveChangesInFileNamed: with: aString]! !
+
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:11'!
+confnameTokens: tokenPrefix
+	"Find the cpp macro definitions corresponding to tokenPrefix in system header files.
+	Assumptions: Running on a gnu-linux platform with system configuration parameters
+	defined in /usr/include/bits/confname.h"
+
+	| include names |
+	include _ '/usr/include/bits/confname.h'.
+	names _ ( OSProcess outputOf: 'grep ', tokenPrefix, ' ', include, ' | grep #define' ) findTokens: String lf.
+	^names collect: [:e |  (e findTokens: String tab, String space) second.].
+! !
+
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:12'!
+confstr
+	"Answer a dictionary of available confstr(3) values for this platform.
+
+	Assumptions: Running on a gnu-linux platform with system configuration parameters
+	defined in /usr/include/bits/confname.h"
+
+	"OSProcess sysconf"
+
+	| tokens entries |
+	tokens _ self confnameTokens: '_CS_'.
+	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor confstr: i - 1 ) ].
+	^Dictionary withAll: entries.! !
+
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:13'!
+fpathconf: fileStream
+	"For the given file stream, answer a dictionary of available fpathconf(3) values for this platform.
+
+	Assumptions: Running on a gnu-linux platform with system configuration parameters
+	defined in /usr/include/bits/confname.h"
+
+	"OSProcess fpathconf: SourceFiles first"
+
+	| aFileStream tokens entries |
+	aFileStream _ SourceFiles first.
+	tokens _ self confnameTokens: '_PC_'.
+	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor fpathconf: aFileStream index: i - 1 ) ].
+	^Dictionary withAll: entries.! !
+
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:35'!
+gnuLinuxConf
+	"Answer system configuration values for the current platform, assuming
+	a gnu-linux or similar platform.. For file parameters use the Squeak sources
+	file as a representative example."
+
+	"OSProcess gnuLinuxConf"
+
+	^ Dictionary withAll: {
+		#sysconf -> self sysconf .
+		#confstr -> self confstr .
+		#fpathconf -> (self fpathconf: SourceFiles first)
+	}.! !
+
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:14'!
+pathconf: path
+	"For a file at path, answer a dictionary of available pathconf(3) values for this platform.
+
+	Assumptions: Running on a gnu-linux platform with system configuration parameters
+	defined in /usr/include/bits/confname.h"
+
+	"OSProcess pathconf: '/bin/date' "
+
+	| aPath tokens entries |
+	aPath _ '/bin/bash'.
+	tokens _ self confnameTokens: '_PC_'.
+	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor pathconf: aPath index: i - 1 ) ].
+	^Dictionary withAll: entries.! !
+
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:14'!
+sysconf
+	"Answer a dictionary of available sysconf(3) values for this platform.
+
+	Assumptions: Running on a gnu-linux platform with system configuration parameters
+	defined in /usr/include/bits/confname.h"
+
+	"OSProcess sysconf"
+
+	| tokens entries |
+	tokens _ self confnameTokens: '_SC_'.
+	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor sysconf: i - 1 ) ].
+	^Dictionary withAll: entries.! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
 accessor
@@ -11193,95 +11380,105 @@ setDefaults
 
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:44'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
 sigabrt
 	"Send a SIGABRT signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigabrt: self! !
+	^ OSProcess thisOSProcess sigabrt: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:52'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
 sigalrm
 	"Send a SIGALRM signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigalrm: self! !
+	^ OSProcess thisOSProcess sigalrm: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:52'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
 sigchld
 	"Send a SIGCHLD signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigchld: self! !
+	^ OSProcess thisOSProcess sigchld: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:52'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
 sigcont
 	"Send a SIGCONT signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigcont: self! !
+	^ OSProcess thisOSProcess sigcont: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:53'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
 sighup
 	"Send a SIGHUP signal to the external process which I represent."
 
-	OSProcess thisOSProcess sighup: self! !
+	^ OSProcess thisOSProcess sighup: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:53'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
 sigint
 	"Send a SIGINT signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigint: self! !
+	^ OSProcess thisOSProcess sigint: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:54'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
 sigkill
 	"Send a SIGKILL signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigkill: self! !
+	^ OSProcess thisOSProcess sigkill: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:54'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
 sigpipe
 	"Send a SIGPIPE signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigpipe: self! !
+	^ OSProcess thisOSProcess sigpipe: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:55'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
 sigquit
 	"Send a SIGQUIT signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigquit: self! !
+	^ OSProcess thisOSProcess sigquit: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:55'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
 sigstop
 	"Send a SIGSTOP signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigstop: self! !
+	^ OSProcess thisOSProcess sigstop: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:55'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:43'!
 sigterm
 	"Send a SIGTERM signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigterm: self! !
+	^ OSProcess thisOSProcess sigterm: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:56'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:43'!
 sigusr1
 	"Send a SIGUSR1 signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigusr1: self! !
+	^ OSProcess thisOSProcess sigusr1: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:56'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:43'!
 sigusr2
 	"Send a SIGUSR2 signal to the external process which I represent."
 
-	OSProcess thisOSProcess sigusr2: self! !
+	^ OSProcess thisOSProcess sigusr2: self! !
 
 !ExternalUnixOSProcess methodsFor: 'testing' stamp: 'dtl 12/22/2001 18:30'!
 succeeded
 
 	^ self isComplete and: [self exitStatus == 0]! !
 
-!ExternalUnixOSProcess methodsFor: 'terminating child' stamp: 'dtl 2/11/2001 16:08'!
+!ExternalUnixOSProcess methodsFor: 'terminating child' stamp: 'dtl 12/5/2020 12:51'!
 terminate
-	"Kill the child process which I represent."
+	"Kill the child process that I represent. Set run state to unknown, expecting
+	that the child process watcher will update it soon. If this is a stale reference
+	to a child process that was created in an earlier session, then the child watcher
+	will not see the exit, and run state will be left in the unknown state.
+	Answer the result of the primitive, which will be -1 in the case of a child
+	process that could not be signalled, possibly because this is a stale reference
+	and the actual child no longer exists."
 
-	self sigkill.
-	self finalize
+	| signalPrimResult |
+	self isRunning ifTrue: [ self unknownRunState ].
+	signalPrimResult _ self sigkill.
+	self finalize.
+	^ signalPrimResult
+
 
 ! !
 
@@ -12137,6 +12334,11 @@ setStdOut
 			[stdOut _ AttachableFileStream name: 'stdout' attachTo: stdOutHandle writable: true].
 	^ stdOut
 ! !
+
+!ThisOSProcess methodsFor: 'testing' stamp: 'dtl 12/5/2020 11:36'!
+isExternalProcess
+
+	^ false! !
 
 !ThisOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 3/5/2005 12:08'!
 concreteClass
@@ -13327,7 +13529,7 @@ stdOut
 	^ self thisOSProcess stdOut
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'jmv 10/24/2020 15:57:51'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 2/24/2013 10:26'!
 backgroundProcessInHeadlessSqueak
 	"Demonstrate running a ''batch job'' in a low priority background Squeak,
 	with output written to an OSPipe. This Squeak image reads data from the
@@ -13353,7 +13555,7 @@ backgroundProcessInHeadlessSqueak
 			, 'take one down and pass it around, '
 			, (beers value: count - 1) , ' of beer on the wall'; cr].
 		pipe close].
-	UISupervisor whenUIinSafeState:
+	WorldState addDeferredUIMessage:
 		[Transcript show: backgroundJob asString , ' started'; cr].
 	pipe closeWriter. "don't need writer end, close it before the #upToEnd"
 	"pipe writer blocks when pipe full, so we need to loop while reading to end "
@@ -13362,11 +13564,11 @@ backgroundProcessInHeadlessSqueak
 		[(Delay forMilliseconds: 200) wait.
 		(s _ pipe upToEnd) ifNotNil: [ws nextPutAll: s]].
 	pipe close.
-	UISupervisor whenUIinSafeState:
+	WorldState addDeferredUIMessage:
 		[Transcript show: backgroundJob asString
 			, ' completed, display results in 2 seconds'; cr].
 	(Delay forSeconds: 2) wait.
-	UISupervisor whenUIinSafeState:
+	WorldState addDeferredUIMessage:
 		[Transcript show: ws contents.
 		Transcript cr; show: 'delay 5 seconds before forking next Squeak job'; cr].
 	(Delay forSeconds: 5) wait] repeat]
