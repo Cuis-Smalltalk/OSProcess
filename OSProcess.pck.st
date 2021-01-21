@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4526] on 19 January 2021 at 10:25:14 pm'!
+'From Cuis 5.0 [latest update: #4526] on 20 January 2021 at 7:00:17 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 15!
-!requires: 'Network-Kernel' 1 1 nil!
+!provides: 'OSProcess' 1 17!
 !requires: 'SqueakCompatibility' 1 4 nil!
+!requires: 'Network-Kernel' 1 1 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
 SystemOrganization addCategory: 'OSProcess-Mac'!
 SystemOrganization addCategory: 'OSProcess-OS2'!
@@ -8282,7 +8282,7 @@ primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: co
 	<primitive: 'primitiveFixPointersInArrayOfStrings' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 5/26/2020 14:35'!
+!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 1/20/2021 18:41'!
 testArgsAsFlatArrayAndOffsets
 	"Test conversion of an array of strings into the form used to create a C **char
 	in UnixOSProcessPlugin."
@@ -8291,7 +8291,7 @@ testArgsAsFlatArrayAndOffsets
 
 	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
 	pointerSize _ OSProcess accessor sizeOfPointer.
-	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character value: 0) ].
+	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character value: 0) asString ].
 	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
 	self assert: stringsAndOffsets size == 2.
 	self assert: stringsAndOffsets second size == 3.
