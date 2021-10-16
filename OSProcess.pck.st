@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4526] on 20 January 2021 at 7:00:17 pm'!
+'From Cuis 5.0 [latest update: #4929] on 16 October 2021 at 4:36:06 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 17!
-!requires: 'SqueakCompatibility' 1 4 nil!
+!provides: 'OSProcess' 1 18!
 !requires: 'Network-Kernel' 1 1 nil!
+!requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
 SystemOrganization addCategory: 'OSProcess-Mac'!
 SystemOrganization addCategory: 'OSProcess-OS2'!
@@ -9656,6 +9656,18 @@ testEightLeafSqueakTree
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
+!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'NM 10/16/2021 16:09:26'!
+testExitCode 
+
+	"The exit code you expect in POSIX systems. "
+
+	|out|
+	out _ OSProcess waitForCommand: ' sh -c "exit 33" '. 
+	self assert: (out exitCode = 33). 
+
+
+! !
+
 !UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 6/29/2005 14:32'!
 testHeadlessChild
 
@@ -11273,6 +11285,14 @@ arguments
 arguments: arrayOfArgumentStrings
 
 	arguments _ arrayOfArgumentStrings! !
+
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'NM 10/16/2021 15:59:09'!
+exitCode
+	"Return the exit code as expected in POSIX systems.  A number between 0 and 255.
+	See notes in UnixProcessExitStatus. "
+	^ (UnixProcessExitStatus for: exitStatus) exitStatus 
+	
+! !
 
 !ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:34'!
 exitStatus
