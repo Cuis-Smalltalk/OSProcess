@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4929] on 16 October 2021 at 4:36:06 pm'!
+'From Cuis 5.0 [latest update: #4928] on 16 October 2021 at 1:43:46 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 18!
+!provides: 'OSProcess' 1 20!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -2087,8 +2087,8 @@ primTestLockableFileRegion: aSQFileStruct offset: begin length: len exclusive: f
 	answer an array with the following six fields:
 		lockable (true or false)
 		l_pid (pid of the process preventing this lock request, or nil)
-		l_type (request type F:=WRLCK or F:=RDLOCK of the process preventing this lock request)
-		l_whence (the SEEK:=SET, SEEK:=CUR, or SEEK:=END value of the lock preventing this lock request).
+		l_type (request type F_WRLCK or F_RDLOCK of the process preventing this lock request)
+		l_whence (the SEEK_SET, SEEK_CUR, or SEEK_END value of the lock preventing this lock request).
 		l_start (offset of the region lock preventing this lock request)
 		l_len (length of the region lock preventing this lock request)"
 
@@ -10848,12 +10848,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/19/2021 21:50'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 10/16/2021 13:29'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.6.24'! !
+	^ '4.6.26'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -13696,7 +13696,7 @@ clientServerDemo2
 	sendBuf _ String new: 4000 withAll: $x.
 	receiveBuf _ String new: 50000.
 	done _ false.
-	bytesSent _ bytesReceived := packetsSent := packetsReceived := 0.
+	bytesSent _ bytesReceived _ packetsSent _ packetsReceived _ 0.
 	t _ Time
 				millisecondsToRun: 
 					[[done]
@@ -14609,7 +14609,7 @@ setStdOut
 		ifFalse: [super setStdOut]
 ! !
 
-!WindowsProcess methodsFor: 'initialize - release' stamp: 'dtl 8/25/2010 20:49'!
+!WindowsProcess methodsFor: 'initialize - release' stamp: 'dtl 7/9/2021 18:36'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is executing. On Windows, we cannot rely
@@ -14620,6 +14620,7 @@ initialize
 	super initialize.
 	(self processAccessor canAccessSystem not or: [processAccessor primOneShot]) ifTrue:
 		["Restarting the VM in a new process"
+		OSProcessAccessor initialize. "new instance required in mingw environment"
 		self resetThreads.
 		self threads; mainThread.
 		processHandle _ nil.
