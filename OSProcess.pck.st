@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4928] on 16 October 2021 at 1:43:46 pm'!
+'From Cuis 6.0 [latest update: #5067] on 10 February 2022 at 7:04:16 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 20!
+!provides: 'OSProcess' 1 23!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -404,7 +404,7 @@ AioEventHandlerExample class
 	instanceVariableNames: ''!
 
 
-!OSProcessAccessor commentStamp: 'dtl 7/7/2010 07:58' prior: 0!
+!OSProcessAccessor commentStamp: '' prior: 0!
 I am an abstract class whose subclasses provide access to an operating system process, such as the process in which the Squeak VM is currently running. My subclasses collaborate with instances of OSProcess subclasses.
 
 The single instance ThisOSProcessAccessor provides access to the OS process in which the virtual machine is running. On Unix, this instance sets a signal handler to respond to externally generated sigchld signals. This must be done after each image restart in order to call a primitive which informs the VM of the  identity of the semaphore to signal. A similar mechanism is used for Windows to obtain exit status of external OS processes. ThisOSProcessor maintains a process that waits on child exit events and updates a dependent OSProcess of changes to external OS processes.
@@ -412,137 +412,137 @@ The single instance ThisOSProcessAccessor provides access to the OS process in w
 When an image is restarted on a different kind of platform, a new instance is assigned to ThisOSProcessAccessor to provide access to the virtual machine OS process.
 !
 
-!MacOSProcessAccessor commentStamp: '<historical>' prior: 0!
+!MacOSProcessAccessor commentStamp: '' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the Macintosh process model.!
 
-!OS2OSProcessAccessor commentStamp: '<historical>' prior: 0!
+!OS2OSProcessAccessor commentStamp: '' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the OS2 process model.!
 
-!RiscOSProcessAccessor commentStamp: '<historical>' prior: 0!
+!RiscOSProcessAccessor commentStamp: '' prior: 0!
 I provide access to the operating system process in which the Squeak VM is currently running. I am based on the RiscOS task model. There is only one instance of me, and instances of RiscOSProcess depend on me to provide access to the operating system process which they represent. I know how to create child processes. I use a semaphore to receive signals when child processes die, and I notify my dependents (instances ofRiscOSProcess) when these events occur.
 !
 
-!UnixOSProcessAccessor commentStamp: '<historical>' prior: 0!
+!UnixOSProcessAccessor commentStamp: '' prior: 0!
 I provide access to the operating system process in which the Squeak VM is currently running. I am based on the Unix process model. There is only one instance of me, and instances of UnixOSProcess depend on me to provide access to the operating system process which they represent.
 
 I know how to create child processes. I use a semaphore to receive signals when child processes die, and I notify my dependents (instances of UnixOSProcess) when these events occur.
 
 !
 
-!WindowsOSProcessAccessor commentStamp: '<historical>' prior: 0!
+!WindowsOSProcessAccessor commentStamp: '' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the Win32 process model for Windows and Windows NT.!
 
-!AioEventHandler commentStamp: 'dtl 11/25/2006 15:55' prior: 0!
+!AioEventHandler commentStamp: '' prior: 0!
 AioEventHandler responds to external IO events, such as data available on a file descriptor. When an external IO event is received, an instance of AioEventHandler sends #changed to itself to notify its dependents that the event has occurred.!
 
-!PseudoAioEventHandler commentStamp: 'dtl 11/25/2006 10:42' prior: 0!
+!PseudoAioEventHandler commentStamp: '' prior: 0!
 PseudoAioEventHandler is a replacement for AioEventHandler for use when an AioPlugin is not present. It creates a polling loop by generating #changed: events periodically. With a real AioEventHandler, events are generated only when actual IO activity occurs, while the PseudoAioEventHandler produces regularly timed events regardless of whether any actual IO changes have happened.!
 
-!AttachableFileStream commentStamp: '<historical>' prior: 0!
+!AttachableFileStream commentStamp: '' prior: 0!
 I am a stream on an input or output channel provided by the underlying operating system. I behave like an ordinary file stream, except that I can attach myself to an input or output stream which has already been opened by the underlying operating system.!
 
-!AsyncFileReadStream commentStamp: 'dtl 7/9/2003 21:04' prior: 0!
+!AsyncFileReadStream commentStamp: '' prior: 0!
 AsyncFileReadStream implements event-driven read behavior on a file stream. Whenever data is available, a #changed event is generated. An AsyncFileReadStream expects to have a client object respond immediately to the change notification by reading the available data, otherwise a possibly endless stream of change notifications will be generated.
 
 AsyncFileReadStream requires aio support in the AioPlugin module.!
 
-!BufferedAsyncFileReadStream commentStamp: 'dtl 3/7/2006 06:55' prior: 0!
+!BufferedAsyncFileReadStream commentStamp: '' prior: 0!
 BufferedAsyncFileReadStream adds output buffering behavior to an event driven file stream, permitting blocking reads without risk of blocking the Squeak VM. This is useful for OS pipes, for which Squeak may wish to read and write the pipe without concern for VM deadlocks.
 
 A BufferedAsyncFileReadStream may be set for either blocking or nonblocking reads. When in blocking mode, a Smalltalk Process that requests a read will be blocked until data is available, but the VM will not be blocked and other Smalltalk Processes can proceed normally.
 
 Whenever data becomes available, a dataAvailableSemaphore is signalled and a #changed event is generated.!
 
-!ExternalPipe commentStamp: 'dtl 3/10/2006 11:06' prior: 0!
+!ExternalPipe commentStamp: '' prior: 0!
 I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
 
 Subclasses implement buffering behavior for the reader end of a pipe.!
 
-!OSPipe commentStamp: 'dtl 3/8/2006 07:27' prior: 0!
+!OSPipe commentStamp: '' prior: 0!
 I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
 
 I use a single-character buffer to implement #peek without losing data from the external OS pipe.!
 
-!AbstractUnixProcessFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:02' prior: 0!
+!AbstractUnixProcessFileLockingTestCase commentStamp: '' prior: 0!
 Test file locking with the UnixOSProcessPlugin. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
 These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
 
-!UnixProcessUnixFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
+!UnixProcessUnixFileLockingTestCase commentStamp: '' prior: 0!
 Test file locking with the UnixOSProcessPlugin using Unix file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
 These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
 
-!UnixProcessWin32FileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
+!UnixProcessWin32FileLockingTestCase commentStamp: '' prior: 0!
 Test file locking with the UnixOSProcessPlugin using Windows file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
 These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
 
-!AioEventHandlerTestCase commentStamp: 'dtl 7/10/2005 15:41' prior: 0!
+!AioEventHandlerTestCase commentStamp: '' prior: 0!
 Test AioEventHandler and AioPlugin. Provides fair coverage of IO readable events, minimal coverage of IO writable events, and no real coverage for IO exception events. The writable events and exception events probably work, but this test suite will not prove it.!
 
-!OSPipeTestCase commentStamp: '<historical>' prior: 0!
+!OSPipeTestCase commentStamp: '' prior: 0!
 Test operation of OSPipe in blocking and nonBlocking mode.!
 
-!UnixProcessAccessorTestCase commentStamp: '<historical>' prior: 0!
+!UnixProcessAccessorTestCase commentStamp: '' prior: 0!
 Unit tests for the UnixProcessAccessor.!
 
-!UnixProcessFileLockTestCase commentStamp: 'dtl 3/7/2005 21:57' prior: 0!
+!UnixProcessFileLockTestCase commentStamp: '' prior: 0!
 This test case was provided by Julian Fitzell. It provides more file locking tests in addition to those in UnitProcessFileLockingTestCase.!
 
-!UnixProcessTestCase commentStamp: '<historical>' prior: 0!
+!UnixProcessTestCase commentStamp: '' prior: 0!
 Unit tests for the Unix portion of OSProcess.!
 
-!OSFileLock commentStamp: 'dtl 2/23/2004 19:36' prior: 0!
+!OSFileLock commentStamp: '' prior: 0!
 I describe the region representing the entire addressable space of an external file, including regions that have not yet been allocated for use by the file. On platforms that support file locking, an OSFileLock is used to describe a lock on the entire file.
 !
 
-!OSFileRegionLock commentStamp: 'jf 2/22/2004 19:50' prior: 0!
+!OSFileRegionLock commentStamp: '' prior: 0!
 I describe an addressable region of contiguous bytes in an external file. On platforms that support file locking, an OSFileRegionLock is used to specify a portion of the file to be locked.
 !
 
-!OSProcess commentStamp: '<historical>' prior: 0!
+!OSProcess commentStamp: '' prior: 0!
 I represent an operating system process, such as the process in which the Squeak VM is currently running. My subclasses implement system specific features for Unix, Windows, MacOS, or other operating systems.
 !
 
-!ExternalOSProcess commentStamp: '<historical>' prior: 0!
+!ExternalOSProcess commentStamp: '' prior: 0!
 I represent an OSProcess other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process.!
 
-!ExternalMacOSProcess commentStamp: '<historical>' prior: 0!
+!ExternalMacOSProcess commentStamp: '' prior: 0!
 I represent an external MacOS process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton MacOSProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent MacOSProcess (a singleton) to check the status of all its ExternalMacOSProcess children, and #update: them accordingly.!
 
-!ExternalOS2Process commentStamp: '<historical>' prior: 0!
+!ExternalOS2Process commentStamp: '' prior: 0!
 I represent an external OS2 process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton OS2ProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent OS2Process (a singleton) to check the status of all its ExternalOS2Process children, and #update: them accordingly.!
 
-!ExternalRiscOSProcess commentStamp: '<historical>' prior: 0!
+!ExternalRiscOSProcess commentStamp: '' prior: 0!
 I represent an external RiscOS task other than the process in which this Squeak is executing. I maintain information about the state of the external task during and after the lifetime of the task. In particular, I hold the exit status of the task after it completes execution. When the external task changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton RiscOSProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent RiscOSProcess (a singleton) to check the status of all its ExternalRiscOSProcess children, and #update: them accordingly.
 !
 
-!ExternalUnixOSProcess commentStamp: '<historical>' prior: 0!
+!ExternalUnixOSProcess commentStamp: '' prior: 0!
 I represent an external Unix process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton UnixProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent UnixProcess (a singleton) to check the status of all its ExternalUnixProcess children, and #update: them accordingly.!
 
-!ExternalWindowsOSProcess commentStamp: '<historical>' prior: 0!
+!ExternalWindowsOSProcess commentStamp: '' prior: 0!
 I represent an external Windows process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton WindowsOSProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent WindowsOSProcess (a singleton) to check the status of all its ExternalWindowsOSProcess children, and #update: them accordingly.!
 
-!ThisOSProcess commentStamp: '<historical>' prior: 0!
+!ThisOSProcess commentStamp: '' prior: 0!
 I represent the operating system process in which the Squeak VM is currently running. My subclasses implement system specific features for Unix, Windows, MacOS, or other operating systems by collaborating with corresponding subclasses of OSProcessAccessor to provide primitive access to the external operating system.
 !
 
-!MacProcess commentStamp: '<historical>' prior: 0!
+!MacProcess commentStamp: '' prior: 0!
 I represent a Macintosh operating system process, such as the process in which the Squeak VM is currently running. I collaborate with an instance of MacOSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of an OSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my MacOSProcessAccessor.!
 
-!OS2Process commentStamp: '<historical>' prior: 0!
+!OS2Process commentStamp: '' prior: 0!
 I represent an OS2 operating system process, such as the process in which the Squeak VM is currently running. I collaborate with an instance of OS2OSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of an OSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my OS2OSProcessAccessor.!
 
-!RiscOSProcess commentStamp: '<historical>' prior: 0!
+!RiscOSProcess commentStamp: '' prior: 0!
 I represent an Acorn RiscOS operating system task, such as the task in which the Squeak VM is currently running. I collaborate with a singleton instance of RiscOSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of a RiscOSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my RiscOSProcessAccessor.
 !
 
-!UnixProcess commentStamp: '<historical>' prior: 0!
+!UnixProcess commentStamp: '' prior: 0!
 I represent the Unix operating system process in which this Squeak session is running. I collaborate with an instance of UnixOSProcessAccessor to provide access to the external operating system. My instance variables are updated when my process accessor changes, allowing them to be monitored with a Smalltalk inspector.
 !
 
-!WindowsProcess commentStamp: 'dtl 9/25/2005 16:31' prior: 0!
+!WindowsProcess commentStamp: '' prior: 0!
 I represent a Windows operating system process, such as the process in which the Squeak VM is currently running. I collaborate with an instance of WindowsOSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of an OSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my WindowsOSProcessAccessor.
 
 My process ID and process handle (a Win32 HANDLE) are held by my pid and processHandle variables. The main thread for this process is held by my mainThread variable.
@@ -555,7 +555,7 @@ Whenever a child process exits, the childWatcherThread will signal a Semaphore (
 
 Note that some Windows applications will exit their main process after creating another application process. These applications will appear to Squeak as if they have exited immediately, even though the application is running.!
 
-!UnixProcessExitStatus commentStamp: 'dtl 8/23/2012 22:48' prior: 0!
+!UnixProcessExitStatus commentStamp: '' prior: 0!
 A UnixProcessExitStatus represents the exit status of a unix process. This is an integer bit field answered by the wait() system call that contains information about exit status of the process. The meaning of the bit field varies according to the cause of process exit. 
 
 Following a normal process exit, the status may be decoded to provide a small positive integer value in the range 0 - 255, which is the value that is presented by a unix shell as the exit status of a program. If terminated by a signal, the corresponding value is the signal number of the signal that caused process exit.
@@ -563,12 +563,12 @@ Following a normal process exit, the status may be decoded to provide a small po
 UnixExitStatus decodes the process exit status in a manner compatible with a typical GNU unix implementation. It is not guaranteed to be portable and may produce misleading results on other unix systems.
 !
 
-!WindowsThread commentStamp: '<historical>' prior: 0!
+!WindowsThread commentStamp: '' prior: 0!
 I represent a thread of execution within a Windows process. May threadID is a unique
 identifier for the thread, and my handle is a Windows HANDLE to the thread. My handle
 should be closed when the thread exits.!
 
-!AioEventHandlerExample commentStamp: 'dtl 7/5/2003 18:38' prior: 0!
+!AioEventHandlerExample commentStamp: '' prior: 0!
 Demonstrate asynchronous read handers for file streams, OS pipes, standard input, and sockets. See class category "examples". Some examples require OSProcess.!
 
 !UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 9/10/2000 10:16'!
@@ -1007,17 +1007,15 @@ newPid
 restartChildWatcherProcess
 	self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 11/28/2010 14:04'!
-isAtEndOfFile: anIOHandle
+!OSProcessAccessor methodsFor: 'file testing' stamp: 'cmm 1/22/2022 23:48'!
+isAtEndOfFile: anIOHandle 
 	"Answer whether the file represented by anIOHandle is at end of file, as determined
 	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
 	true if the file pointer is at the end of the file, but which does not call feof() to
 	determine that an end of file condition has occurred. The difference is significant
 	if aSqFileStruct represents a pipe or a device file, which may not be positionable
 	in the sense of a conventional disk file."
-
-	^ self primTestEndOfFileFlag: (self handleFromAccessor: anIOHandle)
-! !
+	^ (self primTestEndOfFileFlag: (self handleFromAccessor: anIOHandle)) = true! !
 
 !OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 4/8/2007 10:49'!
 primTestEndOfFileFlag: aSqFileStruct
@@ -4718,21 +4716,22 @@ forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writ
 	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 ! !
 
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 9/3/2010 16:48'!
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 1/23/2022 11:31'!
 initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 
 	semaphore _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: semaphore.
-	([self aioEnable: self descriptor forSemaphore: self semaIndex externalObject: true]
-		on: Warning
-		do: [:e |
-			self close. "unregister the semaphore"
-			self notify: e messageText. nil])
-		ifNotNil:
-			[handlerProc _ self
-				handleExceptions: exceptionEventFlag
-				readEvents: readEventFlag
-				writeEvents: writeEventFlag]
+	(AioPluginPresent = true) ifTrue: [
+		([self aioEnable: self descriptor forSemaphore: self semaIndex externalObject: true]
+			on: Warning
+			do: [:e |
+				self close. "unregister the semaphore"
+				OSProcess trace: e messageText asString. nil])
+			ifNotNil:
+				[handlerProc _ self
+					handleExceptions: exceptionEventFlag
+					readEvents: readEventFlag
+					writeEvents: writeEventFlag]]
 ! !
 
 !AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/9/2005 14:00'!
@@ -10848,12 +10847,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 10/16/2021 13:29'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/23/2022 11:44'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.6.26'! !
+	^ '4.6.27'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
