@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5067] on 10 February 2022 at 7:04:16 pm'!
+'From Cuis 6.0 [latest update: #5459] on 20 August 2022 at 2:46:16 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 23!
+!provides: 'OSProcess' 1 24!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -16,7 +16,7 @@ SystemOrganization addCategory: 'OSProcess-Tests'!
 !classDefinition: #OSProcessAccessor category: 'OSProcess-Base'!
 Model subclass: #OSProcessAccessor
 	instanceVariableNames: 'sessionIdentifier grimReaper canObtainSessionIdentifierFromPlugin'
-	classVariableNames: 'EmulateWin32FileLocking FileLockRegistry ThisOSProcessAccessor UseIOHandle'
+	classVariableNames: 'EmulateWin32FileLocking FileLockRegistry ThisOSProcessAccessor'
 	poolDictionaries: ''
 	category: 'OSProcess-Base'!
 !classDefinition: 'OSProcessAccessor class' category: 'OSProcess-Base'!
@@ -404,7 +404,7 @@ AioEventHandlerExample class
 	instanceVariableNames: ''!
 
 
-!OSProcessAccessor commentStamp: '' prior: 0!
+!OSProcessAccessor commentStamp: 'dtl 7/7/2010 07:58' prior: 0!
 I am an abstract class whose subclasses provide access to an operating system process, such as the process in which the Squeak VM is currently running. My subclasses collaborate with instances of OSProcess subclasses.
 
 The single instance ThisOSProcessAccessor provides access to the OS process in which the virtual machine is running. On Unix, this instance sets a signal handler to respond to externally generated sigchld signals. This must be done after each image restart in order to call a primitive which informs the VM of the  identity of the semaphore to signal. A similar mechanism is used for Windows to obtain exit status of external OS processes. ThisOSProcessor maintains a process that waits on child exit events and updates a dependent OSProcess of changes to external OS processes.
@@ -412,137 +412,137 @@ The single instance ThisOSProcessAccessor provides access to the OS process in w
 When an image is restarted on a different kind of platform, a new instance is assigned to ThisOSProcessAccessor to provide access to the virtual machine OS process.
 !
 
-!MacOSProcessAccessor commentStamp: '' prior: 0!
+!MacOSProcessAccessor commentStamp: '<historical>' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the Macintosh process model.!
 
-!OS2OSProcessAccessor commentStamp: '' prior: 0!
+!OS2OSProcessAccessor commentStamp: '<historical>' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the OS2 process model.!
 
-!RiscOSProcessAccessor commentStamp: '' prior: 0!
+!RiscOSProcessAccessor commentStamp: '<historical>' prior: 0!
 I provide access to the operating system process in which the Squeak VM is currently running. I am based on the RiscOS task model. There is only one instance of me, and instances of RiscOSProcess depend on me to provide access to the operating system process which they represent. I know how to create child processes. I use a semaphore to receive signals when child processes die, and I notify my dependents (instances ofRiscOSProcess) when these events occur.
 !
 
-!UnixOSProcessAccessor commentStamp: '' prior: 0!
+!UnixOSProcessAccessor commentStamp: '<historical>' prior: 0!
 I provide access to the operating system process in which the Squeak VM is currently running. I am based on the Unix process model. There is only one instance of me, and instances of UnixOSProcess depend on me to provide access to the operating system process which they represent.
 
 I know how to create child processes. I use a semaphore to receive signals when child processes die, and I notify my dependents (instances of UnixOSProcess) when these events occur.
 
 !
 
-!WindowsOSProcessAccessor commentStamp: '' prior: 0!
+!WindowsOSProcessAccessor commentStamp: '<historical>' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the Win32 process model for Windows and Windows NT.!
 
-!AioEventHandler commentStamp: '' prior: 0!
+!AioEventHandler commentStamp: 'dtl 11/25/2006 15:55' prior: 0!
 AioEventHandler responds to external IO events, such as data available on a file descriptor. When an external IO event is received, an instance of AioEventHandler sends #changed to itself to notify its dependents that the event has occurred.!
 
-!PseudoAioEventHandler commentStamp: '' prior: 0!
+!PseudoAioEventHandler commentStamp: 'dtl 11/25/2006 10:42' prior: 0!
 PseudoAioEventHandler is a replacement for AioEventHandler for use when an AioPlugin is not present. It creates a polling loop by generating #changed: events periodically. With a real AioEventHandler, events are generated only when actual IO activity occurs, while the PseudoAioEventHandler produces regularly timed events regardless of whether any actual IO changes have happened.!
 
-!AttachableFileStream commentStamp: '' prior: 0!
+!AttachableFileStream commentStamp: '<historical>' prior: 0!
 I am a stream on an input or output channel provided by the underlying operating system. I behave like an ordinary file stream, except that I can attach myself to an input or output stream which has already been opened by the underlying operating system.!
 
-!AsyncFileReadStream commentStamp: '' prior: 0!
+!AsyncFileReadStream commentStamp: 'dtl 7/9/2003 21:04' prior: 0!
 AsyncFileReadStream implements event-driven read behavior on a file stream. Whenever data is available, a #changed event is generated. An AsyncFileReadStream expects to have a client object respond immediately to the change notification by reading the available data, otherwise a possibly endless stream of change notifications will be generated.
 
 AsyncFileReadStream requires aio support in the AioPlugin module.!
 
-!BufferedAsyncFileReadStream commentStamp: '' prior: 0!
+!BufferedAsyncFileReadStream commentStamp: 'dtl 3/7/2006 06:55' prior: 0!
 BufferedAsyncFileReadStream adds output buffering behavior to an event driven file stream, permitting blocking reads without risk of blocking the Squeak VM. This is useful for OS pipes, for which Squeak may wish to read and write the pipe without concern for VM deadlocks.
 
 A BufferedAsyncFileReadStream may be set for either blocking or nonblocking reads. When in blocking mode, a Smalltalk Process that requests a read will be blocked until data is available, but the VM will not be blocked and other Smalltalk Processes can proceed normally.
 
 Whenever data becomes available, a dataAvailableSemaphore is signalled and a #changed event is generated.!
 
-!ExternalPipe commentStamp: '' prior: 0!
+!ExternalPipe commentStamp: 'dtl 3/10/2006 11:06' prior: 0!
 I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
 
 Subclasses implement buffering behavior for the reader end of a pipe.!
 
-!OSPipe commentStamp: '' prior: 0!
+!OSPipe commentStamp: 'dtl 3/8/2006 07:27' prior: 0!
 I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
 
 I use a single-character buffer to implement #peek without losing data from the external OS pipe.!
 
-!AbstractUnixProcessFileLockingTestCase commentStamp: '' prior: 0!
+!AbstractUnixProcessFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:02' prior: 0!
 Test file locking with the UnixOSProcessPlugin. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
 These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
 
-!UnixProcessUnixFileLockingTestCase commentStamp: '' prior: 0!
+!UnixProcessUnixFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
 Test file locking with the UnixOSProcessPlugin using Unix file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
 These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
 
-!UnixProcessWin32FileLockingTestCase commentStamp: '' prior: 0!
+!UnixProcessWin32FileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
 Test file locking with the UnixOSProcessPlugin using Windows file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
 These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
 
-!AioEventHandlerTestCase commentStamp: '' prior: 0!
+!AioEventHandlerTestCase commentStamp: 'dtl 7/10/2005 15:41' prior: 0!
 Test AioEventHandler and AioPlugin. Provides fair coverage of IO readable events, minimal coverage of IO writable events, and no real coverage for IO exception events. The writable events and exception events probably work, but this test suite will not prove it.!
 
-!OSPipeTestCase commentStamp: '' prior: 0!
+!OSPipeTestCase commentStamp: '<historical>' prior: 0!
 Test operation of OSPipe in blocking and nonBlocking mode.!
 
-!UnixProcessAccessorTestCase commentStamp: '' prior: 0!
+!UnixProcessAccessorTestCase commentStamp: '<historical>' prior: 0!
 Unit tests for the UnixProcessAccessor.!
 
-!UnixProcessFileLockTestCase commentStamp: '' prior: 0!
+!UnixProcessFileLockTestCase commentStamp: 'dtl 3/7/2005 21:57' prior: 0!
 This test case was provided by Julian Fitzell. It provides more file locking tests in addition to those in UnitProcessFileLockingTestCase.!
 
-!UnixProcessTestCase commentStamp: '' prior: 0!
+!UnixProcessTestCase commentStamp: '<historical>' prior: 0!
 Unit tests for the Unix portion of OSProcess.!
 
-!OSFileLock commentStamp: '' prior: 0!
+!OSFileLock commentStamp: 'dtl 2/23/2004 19:36' prior: 0!
 I describe the region representing the entire addressable space of an external file, including regions that have not yet been allocated for use by the file. On platforms that support file locking, an OSFileLock is used to describe a lock on the entire file.
 !
 
-!OSFileRegionLock commentStamp: '' prior: 0!
+!OSFileRegionLock commentStamp: 'jf 2/22/2004 19:50' prior: 0!
 I describe an addressable region of contiguous bytes in an external file. On platforms that support file locking, an OSFileRegionLock is used to specify a portion of the file to be locked.
 !
 
-!OSProcess commentStamp: '' prior: 0!
+!OSProcess commentStamp: '<historical>' prior: 0!
 I represent an operating system process, such as the process in which the Squeak VM is currently running. My subclasses implement system specific features for Unix, Windows, MacOS, or other operating systems.
 !
 
-!ExternalOSProcess commentStamp: '' prior: 0!
+!ExternalOSProcess commentStamp: '<historical>' prior: 0!
 I represent an OSProcess other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process.!
 
-!ExternalMacOSProcess commentStamp: '' prior: 0!
+!ExternalMacOSProcess commentStamp: '<historical>' prior: 0!
 I represent an external MacOS process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton MacOSProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent MacOSProcess (a singleton) to check the status of all its ExternalMacOSProcess children, and #update: them accordingly.!
 
-!ExternalOS2Process commentStamp: '' prior: 0!
+!ExternalOS2Process commentStamp: '<historical>' prior: 0!
 I represent an external OS2 process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton OS2ProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent OS2Process (a singleton) to check the status of all its ExternalOS2Process children, and #update: them accordingly.!
 
-!ExternalRiscOSProcess commentStamp: '' prior: 0!
+!ExternalRiscOSProcess commentStamp: '<historical>' prior: 0!
 I represent an external RiscOS task other than the process in which this Squeak is executing. I maintain information about the state of the external task during and after the lifetime of the task. In particular, I hold the exit status of the task after it completes execution. When the external task changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton RiscOSProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent RiscOSProcess (a singleton) to check the status of all its ExternalRiscOSProcess children, and #update: them accordingly.
 !
 
-!ExternalUnixOSProcess commentStamp: '' prior: 0!
+!ExternalUnixOSProcess commentStamp: '<historical>' prior: 0!
 I represent an external Unix process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton UnixProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent UnixProcess (a singleton) to check the status of all its ExternalUnixProcess children, and #update: them accordingly.!
 
-!ExternalWindowsOSProcess commentStamp: '' prior: 0!
+!ExternalWindowsOSProcess commentStamp: '<historical>' prior: 0!
 I represent an external Windows process other than the process in which this Squeak is executing. I maintain information about the state of the external process during and after the lifetime of the process. In particular, I hold the exit status of the process after it completes execution. When the external process changes state (e.g. it exits), the VM signals a Squeak semaphore. A singleton WindowsOSProcessAccessor maintains a process which waits on the semaphore, and sends a changed: #childProcessStatus message to itself, thereby notifying its dependent WindowsOSProcess (a singleton) to check the status of all its ExternalWindowsOSProcess children, and #update: them accordingly.!
 
-!ThisOSProcess commentStamp: '' prior: 0!
+!ThisOSProcess commentStamp: '<historical>' prior: 0!
 I represent the operating system process in which the Squeak VM is currently running. My subclasses implement system specific features for Unix, Windows, MacOS, or other operating systems by collaborating with corresponding subclasses of OSProcessAccessor to provide primitive access to the external operating system.
 !
 
-!MacProcess commentStamp: '' prior: 0!
+!MacProcess commentStamp: '<historical>' prior: 0!
 I represent a Macintosh operating system process, such as the process in which the Squeak VM is currently running. I collaborate with an instance of MacOSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of an OSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my MacOSProcessAccessor.!
 
-!OS2Process commentStamp: '' prior: 0!
+!OS2Process commentStamp: '<historical>' prior: 0!
 I represent an OS2 operating system process, such as the process in which the Squeak VM is currently running. I collaborate with an instance of OS2OSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of an OSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my OS2OSProcessAccessor.!
 
-!RiscOSProcess commentStamp: '' prior: 0!
+!RiscOSProcess commentStamp: '<historical>' prior: 0!
 I represent an Acorn RiscOS operating system task, such as the task in which the Squeak VM is currently running. I collaborate with a singleton instance of RiscOSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of a RiscOSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my RiscOSProcessAccessor.
 !
 
-!UnixProcess commentStamp: '' prior: 0!
+!UnixProcess commentStamp: '<historical>' prior: 0!
 I represent the Unix operating system process in which this Squeak session is running. I collaborate with an instance of UnixOSProcessAccessor to provide access to the external operating system. My instance variables are updated when my process accessor changes, allowing them to be monitored with a Smalltalk inspector.
 !
 
-!WindowsProcess commentStamp: '' prior: 0!
+!WindowsProcess commentStamp: 'dtl 9/25/2005 16:31' prior: 0!
 I represent a Windows operating system process, such as the process in which the Squeak VM is currently running. I collaborate with an instance of WindowsOSProcessAccessor to provide primitive access to the external operating system. My instance variables are maintained as a convenience to allow inspection of an OSProcess. Access to these variables should always be done with my accessor methods, which update the instance variables by querying my WindowsOSProcessAccessor.
 
 My process ID and process handle (a Win32 HANDLE) are held by my pid and processHandle variables. The main thread for this process is held by my mainThread variable.
@@ -555,7 +555,7 @@ Whenever a child process exits, the childWatcherThread will signal a Semaphore (
 
 Note that some Windows applications will exit their main process after creating another application process. These applications will appear to Squeak as if they have exited immediately, even though the application is running.!
 
-!UnixProcessExitStatus commentStamp: '' prior: 0!
+!UnixProcessExitStatus commentStamp: 'dtl 8/23/2012 22:48' prior: 0!
 A UnixProcessExitStatus represents the exit status of a unix process. This is an integer bit field answered by the wait() system call that contains information about exit status of the process. The meaning of the bit field varies according to the cause of process exit. 
 
 Following a normal process exit, the status may be decoded to provide a small positive integer value in the range 0 - 255, which is the value that is presented by a unix shell as the exit status of a program. If terminated by a signal, the corresponding value is the signal number of the signal that caused process exit.
@@ -563,184 +563,13 @@ Following a normal process exit, the status may be decoded to provide a small po
 UnixExitStatus decodes the process exit status in a manner compatible with a typical GNU unix implementation. It is not guaranteed to be portable and may produce misleading results on other unix systems.
 !
 
-!WindowsThread commentStamp: '' prior: 0!
+!WindowsThread commentStamp: '<historical>' prior: 0!
 I represent a thread of execution within a Windows process. May threadID is a unique
 identifier for the thread, and my handle is a Windows HANDLE to the thread. My handle
 should be closed when the thread exits.!
 
-!AioEventHandlerExample commentStamp: '' prior: 0!
+!AioEventHandlerExample commentStamp: 'dtl 7/5/2003 18:38' prior: 0!
 Demonstrate asynchronous read handers for file streams, OS pipes, standard input, and sockets. See class category "examples". Some examples require OSProcess.!
-
-!UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 9/10/2000 10:16'!
-printOn: aStream
-	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
-	treats $U as a vowel."
-
-	aStream
-		nextPutAll: 'a ';
-		nextPutAll: self class name;
-		nextPutAll: ' on pid ';
-		nextPutAll: self primGetPid printString
-! !
-
-!AioEventHandler class methodsFor: 'system startup' stamp: 'dtl 11/25/2006 10:04'!
-startUp: resuming
-	"Clear the value of AioPluginPresent. The value will be set once when
-	#aioPluginPresent is first sent, and will remain set to that value for the
-	duration of this Squeak session.
-	This method is called by ThisOSProcess>>startUp. AioEventHandler does
-	not need to be registered in the system startup list."
-
-	resuming ifTrue: [AioPluginPresent _ nil]
-! !
-
-!ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
-printOn: aStream
-	"The implementation of Stream>>printOn: has bad side effects when used
-	for OSPipe. This implementation is copied from Object."
-
-	| title |
-	title _ self class name.
-	aStream
-		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
-		nextPutAll: title! !
-
-!OSProcess methodsFor: 'printing' stamp: 'dtl 10/17/1999 21:12'!
-printOn: aStream
-
-	super printOn: aStream. aStream nextPutAll: ' with pid '. self pid printOn: aStream! !
-
-!ExternalOSProcess methodsFor: 'printing' stamp: 'dtl 3/18/2000 14:07'!
-printOn: aStream
-
-	super printOn: aStream.
-	self isComplete ifTrue: [ aStream nextPutAll: ' (', self runState, ' with status ', self exitStatus printString, ')' ]
-		ifFalse: [ aStream nextPutAll: ' (', self runState asString, ')' ]! !
-
-!ExternalUnixOSProcess methodsFor: 'printing' stamp: 'dtl 8/23/2012 22:45'!
-printOn: aStream
-
-	self programName isNil
-		ifTrue:
-			[^ super printOn: aStream]
-		ifFalse:
-			[aStream
-				nextPutAll: 'an ';
-				nextPutAll: self class name, ' with pid ';
-				nextPutAll: self pid printString;
-				nextPutAll: ' on ';
-				nextPutAll: programName;
-				nextPutAll: ' (';
-				nextPutAll: self runState asString.
-			self isComplete
-				ifTrue: [aStream nextPutAll: ', ';
-					nextPutAll: (UnixProcessExitStatus for: exitStatus) printString].
-			aStream nextPut: $)].
-! !
-
-!ExternalWindowsOSProcess methodsFor: 'printing' stamp: 'dtl 2/26/2002 10:42'!
-printOn: aStream
-
-	self commandLine isNil
-		ifTrue:
-			[^ super printOn: aStream]
-		ifFalse:
-			[aStream
-				nextPutAll: 'a ';
-				nextPutAll: self class name, ' with pid ';
-				nextPutAll: self pid printString.
-			(self isComplete and: [handle isNil])
-				ifTrue:
-					[aStream nextPutAll: ' (handle closed)']
-				ifFalse:
-					[aStream nextPutAll: ' handle ';
-						nextPutAll: (handle isNil
-							ifTrue: [handle printString]
-							ifFalse: [handle asArray printString])].
-			aStream
-				nextPutAll: ' on ''';
-				nextPutAll: commandLine;
-				nextPutAll: ''' (';
-				nextPutAll: self runState asString;
-				nextPut: $)]
-
-! !
-
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 6/25/2020 10:26'!
-shutDown: quitting
-	"Break dependency on my OSProcessAccessor. This is done explicitly at
-	shutDown time in order to prevent possible problems when an image is
-	restarted on another platform type, in which case a new ThisOSProcess
-	instance is created and the old instance could still have an unwanted
-	dependency on an OSProcessAccessor."
-
-	quitting
-		ifTrue: [ self thisOSProcess ifNotNil: [ :osp |
-			osp processAccessor ifNotNil: [ :acc |
-				acc breakDependents ] ] ]
-! !
-
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
-startUp: resuming
-	"Initialize my singleton instance, and the singleton instance of my
-	OSProcessAccessor. On Unix, set the signal handler in my process
-	accessor to respond to externally generated sigchld signals. This
-	must be done after each image restart in order to call a primitive
-	which informs the VM of the identity of the semaphore to signal.
-	When not running on a Unix system, the primitive fails and the
-	method has no effect. Notify dependents of the singleton instance
-	if the image has restarted in a different OS process (this is not the
-	case when #startUp is called after a simple image save). The
-	notification is done in the initialization of my OSProcessAccessor."
-
-	| aio |
-	(aio _ Smalltalk at: #AioEventHandler)
-		ifNotNil: [ aio startUp: resuming ].
-	resuming ifTrue: [ self initializeThisOSProcess ]! !
-
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
-environment
-
-	^ environment
-! !
-
-!UnixProcess methodsFor: 'printing' stamp: 'dtl 7/7/2010 07:37'!
-printOn: aStream
-	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
-	treats $U as a vowel."
-
-	self ppid.		"Force update of ppid, in case parent may have exited."
-	aStream nextPutAll: 'a ';
-			nextPutAll: self class name;
-			nextPutAll: ' with pid ';
-			nextPutAll: self pid printString
-! !
-
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 22:02'!
-environment
-
-	^ environment
-! !
-
-!UnixProcessExitStatus methodsFor: 'printing' stamp: 'dtl 8/22/2012 23:18'!
-printOn: aStream
-
-	self isExited
-		ifTrue: [aStream nextPutAll: 'normal termination with status ';
-				 nextPutAll: self statusIfExited asString].
-	self isSignaled
-		ifTrue: [aStream nextPutAll: 'exit due to signal ';
-				nextPutAll: self statusIfSignaled asString].
-	self isStopped
-		ifTrue: [aStream nextPutAll: 'stopped due to signal ';
-				nextPutAll: self statusIfStopped].! !
-
-!WindowsThread methodsFor: 'printing' stamp: 'dtl 2/27/2002 12:02'!
-printOn: aStream
-
-	super printOn: aStream.
-	aStream nextPutAll: ' (', self threadID printString, ', ', self runState, ')'
-! !
 
 !OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
 aioModuleName
@@ -887,20 +716,11 @@ sessionIdentifier
 	^ sessionIdentifier ifNil: [sessionIdentifier _ self getSessionIdentifier]
 ! !
 
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/15/2018 10:12:22'!
+!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 8/20/2022 01:22'!
 getSessionIdentifier
-	"Call a primitive to obtain the unique identifier for this Squeak session. If the
-	primitive fails, try to deduce the session identifier from an instance of
-	StandardFileStream. Some versions of the OSProcessPlugin may not be able to
-	obtain a session ID, so this provides a mechanism for obtaining the session ID
-	indirectly if necessary."
+	"Answer the unique identifier for this Squeak session"
 
-	"OSProcess accessor getSessionIdentifier"
-
-	| session |
-	session _ self primGetSession.
-	session ifNil: [session _  self getSessionIdentifierFromSourcesFile].
-	^ session
+	^ self primGetSession.
 ! !
 
 !OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/20/2018 19:21:57'!
@@ -1007,15 +827,15 @@ newPid
 restartChildWatcherProcess
 	self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'file testing' stamp: 'cmm 1/22/2022 23:48'!
-isAtEndOfFile: anIOHandle 
-	"Answer whether the file represented by anIOHandle is at end of file, as determined
+!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 8/19/2022 19:10'!
+isAtEndOfFile: ioHandle 
+	"Answer whether the file represented by ioHandle is at end of file, as determined
 	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
 	true if the file pointer is at the end of the file, but which does not call feof() to
 	determine that an end of file condition has occurred. The difference is significant
 	if aSqFileStruct represents a pipe or a device file, which may not be positionable
 	in the sense of a conventional disk file."
-	^ (self primTestEndOfFileFlag: (self handleFromAccessor: anIOHandle)) = true! !
+	^ (self primTestEndOfFileFlag: ioHandle) = true! !
 
 !OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 4/8/2007 10:49'!
 primTestEndOfFileFlag: aSqFileStruct
@@ -1149,12 +969,11 @@ emulateWin32FileLocking: trueOrFalse
 	EmulateWin32FileLocking _ trueOrFalse
 ! !
 
-!OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 12/14/2013 09:15'!
+!OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:58'!
 initialize
 
 	"OSProcessAccessor initialize"
 
-	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle).
 	ThisOSProcessAccessor _ nil.
 	self emulateWin32FileLocking: false.
 	self allSubInstances do: [:e | e finalize]
@@ -1249,6 +1068,18 @@ isResponsibleForThisPlatform
 	Squeak VM running on the current platform."
 
 	^ OSProcess isRiscOS
+! !
+
+!UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 9/10/2000 10:16'!
+printOn: aStream
+	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
+	treats $U as a vowel."
+
+	aStream
+		nextPutAll: 'a ';
+		nextPutAll: self class name;
+		nextPutAll: ' on pid ';
+		nextPutAll: self primGetPid printString
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:43'!
@@ -1636,38 +1467,38 @@ closeUnixFileNumber: unixFileDescriptor
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 11/28/2010 12:13'!
-flushExternalStream: anIOHandle
-	"Convert anIOHandle to an SQFile data structure and call primitive to flush the
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:11'!
+flushExternalStream: ioHandle
+	"Convert ioHandle to an SQFile data structure and call primitive to flush the
 	external I/O stream."
 
-	^ self primSQFileFlush: (self handleFromAccessor: anIOHandle)
+	^ self primSQFileFlush: ioHandle
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 11/28/2010 12:15'!
-setBlocking: anIOHandle
-	"Convert anIOHandle to an SQFile data structure and call primitive to set for blocking I/O."
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:07'!
+setBlocking: ioHandle
+	"Convert ioHandle to an SQFile data structure and call primitive to set for blocking I/O."
 
-	^ self primSQFileSetBlocking: (self handleFromAccessor: anIOHandle)
+	^ self primSQFileSetBlocking: ioHandle
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 11/28/2010 12:16'!
-setNonBlocking: anIOHandle
-	"Convert anIOHandle to an SQFile data structure and call primitive to set it non-blocking."
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:07'!
+setNonBlocking: ioHandle
+	"Convert ioHandle to an SQFile data structure and call primitive to set it non-blocking."
 
-	^ self primSQFileSetNonBlocking: (self handleFromAccessor: anIOHandle)! !
+	^ self primSQFileSetNonBlocking: ioHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 11/28/2010 12:17'!
-setUnbuffered: anIOHandle
-	"Convert anIOHandle to an SQFile data structure and call primitive to set unbuffered I/O."
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:04'!
+setUnbuffered: ioHandle
+	"Convert ioHandle to an SQFile data structure and call primitive to set unbuffered I/O."
 
-	^ self primSQFileSetUnbuffered: (self handleFromAccessor: anIOHandle)! !
+	^ self primSQFileSetUnbuffered: ioHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 10/6/2001 07:27'!
-unixFileNumber: anIOHandle
-	"Answer the integer Unix file number corresponding to anIOHandle."
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:04'!
+unixFileNumber: ioHandle
+	"Answer the integer Unix file number corresponding to ioHandle."
 
-	^ anIOHandle ifNotNil: [self primUnixFileNumber: (self handleFromAccessor: anIOHandle)]
+	^ ioHandle ifNotNil: [self primUnixFileNumber: ioHandle]
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 11/19/2006 09:02'!
@@ -2319,7 +2150,7 @@ finalize
 			self sigChldSemaphore: nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 3/4/2018 19:36'!
+!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'eem 11/19/2021 12:34'!
 grimReaperProcess
 	"This is a process which waits for the death of a child OSProcess, and 
 	informs any dependents of the change. Use SIGCHLD events if possible,
@@ -2345,7 +2176,7 @@ grimReaperProcess
 						name:
 							((ReadStream on: grimReaper hash asString) next: 5)
 								, ': the child OSProcess watcher' ] ]
-		ifFalse: [ grimReaper priority: Processor userSchedulingPriority ]! !
+		ifFalse: [ grimReaper ifNotNil: [grimReaper priority: Processor userSchedulingPriority ]]! !
 
 !UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 7/7/2010 07:46'!
 initialize
@@ -2746,38 +2577,26 @@ restoreSignal: signalNumber
 	^ sema
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/31/2019 15:47'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:38'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
 
-	| handle |
-	(handle _ self primGetStdErrHandle)
-		ifNotNil: [^self ioAccessorFromSQFile: handle].
-	^nil
-! !
+	^ self primGetStdErrHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/31/2019 15:46'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:39'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
 
-	| handle |
-	(handle _ self primGetStdInHandle)
-		ifNotNil: [^self ioAccessorFromSQFile: handle].
-	^nil
-! !
+	^ self primGetStdInHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/31/2019 15:45'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:39'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
 
-	| handle |
-	(handle _ self primGetStdOutHandle)
-		ifNotNil: [^self ioAccessorFromSQFile: handle].
-	^nil
-! !
+	^ self primGetStdOutHandle! !
 
 !UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 3/17/2007 23:14'!
 getThreadID
@@ -3249,7 +3068,7 @@ killOnVmExit: proxies withSignal: signumOrNil
 	^ self kill: pids withSignal: signumOrNil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 1/31/2004 19:08'!
+!UnixOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 8/19/2022 19:34'!
 makePipeHandles
 	"Create a pipe, and answer an array of two IO accessors for the pipe 
 	reader and writer. Set a signal handler to cause SIGPIPE signals to be
@@ -3261,7 +3080,7 @@ makePipeHandles
 	ignored."
 
 	self forwardSigPipe.
-	^ super makePipeHandles
+	^ self primCreatePipe
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 6/3/2013 22:05'!
@@ -4087,7 +3906,7 @@ primGetPidHandle
 	<primitive: 'primitiveGetPidHandle' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/7/2002 20:09'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:41'!
 getStdErr
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	error for the OS process in which I am currently executing, or nil if the IO handle
@@ -4098,19 +3917,19 @@ getStdErr
 	| error |
 	error _ self primGetStdErrorForSession: self sessionIdentifier.
 	^ (error notNil and: [error last])
-		ifTrue: [self ioAccessorFromSQFile: error first]
+		ifTrue: [error first]
 		ifFalse: [nil]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/25/2005 16:11'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:51'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
 
-	^ self ioAccessorFromSQFile: self getStdErr
+	^ self getStdErr
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/7/2002 20:11'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:45'!
 getStdIn
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	input for the OS process in which I am currently executing, or nil if the IO handle
@@ -4121,19 +3940,19 @@ getStdIn
 	| input |
 	input _ self primGetStdInputForSession: self sessionIdentifier.
 	^ (input notNil and: [input last])
-		ifTrue: [self ioAccessorFromSQFile: input first]
+		ifTrue: [input first]
 		ifFalse: [nil]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/25/2005 16:10'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:51'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
 
-	^ self ioAccessorFromSQFile: self getStdIn
+	^ self getStdIn
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/7/2002 20:11'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:45'!
 getStdOut
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	output for the OS process in which I am currently executing, or nil if the IO handle
@@ -4144,19 +3963,19 @@ getStdOut
 	| output |
 	output _ self primGetStdOutputForSession: self sessionIdentifier.
 	^ (output notNil and: [output last])
-		ifTrue: [self ioAccessorFromSQFile: output first]
+		ifTrue: [output first]
 		ifFalse: [nil]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/25/2005 16:09'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:51'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
 
-	^ self ioAccessorFromSQFile: self getStdOut
+	^ self getStdOut
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/7/2002 20:03'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:41'!
 openStdErr
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	error for the OS process in which I am currently executing. Open a console if necessary
@@ -4171,10 +3990,10 @@ openStdErr
 		ifFalse:
 			[self primAllocConsole.
 			error _ self primGetStdOutputForSession: self sessionIdentifier].
-	^ self ioAccessorFromSQFile: error first
+	^ error first
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/7/2002 20:04'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:45'!
 openStdIn
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	input for the OS process in which I am currently executing. Open a console if necessary
@@ -4189,10 +4008,10 @@ openStdIn
 		ifFalse:
 			[self primAllocConsole.
 			input _ self primGetStdOutputForSession: self sessionIdentifier].
-	^ self ioAccessorFromSQFile: input first
+	^ input first
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/7/2002 20:05'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:46'!
 openStdOut
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	output for the OS process in which I am currently executing. Open a console if necessary
@@ -4207,10 +4026,10 @@ openStdOut
 		ifFalse:
 			[self primAllocConsole.
 			output _ self primGetStdOutputForSession: self sessionIdentifier].
-	^ self ioAccessorFromSQFile: output first
+	^ output first
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/9/2002 07:22'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/20/2022 00:50'!
 setStdErr: aFileStream
 	"Set the standard error handle for this OSProcess to be that of aFileStream"
 
@@ -4218,15 +4037,11 @@ setStdErr: aFileStream
 	fs _ FileStream fileNamed: 'stdError.tmp'.
 	OSProcess accessor setStdErr: fs"
 
-	| sqFile |
 	aFileStream ifNil: [^ false].
-	sqFile _ UseIOHandle
-				ifTrue: [aFileStream ioHandle handle]
-				ifFalse: [aFileStream fileID].
-	^ self primSetStdErr: sqFile
+	^ self primSetStdErr: aFileStream fileID
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/9/2002 07:22'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/20/2022 00:51'!
 setStdIn: aFileStream
 	"Set the standard input handle for this OSProcess to be that of aFileStream"
 
@@ -4236,15 +4051,11 @@ setStdIn: aFileStream
 	fs position: 0.
 	OSProcess accessor setStdIn: fs"
 
-	| sqFile |
 	aFileStream ifNil: [^ false].
-	sqFile _ UseIOHandle
-				ifTrue: [aFileStream ioHandle handle]
-				ifFalse: [aFileStream fileID].
-	^ self primSetStdIn: sqFile
+	^ self primSetStdIn: aFileStream fileID
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/9/2002 07:22'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/20/2022 00:51'!
 setStdOut: aFileStream
 	"Set the standard output handle for this OSProcess to be that of aFileStream"
 
@@ -4252,12 +4063,8 @@ setStdOut: aFileStream
 	fs _ FileStream fileNamed: 'stdOutput.tmp'.
 	OSProcess accessor setStdOut: fs"
 
-	| sqFile |
 	aFileStream ifNil: [^ false].
-	sqFile _ UseIOHandle
-				ifTrue: [aFileStream ioHandle handle]
-				ifFalse: [aFileStream fileID].
-	^ self primSetStdOut: sqFile
+	^ self primSetStdOut: aFileStream fileID
 ! !
 
 !WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 10/1/2005 09:26'!
@@ -4283,16 +4090,12 @@ lastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 	^ self primLastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 4/1/2002 11:02'!
+!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 8/20/2022 00:50'!
 nextFrom: aFileStream signaling: aSemaphoreIndex
 	"Read the next character from aFileStream into a buffer in the VM. When the read completes,
 	signal the specified Semaphore to notify that the character is available."
 
-	| sqFile |
-	sqFile _ UseIOHandle
-				ifTrue: [aFileStream ioHandle handle]
-				ifFalse: [aFileStream fileID].
-	^ self primNextFrom: sqFile signaling: aSemaphoreIndex
+	^ self primNextFrom: aFileStream fileID signaling: aSemaphoreIndex
 ! !
 
 !WindowsOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 11:46'!
@@ -4679,39 +4482,39 @@ for: aSocketOrFileStream exceptions: exceptionEventFlag readEvents: readEventFla
 					writeEvents: writeEventFlag].
 	self error: 'expected a FileStream or Socket subclass'! !
 
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/9/2005 14:00'!
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:25'!
 forFileStream: aFileStream
 
-	self descriptor: (self handleForFile: aFileStream).
+	self descriptor: (self descriptorForFile: aFileStream).
 	self setDefaultEventMask.
 ! !
 
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/5/2003 11:01'!
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:25'!
 forFileStream: aFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 
-	self descriptor: (self handleForFile: aFileStream).
+	self descriptor: (self descriptorForFile: aFileStream).
 	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 
 ! !
 
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/9/2005 14:00'!
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:27'!
 forSocket: aSocket
 	"Any existing event handling for aSocket will be disabled. Note that this
 	will make the socket useless for any applications that expect the prior
 	event handling behavior."
 
-	self descriptor: (self handleForSocket: aSocket).
+	self descriptor: (self desriptorForSocket: aSocket).
 	self aioDisable: self descriptor.
 	self setDefaultEventMask.
 ! !
 
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/5/2003 12:46'!
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:27'!
 forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 	"Any existing event handling for aSocket will be disabled. Note that this
 	will make the socket useless for any applications that expect the prior
 	event handling behavior."
 
-	self descriptor: (self handleForSocket: aSocket).
+	self descriptor: (self desriptorForSocket: aSocket).
 	self aioDisable: self descriptor.
 	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
 ! !
@@ -4824,6 +4627,22 @@ finalize
 	self close
 ! !
 
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 8/19/2022 23:24'!
+descriptorForFile: aFileStream
+
+	"self new descriptorForFile: SourceFiles first"
+
+	^ self primOSFileHandle: aFileStream fileID
+! !
+
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 8/19/2022 23:25'!
+desriptorForSocket: aSocket
+
+	"self new desriptorForSocket: Socket newTCP"
+
+	^ self primOSSocketHandle: aSocket socketHandle
+! !
+
 !AioEventHandler methodsFor: 'private' stamp: 'dtl 9/4/2003 06:40'!
 handleForFile: aFileStream
 
@@ -4933,6 +4752,17 @@ primOSSocketHandle: sqFile
 
 	<primitive: 'primitiveOSSocketHandle' module: 'AioPlugin'>
 	^ nil
+! !
+
+!AioEventHandler class methodsFor: 'system startup' stamp: 'dtl 11/25/2006 10:04'!
+startUp: resuming
+	"Clear the value of AioPluginPresent. The value will be set once when
+	#aioPluginPresent is first sent, and will remain set to that value for the
+	duration of this Squeak session.
+	This method is called by ThisOSProcess>>startUp. AioEventHandler does
+	not need to be registered in the system startup list."
+
+	resuming ifTrue: [AioPluginPresent _ nil]
 ! !
 
 !AioEventHandler class methodsFor: 'testing' stamp: 'dtl 12/18/2016 18:06'!
@@ -5051,15 +4881,15 @@ eventGenerator
 
 	^ eventGenerator ifNil: [eventGenerator _ self eventGeneratorProcess]! !
 
-!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 21:01'!
+!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 01:00'!
 asAsyncFileReadStream
 	"Answer a replacement for this object, with asynchronous event handling.
-	Do not close the ioHandle when this object is finalized."
+	Do not close the fileID when this object is finalized."
 
 	self keepOpen.
 	^ AsyncFileReadStream
 		name: self name
-		attachTo: self ioHandle
+		attachTo: fileID
 		writable: self isReadOnly not
 ! !
 
@@ -5069,15 +4899,15 @@ asAttachableFileStream
 	^ self
 ! !
 
-!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 21:01'!
+!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 01:00'!
 asBufferedAsyncFileReadStream
 	"Answer a replacement for this object, with asynchronous event handling
-	and buffered output. Do not close the ioHandle when this object is finalized."
+	and buffered output. Do not close the fileID when this object is finalized."
 
 	self keepOpen.
 	^ BufferedAsyncFileReadStream
 		name: self name
-		attachTo: self ioHandle
+		attachTo: fileID
 		writable: self isReadOnly not
 ! !
 
@@ -5102,20 +4932,14 @@ keepOpen
 	autoClose _ false
 ! !
 
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 1/20/2018 19:19:25'!
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 8/20/2022 00:36'!
 close
 	"Close this file."
 
-	| h |
-	(h _ self ioHandle) ifNotNil:
-		[UseIOHandle
-			ifTrue:
-				[h close.
-				self perform: #ioHandle: with: nil]
-			ifFalse:
-				[self primCloseNoError: h.
-				self unregister.
-				fileID _ nil]]
+	fileID ifNotNil:
+		[self primCloseNoError: fileID.
+			self unregister.
+			fileID _ nil]
 ! !
 
 !AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:00'!
@@ -5152,11 +4976,11 @@ reopen
 disableEventHandling
 	"Subclasses may disable event handling"! !
 
-!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 11/8/2000 21:55'!
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 8/20/2022 00:36'!
 flush
 	"Flush the external OS stream (the one in the C library)."
 
-	OSProcess accessor flushExternalStream: self ioHandle! !
+	OSProcess accessor flushExternalStream: fileID! !
 
 !AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 5/17/2009 14:11'!
 position
@@ -5196,41 +5020,39 @@ upToEndOfFile
 	[self atEndOfFile] whileFalse: [newStream nextPutAll: (self nextInto: buffer)].
 	^ newStream contents! !
 
-!AttachableFileStream methodsFor: 'private - IOHandle' stamp: 'dtl 1/29/2000 15:18'!
-ioHandle
-
-	UseIOHandle
-		ifTrue: [^ super ioHandle]
-		ifFalse: [^ fileID]! !
-
 !AttachableFileStream methodsFor: 'testing' stamp: 'dtl 3/26/2006 15:52'!
 isPipe
 
 	^ false
 ! !
 
-!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 1/20/2018 19:19:07'!
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 8/20/2022 00:56'!
 name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
 	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
 
 	name _ aSymbolOrString.
-	UseIOHandle
-		ifTrue: [self perform: #ioHandle: with: anIOHandle]
-		ifFalse: [fileID _ anIOHandle].
+	fileID _ anIOHandle.
 	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
 	self ascii.
-	UseIOHandle ifFalse: [self register]
+	self register.
 ! !
 
-!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 2/17/2007 18:10'!
+!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 8/20/2022 00:36'!
 setBlocking
 
-	OSProcess accessor setBlocking: self ioHandle! !
+	OSProcess accessor setBlocking: fileID! !
 
-!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 2/17/2007 18:10'!
+!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 8/20/2022 00:36'!
 setNonBlocking
 
-	OSProcess accessor setNonBlocking: self ioHandle! !
+	OSProcess accessor setNonBlocking: fileID! !
+
+!AttachableFileStream methodsFor: 'deprecated' stamp: 'dtl 8/20/2022 00:53'!
+ioHandle
+
+	"Deprecated, retained for support of older versions of CommandShell (19-Aug-2022)"
+
+	^ fileID! !
 
 !AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 6/12/1999 15:53'!
 fileNamed: fileName
@@ -5300,12 +5122,12 @@ unregister: anObject
 
 	^ anObject! !
 
-!AttachableFileStream class methodsFor: 'examples' stamp: 'dtl 3/7/2006 06:42'!
+!AttachableFileStream class methodsFor: 'examples' stamp: 'dtl 8/20/2022 00:37'!
 stdIn
 
 	"self stdIn"
 
-	^ self name: 'stdIn' attachTo: OSProcess thisOSProcess stdIn ioHandle writable: false
+	^ self name: 'stdIn' attachTo: OSProcess thisOSProcess stdIn fileID writable: false
 ! !
 
 !AsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 6/17/2006 08:08'!
@@ -5329,25 +5151,25 @@ asAsyncFileReadStream
 	^ self
 ! !
 
-!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 19:40'!
+!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 01:00'!
 asAttachableFileStream
 	"Answer a replacement for this object, with no asynchronous event handling.
-	Do not close the ioHandle when this object is finalized."
+	Do not close the fileID when this object is finalized."
 
 	self keepOpen.
 	^ AttachableFileStream
 		name: self name
-		attachTo: self ioHandle
+		attachTo: fileID
 		writable: self isReadOnly not
 ! !
 
-!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 21:01'!
+!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 00:33'!
 asBufferedAsyncFileReadStream
 	"Answer a replacement for this object, with buffered output."
 
 	^ BufferedAsyncFileReadStream
 		name: self name
-		attachTo: self ioHandle
+		attachTo: fileID
 		writable: self isReadOnly not
 ! !
 
@@ -5357,12 +5179,12 @@ close
 	self disableEventHandling.
 	^ super close! !
 
-!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 3/15/2006 07:45'!
+!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:33'!
 initialize
 
 	super initialize.
 	self readOnly.
-	OSProcess accessor setNonBlocking: self ioHandle.
+	OSProcess accessor setNonBlocking: fileID.
 	self enableEventHandling
 ! !
 
@@ -5480,7 +5302,7 @@ appendToBuffer: aCharacter
 	self dataAvailableSemaphore signal.
 	self changed! !
 
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 3/4/2017 14:02'!
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 8/20/2022 00:38'!
 moveAvailableDataFrom: sqFile
 
 	| count bufferSize buffer |
@@ -5498,15 +5320,15 @@ moveAvailableDataFrom: sqFile
 				ifFalse:
 					[self appendAllToBuffer: (buffer copyFrom: 1 to: count)]]
 		ifFalse:
-			[(self closed or: [OSProcess accessor isAtEndOfFile: self ioHandle])
+			[(self closed or: [OSProcess accessor isAtEndOfFile: fileID])
 				ifTrue:
 					[self disableEventHandling]]
 ! !
 
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/6/2003 20:30'!
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 8/20/2022 00:38'!
 moveAvailableDataToBuffer
 
-	^ self moveAvailableDataFrom: (OSProcess accessor handleFromAccessor: self ioHandle).
+	^ self moveAvailableDataFrom: fileID.
 ! !
 
 !BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 3/4/2017 14:06'!
@@ -5550,14 +5372,14 @@ waitForDataReady: count
 		critical: [self readBuffer size - readBuffer position < count]]
 		whileTrue: [self waitForDataReady]! !
 
-!BufferedAsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 20:54'!
+!BufferedAsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 00:37'!
 asAsyncFileReadStream
 	"Answer a replacement for this object, with asynchronous event handling but
 	no buffering."
 
 	^ AsyncFileReadStream
 		name: self name
-		attachTo: self ioHandle
+		attachTo: fileID
 		writable: self isReadOnly not
 ! !
 
@@ -5790,6 +5612,17 @@ stdIn
 	^ super stdIn
 ! !
 
+!ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
+printOn: aStream
+	"The implementation of Stream>>printOn: has bad side effects when used
+	for OSPipe. This implementation is copied from Object."
+
+	| title |
+	title _ self class name.
+	aStream
+		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
+		nextPutAll: title! !
+
 !ExternalPipe methodsFor: 'testing' stamp: 'dtl 4/2/2006 21:14'!
 atEnd
 	"Answer whether the receiver can access any more objects."
@@ -5954,12 +5787,12 @@ initialize
 	^ self makePipe
 ! !
 
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 3/7/2006 19:44'!
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 19:35'!
 makePipe
 	"Create an OS pipe and attach it to my input and output streams."
 
 	| handleArray |
-	handleArray _ OSProcess accessor makePipeHandles.
+	handleArray _ OSProcess accessor primCreatePipe.
 	handleArray isNil
 		ifTrue:
 			[self error: 'cannot create OS pipe']
@@ -5974,11 +5807,11 @@ makePipe
 							writable: true)]
 ! !
 
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 3/9/2006 06:40'!
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:38'!
 setBlocking
 	"Set the reader side of the pipe for blocking reads."
 
-	reader ifNotNil: [OSProcess accessor setBlocking: reader ioHandle].
+	reader ifNotNil: [OSProcess accessor setBlocking: reader fileID].
 	self blocking: true
 ! !
 
@@ -5998,11 +5831,11 @@ setBufferedReader
 	^ false
 ! !
 
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 3/9/2006 06:40'!
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:38'!
 setNonBlocking
 	"Set the reader side of the pipe for non-blocking reads."
 
-	reader ifNotNil: [OSProcess accessor setNonBlocking: reader ioHandle].
+	reader ifNotNil: [OSProcess accessor setNonBlocking: reader fileID].
 	self blocking: false
 ! !
 
@@ -7337,13 +7170,13 @@ isAbstract
 	^self name = #TestCase
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 6/27/2020 20:05'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
 testEnableHandleAndDisable
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult aioDisableResult |
 	eventHandler _ AioEventHandler new.
 	anOpenFile _ OSProcess fileNamed: 'delete.me'.
-	fileHandle _ eventHandler handleForFile: anOpenFile.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
 	sema _ Semaphore new.
 	[semaIndex _ Smalltalk registerExternalObject: sema.
 	[aioEnableResult _ eventHandler
@@ -7392,7 +7225,7 @@ testEnableHandleAndDisable
 	OSProcess deleteFileNamed: 'delete.me'.
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:56:54'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
 testFileReadableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
@@ -7401,7 +7234,7 @@ testFileReadableEvent
 	eventHandler _ AioEventHandler new.
 	OSProcess deleteFileNamed: fileName.
 	[anOpenFile _ OSProcess fileNamed: fileName.
-	fileHandle _ eventHandler handleForFile: anOpenFile.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	[aioEnableResult _ eventHandler
@@ -7473,7 +7306,7 @@ testFileReadableEvent
 			Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:57:17'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
 testFileWritableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
@@ -7482,7 +7315,7 @@ testFileWritableEvent
 	eventHandler _ AioEventHandler new.
 	OSProcess deleteFileNamed: fileName.
 	[anOpenFile _ OSProcess fileNamed: fileName.
-	fileHandle _ eventHandler handleForFile: anOpenFile.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	[aioEnableResult _ eventHandler
@@ -7554,26 +7387,26 @@ testFileWritableEvent
 			Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 6/27/2020 20:06'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
 testHandleForFile
 
 	| eventHandler anOpenFile fileHandle |
 	eventHandler _ AioEventHandler new.
 	anOpenFile _ OSProcess fileNamed: 'delete.me'.
-	fileHandle _ eventHandler handleForFile: anOpenFile.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
 	anOpenFile close.
 	OSProcess deleteFileNamed: 'delete.me'.
 	self assert: fileHandle notNil.
 	self assert: (fileHandle isKindOf: Integer)
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 7/9/2005 17:10'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
 testHandleForSocket
 
 	| eventHandler socket socketHandle |
 	eventHandler _ AioEventHandler new.
 	socket _ Socket newTCP.
-	socketHandle _ eventHandler handleForSocket: socket.
+	socketHandle _ eventHandler desriptorForSocket: socket.
 	self assert: socketHandle notNil.
 	self assert: (socketHandle isKindOf: Integer).
 	self assert: (socketHandle ~= 0) "0 is stdin on unix, unlikely to be used on other platforms"
@@ -7597,7 +7430,7 @@ testPrimAioModuleVersionString
 	self assert: (versionString isKindOf: String)
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/7/2005 12:58'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
 testSocketExceptionEvent
 	"Close the client socket to generate an event on the server socket"
 
@@ -7622,7 +7455,7 @@ testSocketExceptionEvent
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7660,7 +7493,7 @@ testSocketExceptionEvent
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/7/2005 13:01'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
 testSocketExceptionEvent2
 	"Close the client socket to generate an event on the server socket"
 
@@ -7676,7 +7509,7 @@ testSocketExceptionEvent2
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7713,7 +7546,7 @@ testSocketExceptionEvent2
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/7/2005 13:02'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
 testSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
@@ -7737,7 +7570,7 @@ testSocketReadableEvent
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7797,7 +7630,7 @@ testSocketReadableEvent
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/7/2005 12:59'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
 testSocketReadableEventWithMaskNotSet
 	"Same as testSocketReadableEvent, except that the mask bit for read events is not set,
 	so we expect to not receive the event notification. This is just a check to ensure that
@@ -7824,7 +7657,7 @@ testSocketReadableEventWithMaskNotSet
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -7855,7 +7688,7 @@ testSocketReadableEventWithMaskNotSet
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/7/2005 12:59'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
 testSuspendAioForSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
@@ -7879,7 +7712,7 @@ testSuspendAioForSocketReadableEvent
 	sema _ Semaphore new.
 	semaIndex _ Smalltalk registerExternalObject: sema.
 	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler handleForSocket: serverTcpSocket.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
 
 	"An aio handler may already have been established for the socket
 	by the SocketPlugin. The following request disables any existing handling
@@ -10078,13 +9911,12 @@ lock
 	^ self lockIfFail: [false]
 ! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 5/8/2006 06:57'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/19/2022 22:46'!
 lockIfFail: failBlock
 
-	| handle result |
-	handle _ ThisOSProcess accessor handleFromFileStream: self fileStream.
+	| result |
 	result _ ThisOSProcess accessor
-		primLockFileRegion: handle
+		primLockFileRegion: fileStream fileID
 		offset: self offset
 		length: self length
 		exclusive: self isExclusive.
@@ -10093,18 +9925,16 @@ lockIfFail: failBlock
 		ifFalse: [^ failBlock value]
 ! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 5/8/2006 07:00'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/19/2022 19:26'!
 test
 	"Answer true if this is a lockable file or region"
 
-	| handle result |
-	handle _ ThisOSProcess accessor handleFromFileStream: self fileStream.
+	| result |
 	result _ ThisOSProcess accessor
-		primTestLockableFileRegion: handle
+		primTestLockableFileRegion: fileStream fileID
 		offset: self offset
 		length: self length
 		exclusive: self isExclusive.
-		
 	^ (result == -1 or: [result isNil])
 		ifTrue: [false]
 		ifFalse: [result first]! !
@@ -10116,13 +9946,12 @@ unlock
 	^ self unlockIfFail: [false]
 ! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 5/8/2006 06:57'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/19/2022 19:27'!
 unlockIfFail: failBlock
 
-	| handle result |
-	handle _ ThisOSProcess accessor handleFromFileStream: self fileStream.
+	| result |
 	result _ ThisOSProcess accessor
-		primUnlockFileRegion: handle
+		primUnlockFileRegion: fileStream fileID
 		offset: self offset
 		length: self length.
 	result == 0
@@ -10205,6 +10034,11 @@ onFile: aFileStream interval: anInterval exclusive: writeLockFlag
 
 	^ super new onFile: aFileStream interval: anInterval exclusive: writeLockFlag
 ! !
+
+!OSProcess methodsFor: 'printing' stamp: 'dtl 10/17/1999 21:12'!
+printOn: aStream
+
+	super printOn: aStream. aStream nextPutAll: ' with pid '. self pid printOn: aStream! !
 
 !OSProcess methodsFor: 'initialize - release' stamp: 'dtl 5/31/1999 13:54'!
 initialize
@@ -10378,7 +10212,7 @@ evaluate: aCommandString
 	self notify: 'CommandShell not found'
 ! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 2/8/2020 16:21'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 7/6/2022 10:56'!
 outputOf: aCommandString
 	"Evaluate a command pipeline created from aCommandString. Answer a
 	the output of the evaluation. If the command string resulted in error outputs,
@@ -10392,7 +10226,7 @@ outputOf: aCommandString
 	|pipeline out err|
 	pipeline _ self evaluate: aCommandString.
 	out _ pipeline upToEndOfFile.
-	err _ pipeline errorUpToEnd.
+	err _ pipeline errorUpToEndOfFile.
 	err isEmpty ifFalse: [self error: err].
 	^ out
 ! !
@@ -10630,7 +10464,7 @@ helloWorld
 	this stdOut ifNil: [self noAccessorAvailable. ^ nil].
 	^ this stdOut nextPutAll: 'Hello world'; nextPut: Character lf; yourself! !
 
-!OSProcess class methodsFor: 'examples' stamp: 'dtl 11/8/2000 23:23'!
+!OSProcess class methodsFor: 'examples' stamp: 'dtl 8/20/2022 00:39'!
 readFromStdIn
 	"Type some text on the standard input terminal, followed by <return> or <enter>,
 	then call this method. Any available input text in the stdin stream will be read.
@@ -10646,7 +10480,7 @@ readFromStdIn
 	| input ioHandle resultString |
 	input _ self thisOSProcess stdIn.
 	input ifNil: [self noAccessorAvailable. ^ nil].
-	ioHandle _ input ioHandle.
+	ioHandle _ input fileID.
 	self accessor setNonBlocking: ioHandle.
 	resultString _ self thisOSProcess stdIn next: 10000.
 	self accessor setBlocking: ioHandle.
@@ -10847,12 +10681,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 1/23/2022 11:44'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 8/20/2022 01:07'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.6.27'! !
+	^ '4.7.1'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -11049,6 +10883,13 @@ sysconf
 	tokens _ self confnameTokens: '_SC_'.
 	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor sysconf: i - 1 ) ].
 	^Dictionary withAll: entries.! !
+
+!ExternalOSProcess methodsFor: 'printing' stamp: 'dtl 3/18/2000 14:07'!
+printOn: aStream
+
+	super printOn: aStream.
+	self isComplete ifTrue: [ aStream nextPutAll: ' (', self runState, ' with status ', self exitStatus printString, ')' ]
+		ifFalse: [ aStream nextPutAll: ' (', self runState asString, ')' ]! !
 
 !ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
 accessor
@@ -11259,6 +11100,27 @@ isResponsibleForThisPlatform
 	an OS process other than that in which the Squeak VM is currently running."
 
 	^ self isRiscOS
+! !
+
+!ExternalUnixOSProcess methodsFor: 'printing' stamp: 'dtl 8/23/2012 22:45'!
+printOn: aStream
+
+	self programName isNil
+		ifTrue:
+			[^ super printOn: aStream]
+		ifFalse:
+			[aStream
+				nextPutAll: 'an ';
+				nextPutAll: self class name, ' with pid ';
+				nextPutAll: self pid printString;
+				nextPutAll: ' on ';
+				nextPutAll: programName;
+				nextPutAll: ' (';
+				nextPutAll: self runState asString.
+			self isComplete
+				ifTrue: [aStream nextPutAll: ', ';
+					nextPutAll: (UnixProcessExitStatus for: exitStatus) printString].
+			aStream nextPut: $)].
 ! !
 
 !ExternalUnixOSProcess methodsFor: 'comparing' stamp: 'dtl 11/15/2013 10:31'!
@@ -11669,6 +11531,34 @@ isResponsibleForThisPlatform
 	an OS process other than that in which the Squeak VM is currently running."
 
 	^ self isUnix
+! !
+
+!ExternalWindowsOSProcess methodsFor: 'printing' stamp: 'dtl 2/26/2002 10:42'!
+printOn: aStream
+
+	self commandLine isNil
+		ifTrue:
+			[^ super printOn: aStream]
+		ifFalse:
+			[aStream
+				nextPutAll: 'a ';
+				nextPutAll: self class name, ' with pid ';
+				nextPutAll: self pid printString.
+			(self isComplete and: [handle isNil])
+				ifTrue:
+					[aStream nextPutAll: ' (handle closed)']
+				ifFalse:
+					[aStream nextPutAll: ' handle ';
+						nextPutAll: (handle isNil
+							ifTrue: [handle printString]
+							ifFalse: [handle asArray printString])].
+			aStream
+				nextPutAll: ' on ''';
+				nextPutAll: commandLine;
+				nextPutAll: ''' (';
+				nextPutAll: self runState asString;
+				nextPut: $)]
+
 ! !
 
 !ExternalWindowsOSProcess methodsFor: 'comparing' stamp: 'dtl 11/15/2013 10:30'!
@@ -12167,7 +12057,7 @@ handleFromFileStream: aFileStream
 		ifFalse: [^ aFileStream fileID]
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 9/25/2005 16:23'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 8/19/2022 22:21'!
 isStdErr: anIOHandle
 	"Answer true if anIOHandle represents stderr."
 
@@ -12175,12 +12065,10 @@ isStdErr: anIOHandle
 	anIOHandle ifNil: [^ false].
 	realHandle _ self processAccessor getStdErrHandle.
 	realHandle ifNil: [^ false].
-	UseIOHandle
-		ifTrue: [^ anIOHandle handle = realHandle handle]
-		ifFalse: [^ anIOHandle = realHandle]
+	^ anIOHandle = realHandle
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 9/25/2005 16:23'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 8/19/2022 22:21'!
 isStdIn: anIOHandle
 	"Answer true if anIOHandle represents stdin."
 
@@ -12188,12 +12076,10 @@ isStdIn: anIOHandle
 	anIOHandle ifNil: [^ false].
 	realHandle _ self processAccessor getStdInHandle.
 	realHandle ifNil: [^ false].
-	UseIOHandle
-		ifTrue: [^ anIOHandle handle = realHandle handle]
-		ifFalse: [^ anIOHandle = realHandle]
+	^ anIOHandle = realHandle
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 9/25/2005 16:23'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 8/19/2022 22:21'!
 isStdOut: anIOHandle
 	"Answer true if anIOHandle represents stdout."
 
@@ -12201,9 +12087,7 @@ isStdOut: anIOHandle
 	anIOHandle ifNil: [^ false].
 	realHandle _ self processAccessor getStdOutHandle.
 	realHandle ifNil: [^ false].
-	UseIOHandle
-		ifTrue: [^ anIOHandle handle = realHandle handle]
-		ifFalse: [^ anIOHandle = realHandle]
+	^ anIOHandle = realHandle
 ! !
 
 !ThisOSProcess methodsFor: 'initialize - release' stamp: 'dtl 7/26/2010 13:51'!
@@ -12299,7 +12183,7 @@ stdOut
 
 	^ stdOut! !
 
-!ThisOSProcess methodsFor: 'private' stamp: 'dtl 9/25/2005 13:28'!
+!ThisOSProcess methodsFor: 'private' stamp: 'dtl 8/20/2022 00:47'!
 setStdErr
 	"If stdErr is nil, then set it. If not nil, check to see if it is has a valid connection to
 	stderr. If not valid, then replace it, otherwise answer the existing valid stream.
@@ -12310,14 +12194,14 @@ setStdErr
 
 	| stdErrHandle |
 	stdErr ifNotNil:
-			[(self isStdErr: stdErr ioHandle) ifTrue: [^ stdErr]].
+			[(self isStdErr: stdErr fileID) ifTrue: [^ stdErr]].
 	stdErrHandle _ self processAccessor getStdErrHandle.
 	stdErrHandle ifNotNil:
 			[stdErr _ AttachableFileStream name: 'stderr' attachTo: stdErrHandle writable: true].
 	^ stdErr
 ! !
 
-!ThisOSProcess methodsFor: 'private' stamp: 'dtl 9/25/2005 13:28'!
+!ThisOSProcess methodsFor: 'private' stamp: 'dtl 8/20/2022 00:48'!
 setStdIn
 	"If stdIn is nil, then set it. If not nil, check to see if it is has a valid connection to
 	stdin. If not valid, then replace it, otherwise answer the existing valid stream.
@@ -12328,7 +12212,7 @@ setStdIn
 
 	| stdInHandle |
 	stdIn ifNotNil:
-			[(self isStdIn: stdIn ioHandle) ifTrue: [^ stdIn]].
+			[(self isStdIn: stdIn fileID) ifTrue: [^ stdIn]].
 	stdInHandle _ self processAccessor getStdInHandle.
 	stdInHandle ifNotNil:
 			[stdIn _ AttachableFileStream name: 'stdin' attachTo: stdInHandle writable: false].
@@ -12336,7 +12220,7 @@ setStdIn
 
 ! !
 
-!ThisOSProcess methodsFor: 'private' stamp: 'dtl 9/25/2005 13:29'!
+!ThisOSProcess methodsFor: 'private' stamp: 'dtl 8/20/2022 00:48'!
 setStdOut
 	"If stdOut is nil, then set it. If not nil, check to see if it is has a valid connection to
 	stdout. If not valid, then replace it, otherwise answer the existing valid stream.
@@ -12347,7 +12231,7 @@ setStdOut
 
 	| stdOutHandle |
 	stdOut ifNotNil:
-			[(self isStdOut: stdOut ioHandle) ifTrue: [^ stdOut]].
+			[(self isStdOut: stdOut fileID) ifTrue: [^ stdOut]].
 	stdOutHandle _ self processAccessor getStdOutHandle.
 	stdOutHandle ifNotNil:
 			[stdOut _ AttachableFileStream name: 'stdout' attachTo: stdOutHandle writable: true].
@@ -12358,6 +12242,38 @@ setStdOut
 isExternalProcess
 
 	^ false! !
+
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 6/25/2020 10:26'!
+shutDown: quitting
+	"Break dependency on my OSProcessAccessor. This is done explicitly at
+	shutDown time in order to prevent possible problems when an image is
+	restarted on another platform type, in which case a new ThisOSProcess
+	instance is created and the old instance could still have an unwanted
+	dependency on an OSProcessAccessor."
+
+	quitting
+		ifTrue: [ self thisOSProcess ifNotNil: [ :osp |
+			osp processAccessor ifNotNil: [ :acc |
+				acc breakDependents ] ] ]
+! !
+
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
+startUp: resuming
+	"Initialize my singleton instance, and the singleton instance of my
+	OSProcessAccessor. On Unix, set the signal handler in my process
+	accessor to respond to externally generated sigchld signals. This
+	must be done after each image restart in order to call a primitive
+	which informs the VM of the identity of the semaphore to signal.
+	When not running on a Unix system, the primitive fails and the
+	method has no effect. Notify dependents of the singleton instance
+	if the image has restarted in a different OS process (this is not the
+	case when #startUp is called after a simple image save). The
+	notification is done in the initialization of my OSProcessAccessor."
+
+	| aio |
+	(aio _ Smalltalk at: #AioEventHandler)
+		ifNotNil: [ aio startUp: resuming ].
+	resuming ifTrue: [ self initializeThisOSProcess ]! !
 
 !ThisOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 3/5/2005 12:08'!
 concreteClass
@@ -12606,6 +12522,12 @@ arguments
 	^ arguments
 ! !
 
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
+environment
+
+	^ environment
+! !
+
 !UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
 path
 
@@ -12647,6 +12569,18 @@ pthread
 	we refresh pthread on every access."
 
 	^ pthread _ processAccessor getThreadID
+! !
+
+!UnixProcess methodsFor: 'printing' stamp: 'dtl 7/7/2010 07:37'!
+printOn: aStream
+	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
+	treats $U as a vowel."
+
+	self ppid.		"Force update of ppid, in case parent may have exited."
+	aStream nextPutAll: 'a ';
+			nextPutAll: self class name;
+			nextPutAll: ' with pid ';
+			nextPutAll: self pid printString
 ! !
 
 !UnixProcess methodsFor: 'private' stamp: 'djr 4/6/2009 14:31'!
@@ -13162,7 +13096,7 @@ forkSqueakAndDoThenQuit: aBlock
 			Smalltalk quitPrimitive]. "Child process"
 	^ childOrThisProc! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 1/25/2004 12:40'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 8/20/2022 00:49'!
 processProxy: anExternalProcess forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Call Unix vfork() and execve() to create a child process, and answer the child process.
 	This method is expected to be called by class side methods. Prepare the arguments before
@@ -13196,22 +13130,22 @@ processProxy: anExternalProcess forkAndExec: executableFile arguments: arrayOfSt
 			envOffsets _ nil].	"Same as current environment, so just pass nil."
 	arrayOf3Streams isNil
 		ifTrue:
-			[in _ self handleFromAccessor: (self stdIn ioHandle).
-			out _ self handleFromAccessor: (self stdOut ioHandle).
-			err _ self handleFromAccessor: (self stdIn ioHandle)]
+			[in _ self stdIn fileID.
+			out _ self stdOut fileID.
+			err _ self stdIn fileID]
 		ifFalse:
 			[(arrayOf3Streams at: 1)
 				isNil
-					ifTrue: [in _ self handleFromAccessor: (self stdIn ioHandle)]
-					ifFalse: [in _ self handleFromFileStream: (arrayOf3Streams at: 1)].			
+					ifTrue: [in _ self stdIn fileID]
+					ifFalse: [in _ (arrayOf3Streams at: 1) fileID].			
 			(arrayOf3Streams at: 2)
 				isNil
-					ifTrue: [ out _ self handleFromAccessor: (self stdOut ioHandle)]
-					ifFalse: [ out _ self handleFromFileStream: (arrayOf3Streams at: 2)].
+					ifTrue: [ out _ self stdOut fileID]
+					ifFalse: [ out _ (arrayOf3Streams at: 2) fileID].
 			(arrayOf3Streams at: 3)
 				isNil
-					ifTrue: [ err _ self handleFromAccessor: (self stdErr ioHandle)]
-					ifFalse: [ err _ self handleFromFileStream: (arrayOf3Streams at: 3)]].
+					ifTrue: [ err _ self stdErr fileID]
+					ifFalse: [ err _ (arrayOf3Streams at: 3) fileID]].
 	pwd _ anExternalProcess pwd.
 	(pwd = self getCwd)
 		ifTrue: [pwd _ nil]
@@ -14399,6 +14333,12 @@ waitForCommandOutputArray: aCommandString
 
 	^ self thisOSProcess waitForCommandOutputArray: aCommandString! !
 
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 22:02'!
+environment
+
+	^ environment
+! !
+
 !WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:15'!
 mainThread
 	"The main thread for this OS process. The handle for this thread is a
@@ -14683,6 +14623,19 @@ isResponsibleForThisPlatform
 	^ self isWindows
 ! !
 
+!UnixProcessExitStatus methodsFor: 'printing' stamp: 'dtl 8/22/2012 23:18'!
+printOn: aStream
+
+	self isExited
+		ifTrue: [aStream nextPutAll: 'normal termination with status ';
+				 nextPutAll: self statusIfExited asString].
+	self isSignaled
+		ifTrue: [aStream nextPutAll: 'exit due to signal ';
+				nextPutAll: self statusIfSignaled asString].
+	self isStopped
+		ifTrue: [aStream nextPutAll: 'stopped due to signal ';
+				nextPutAll: self statusIfStopped].! !
+
 !UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 8/22/2012 23:10'!
 exitStatus
 	self isExited ifTrue: [^self statusIfExited].
@@ -14762,6 +14715,13 @@ isSuccess
 for: integerValue
 
 	^self new for: integerValue
+! !
+
+!WindowsThread methodsFor: 'printing' stamp: 'dtl 2/27/2002 12:02'!
+printOn: aStream
+
+	super printOn: aStream.
+	aStream nextPutAll: ' (', self threadID printString, ', ', self runState, ')'
 ! !
 
 !WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 2/25/2002 07:38'!
