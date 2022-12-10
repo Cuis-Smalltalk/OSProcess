@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5459] on 20 August 2022 at 2:46:16 pm'!
+'From Cuis 6.0 [latest update: #5588] on 10 December 2022 at 10:26:09 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 24!
+!provides: 'OSProcess' 1 26!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -1190,7 +1190,7 @@ sizeOfPointer
 
 	^ self primSizeOfPointer! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/31/2001 15:07'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/9/2022 19:36:22'!
 chDir: pathString
 	"Change current working directory. The $PWD environment variable is not updated (but
 	see UnixProcess>>chDir:). Answer nil for success, or an error message."
@@ -1200,7 +1200,7 @@ chDir: pathString
 	"OSProcess accessor chDir: FileDirectory default name"
 
 	| result message |
-	result _ self primChdir: pathString.
+	result _ self primChdir: pathString asByteString.
 	result isNil
 		ifTrue:
 			[^ nil]
@@ -1209,16 +1209,16 @@ chDir: pathString
 			^ message]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/2/2000 19:59'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/9/2022 19:22:43'!
 environmentAt: aSymbolOrString
 	"Get an environment variable from the external OS process."
 
-	"OSProcess thisOSProcess environmentAt: 'PATH'"
+	"OSProcess accessor environmentAt: 'PATH'"
 
-	^ self primEnvironmentAtSymbol: aSymbolOrString
+	^ self primEnvironmentAtSymbol: aSymbolOrString asByteString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 10/7/2001 01:18'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/9/2022 19:26:51'!
 environmentAt: aSymbolOrString put: aString
 	"Add or update an environment variable in the external OS process. Convert aSymbol
 	and aString into a KEY=value string and pass this to the OS process environment.
@@ -1232,9 +1232,9 @@ environmentAt: aSymbolOrString put: aString
 
 	aString isNil
 		ifTrue:
-			[^ self primUnsetEnv: aSymbolOrString, (Character value: 0) asString]
+			[^ self primUnsetEnv: aSymbolOrString asByteString, (Character value: 0) asString]
 		ifFalse:
-			[^ self environmentPut: (aSymbolOrString asString, '=', aString)]
+			[^ self environmentPut: (aSymbolOrString asString, '=', aString) asByteString]
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 11:21'!
@@ -1425,7 +1425,7 @@ putPath: aString
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/25/2013 18:59'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/9/2022 19:09:43'!
 realpath: pathString
 	"Get the real path for pathString from the external OS process."
 
@@ -1433,7 +1433,7 @@ realpath: pathString
 	"OSProcess accessor realpath: OSProcess defaultPathString"
 	"OSProcess accessor realpath: '/bogus/path/name'"
 
-	^ self primRealpath: pathString
+	^ self primRealpath: pathString asByteString
 ! !
 
 !UnixOSProcessAccessor methodsFor: 'signal print stack trace' stamp: 'dtl 7/20/2010 00:06'!
@@ -1955,9 +1955,15 @@ primUnlockFileRegion: aSQFileStruct offset: begin length: len
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/7/2001 00:37'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 12/9/2022 19:33:15'!
 primUnsetEnv: aKeyString
 	"Remove an environment variable from the external OS process environment."
+
+	^ self primUnsetEnvPrivate: aKeyString asByteString! !
+
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 12/9/2022 19:32:28'!
+primUnsetEnvPrivate: aByteString
+	"Dangerous, primitive may not check class type properly, VM crash possible"
 
 	<primitive: 'primitiveUnsetEnv' module: 'UnixOSProcessPlugin'>
 	^ nil! !
@@ -1982,7 +1988,7 @@ primXDisplayControlPluginModuleVersionString
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 05:49'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 12/9/2022 19:43:10'!
 fileProtectionMask: aPathString
 	"Call stat(2) to obtain the file protection mask for a file."
 
@@ -1993,15 +1999,14 @@ fileProtectionMask: aPathString
 	"OSProcess accessor fileProtectionMask: 12345"
 
 	| mask |
-	(aPathString isKindOf: String) ifFalse: [self error: 'expected a path string'. ^ nil].
-	mask _ self primFileProtectionMask: aPathString.
+	mask _ self primFileProtectionMask: aPathString asByteString.
 	(mask == nil) ifTrue: [^ nil].
 	(mask isKindOf: Integer)
 		ifTrue: [^ self primErrorMessageAt: mask].
 	^ mask
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 05:49'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 12/9/2022 19:43:38'!
 fileStat: aPathString
 	"Call stat(2) to obtain the UID, GID, and file protection mask for a file."
 
@@ -2012,8 +2017,7 @@ fileStat: aPathString
 	"OSProcess accessor fileStat: 12345"
 
 	| mask |
-	(aPathString isKindOf: String) ifFalse: [self error: 'expected a path string'. ^ nil].
-	mask _ self primFileStat: aPathString.
+	mask _ self primFileStat: aPathString asByteString.
 	(mask == nil) ifTrue: [^ nil].
 	(mask isKindOf: Integer)
 		ifTrue: [^ self primErrorMessageAt: mask].
@@ -4982,6 +4986,10 @@ flush
 
 	OSProcess accessor flushExternalStream: fileID! !
 
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 12/9/2022 22:01:51'!
+nextPutAll: aString
+	^ super nextPutAll: aString asByteString! !
+
 !AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 5/17/2009 14:11'!
 position
 	"Return the receiver's current file position. If the stream is not positionable,
@@ -5026,11 +5034,11 @@ isPipe
 	^ false
 ! !
 
-!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 8/20/2022 00:56'!
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 12/9/2022 18:16:49'!
 name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
 	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
 
-	name _ aSymbolOrString.
+	name _ aSymbolOrString asByteString.
 	fileID _ anIOHandle.
 	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
 	self ascii.
@@ -10681,12 +10689,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 8/20/2022 01:07'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 12/10/2022 00:27'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.7.1'! !
+	^ '4.7.2'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -11472,7 +11480,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 		forkChild
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/27/2002 15:25'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 12/9/2022 18:35:46'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Run a program in an external OS process, and answer an instance of myself
 	which represents the external process."
@@ -11485,8 +11493,8 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 
 	| proc |
 	proc _ super new
-		programName: executableFile;
-		arguments: arrayOfStrings;
+		programName: executableFile asByteString;
+		arguments: (arrayOfStrings ifNotNil: [(arrayOfStrings collect: [ :s | s asByteString ])]);
 		initialEnvironment: stringDictionary.
 	arrayOf3Streams ifNotNil:
 		[proc initialStdIn: (arrayOf3Streams at: 1).
@@ -12583,7 +12591,7 @@ printOn: aStream
 			nextPutAll: self pid printString
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'djr 4/6/2009 14:31'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 12/9/2022 18:48:51'!
 argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	"Given anArrayOfNullTerminatedStrings, flatten the array into a string buffer,
 	leaving space at the beginning of the buffer for a list of C pointers. Answer
@@ -12607,7 +12615,7 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	flatStringArray _ String new: arraySize.
 	ws _ WriteStream on: flatStringArray.
 	offset timesRepeat: [ws nextPut: (Character value: 0)].
-	anArrayOfNullTerminatedStrings do: [:e | ws nextPutAll: e].
+	anArrayOfNullTerminatedStrings do: [:e | ws nextPutAll: e asByteString].
 	"Find address offsets to be used in creating the addresses for the strings."
 	ws _ WriteStream on: (Array new: anArrayOfNullTerminatedStrings size).
 	(anArrayOfNullTerminatedStrings collect: [:e | e size])
@@ -12617,7 +12625,7 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	^ Array with: flatStringArray with: addresses
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'djr 4/6/2009 14:31'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 12/9/2022 18:58:44'!
 envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	"Given anEnvironmentDictionary, flatten the dictionary into a string buffer,
 	leaving space at the beginning of the buffer for a list of C pointers. Answer
@@ -12633,7 +12641,7 @@ envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	offset _ (anEnvironmentDictionary size + 1) * self processAccessor sizeOfPointer.
 	"Build collection of environment strings"
 	envArray _ OrderedCollection new.
-	anEnvironmentDictionary keysAndValuesDo: [:k :v | envArray add: (k, '=', v)].
+	anEnvironmentDictionary keysAndValuesDo: [:k :v | envArray add: (k, '=', v) asByteString].
 	"Allocate flat strings buffer"
 	arraySize _ ((envArray collect: [:e | e size + 1]) sum) + offset.
 	"Flatten the strings out into a buffer, leaving room at the beginning of
@@ -12737,15 +12745,15 @@ environmentAt: aSymbol
 	^ environment at: aSymbol asSymbol ifAbsent: []
 ! !
 
-!UnixProcess methodsFor: 'environment' stamp: 'dtl 3/6/2001 21:30'!
+!UnixProcess methodsFor: 'environment' stamp: 'dtl 12/9/2022 19:14:38'!
 environmentAt: aSymbol put: aString
 	"Set an environment variable for the external OS process, and update the dictionary in
 	this Smalltalk object."
 
 	| s |
 	self initialize.
-	s _ self processAccessor environmentAt: aSymbol put: aString.
-	s ifNotNil: [ self environment at: aSymbol asSymbol put: aString ].
+	s _ self processAccessor environmentAt: aSymbol put: aString asByteString.
+	s ifNotNil: [ self environment at: aSymbol asSymbol put: aString asByteString ].
 	^ s
 
 ! !
@@ -14467,15 +14475,15 @@ environmentAt: aSymbol
 	^ environment at: aSymbol asSymbol ifAbsent: []
 ! !
 
-!WindowsProcess methodsFor: 'environment' stamp: 'DamienCassou 5/3/2012 11:53'!
+!WindowsProcess methodsFor: 'environment' stamp: 'dtl 12/9/2022 19:14:56'!
 environmentAt: aSymbol put: aString
 	"Set an environment variable for the external OS process, and update the dictionary in
 	this Smalltalk object."
 
 	| s |
 	self initialize.
-	s _ self processAccessor environmentAt: aSymbol put: aString.
-	s ifNotNil: [ self environment at: aSymbol asSymbol put: aString ].
+	s _ self processAccessor environmentAt: aSymbol put: aString asByteString.
+	s ifNotNil: [ self environment at: aSymbol asSymbol put: aString asByteString ].
 	^ s
 
 ! !
