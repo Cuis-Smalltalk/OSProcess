@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5588] on 10 December 2022 at 10:26:09 am'!
+'From Cuis 6.0 [latest update: #5593] on 16 December 2022 at 7:51:49 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 26!
+!provides: 'OSProcess' 1 27!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -7909,7 +7909,7 @@ testBlockingBufferedPipe
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 4/12/2014 16:09'!
+!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:43:23'!
 testBlockingPeek
 
 	"(OSPipeTestCase selector: #testBlockingPeek) run"
@@ -7918,20 +7918,20 @@ testBlockingPeek
 	p _ OSPipe blockingPipe.
 	p nextPutAll: 'abc'.
 	p flush. "protect against buggy clib that may never flush output"
-	self assert: (p peek == $a).
-	self assert: (p next == $a).
-	self assert: (p peek == $b).
-	self assert: (p next == $b).
-	self assert: (p peek == $c).
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
 	self deny: p atEnd.
-	self assert: (p next == $c).
+	self assert: (p next = $c).
 	self deny: p atEnd.
 	p closeWriter.
 	self assert: p atEnd.
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:28'!
+!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:43:53'!
 testBlockingPeekBufferedPipe
 
 	"(OSPipeTestCase selector: #testBlockingPeekBufferedPipe) run"
@@ -7940,13 +7940,13 @@ testBlockingPeekBufferedPipe
 	p _ ExternalPipe bufferedBlockingPipe.
 	[p nextPutAll: 'abc'; flush.
 	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	self assert: (p peek == $a).
-	self assert: (p next == $a).
-	self assert: (p peek == $b).
-	self assert: (p next == $b).
-	self assert: (p peek == $c).
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
 	self deny: p atEnd.
-	self assert: (p next == $c).
+	self assert: (p next = $c).
 	self deny: p atEnd.
 	p closeWriter.
 	self assert: p atEnd]
@@ -7972,7 +7972,7 @@ testBufferedUpToEnd
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 2/9/2020 15:34'!
+!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:46:18'!
 testIsAtEndOfFile
 
 	"(OSPipeTestCase selector: #testIsAtEndOfFile) debug"
@@ -7988,7 +7988,7 @@ testIsAtEndOfFile
 	self deny: p reader atEnd.
 	self deny: p atEnd.
 	p writer nextPut: $X; flush.
-	self assert: (p reader basicNext == $X).
+	self assert: (p reader basicNext = $X).
 	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
 	self deny: p reader atEnd.
 	self deny: p atEnd.
@@ -8060,7 +8060,7 @@ testNonBlockingBufferedPipe
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:28'!
+!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:44:23'!
 testNonBlockingPeek
 
 	"(OSPipeTestCase selector: #testNonBlockingPeek) run"
@@ -8068,20 +8068,20 @@ testNonBlockingPeek
 	| p |
 	p _ OSPipe nonBlockingPipe.
 	p nextPutAll: 'abc'; flush.
-	self assert: (p peek == $a).
-	self assert: (p next == $a).
-	self assert: (p peek == $b).
-	self assert: (p next == $b).
-	self assert: (p peek == $c).
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
 	self deny: p atEnd.
-	self assert: (p next == $c).
+	self assert: (p next = $c).
 	self deny: p atEnd.
 	p closeWriter.
 	self assert: p atEnd.
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:28'!
+!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:44:44'!
 testNonBlockingPeekBufferedPipe
 
 	"(OSPipeTestCase selector: #testNonBlockingPeekBufferedPipe) run"
@@ -8089,15 +8089,15 @@ testNonBlockingPeekBufferedPipe
 	| p |
 	p _ ExternalPipe bufferedNonBlockingPipe.
 	[p nextPutAll: 'abc'; flush.
-	self assert: (p peek == nil).
+	self assert: (p peek = nil).
 	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	self assert: (p peek == $a).
-	self assert: (p next == $a).
-	self assert: (p peek == $b).
-	self assert: (p next == $b).
-	self assert: (p peek == $c).
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
 	self deny: p atEnd.
-	self assert: (p next == $c).
+	self assert: (p next = $c).
 	self deny: p atEnd.
 	p closeWriter.
 	self assert: p atEnd]
