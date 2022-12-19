@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5597] on 18 December 2022 at 5:43:15 pm'!
+'From Cuis 6.0 [latest update: #5597] on 18 December 2022 at 7:35:40 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 28!
+!provides: 'OSProcess' 1 29!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -12628,7 +12628,7 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	^ Array with: flatStringArray with: addresses
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 12/18/2022 17:23'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 12/18/2022 19:07'!
 envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	"Given anEnvironmentDictionary, flatten the dictionary into a string buffer,
 	leaving space at the beginning of the buffer for a list of C pointers. Answer
@@ -12651,7 +12651,7 @@ envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	the buffer for an array of addresses."
 	flatStringArray _ ByteArray new: arraySize.
 	ws _ WriteStream on: flatStringArray.
-	offset timesRepeat: [ws nextPut: (Character value: 0)].
+	offset timesRepeat: [ws nextPut: 0].
 	envArray do: [:e | ws nextPutAll: e; nextPut: 0].
 	"Find address offsets to be used in creating the addresses for the strings."
 	ws _ WriteStream on: (Array new: anEnvironmentDictionary size).
