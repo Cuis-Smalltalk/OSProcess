@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5597] on 18 December 2022 at 7:35:40 pm'!
+'From Cuis 6.0 [latest update: #5597] on 18 December 2022 at 9:02:01 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 29!
+!provides: 'OSProcess' 1 30!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -7440,7 +7440,7 @@ testPrimAioModuleVersionString
 	self assert: (versionString isKindOf: String)
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:15'!
 testSocketExceptionEvent
 	"Close the client socket to generate an event on the server socket"
 
@@ -7485,7 +7485,7 @@ testSocketExceptionEvent
 		readEvents: false
 		writeEvents: false.
 	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	self deny: sema isSignaled.
 	receivedData _ serverTcpSocket receiveAvailableData.
@@ -7503,7 +7503,7 @@ testSocketExceptionEvent
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:15'!
 testSocketExceptionEvent2
 	"Close the client socket to generate an event on the server socket"
 
@@ -7541,7 +7541,7 @@ testSocketExceptionEvent2
 	self deny: sema isSignaled.
 	[serverTcpSocket
 		primSocket: serverTcpSocket socketHandle
-		sendData: 'a string to send'
+		sendData: 'a string to send' asByteArray
 		startIndex: 1
 		count: 10] on: Error do: [self halt].
 	serverTcpSocket
@@ -7556,7 +7556,7 @@ testSocketExceptionEvent2
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:16'!
 testSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
@@ -7601,7 +7601,7 @@ testSocketReadableEvent
 		readEvents: true
 		writeEvents: false.
 	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	self assert: sema isSignaled.
 	sema wait. "consume the signal"
@@ -7614,7 +7614,7 @@ testSocketReadableEvent
 		readEvents: true
 		writeEvents: false.
 	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	self assert: sema isSignaled.
 	sema wait. "consume the signal"
@@ -7627,7 +7627,7 @@ testSocketReadableEvent
 		readEvents: true
 		writeEvents: false.
 	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	self assert: sema isSignaled.
 	sema wait. "consume the signal"
@@ -7640,7 +7640,7 @@ testSocketReadableEvent
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:16'!
 testSocketReadableEventWithMaskNotSet
 	"Same as testSocketReadableEvent, except that the mask bit for read events is not set,
 	so we expect to not receive the event notification. This is just a check to ensure that
@@ -7687,7 +7687,7 @@ testSocketReadableEventWithMaskNotSet
 		readEvents: false	"Read event bit not set"
 		writeEvents: false.
 	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	self deny: sema isSignaled. "This time we should not receive a signal"
 	receivedData _ serverTcpSocket receiveAvailableData.
@@ -7698,7 +7698,7 @@ testSocketReadableEventWithMaskNotSet
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
+!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:17'!
 testSuspendAioForSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
@@ -7746,7 +7746,7 @@ testSuspendAioForSocketReadableEvent
 	self deny: sema isSignaled.
 
 	"Handler generates a signal"
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
@@ -7755,7 +7755,7 @@ testSuspendAioForSocketReadableEvent
 	self deny: sema isSignaled.
 
 	"Handler has not been reset, so no signal this time"
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
@@ -7769,7 +7769,7 @@ testSuspendAioForSocketReadableEvent
 		writeEvents: false.
 
 	"Handler generates a signal"
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
@@ -7790,7 +7790,7 @@ testSuspendAioForSocketReadableEvent
 		writeEvents: false.
 
 	"Handler suspended, so no signal this time"
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
@@ -7804,7 +7804,7 @@ testSuspendAioForSocketReadableEvent
 		writeEvents: false.
 
 	"Handler generates a signal"
-	clientTcpSocket sendData: 'some data to send to the socket'.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
 	(Delay forMilliseconds: 200) wait.
 	receivedData _ serverTcpSocket receiveAvailableData.
 	self assert: 'some data to send to the socket' = receivedData.
