@@ -1,6 +1,6 @@
 'From Cuis 6.0 [latest update: #5597] on 18 December 2022 at 9:02:01 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 30!
+!provides: 'OSProcess' 1 31!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -5036,14 +5036,14 @@ isPipe
 	^ false
 ! !
 
-!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 8/20/2022 00:56'!
+!AttachableFileStream methodsFor: 'attaching' stamp: 'KLG 9/9/2023 21:45:34'!
 name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
 	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
 
 	name _ aSymbolOrString.
 	fileID _ anIOHandle.
 	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
-	self ascii.
+	self useCharacters.
 	self register.
 ! !
 
