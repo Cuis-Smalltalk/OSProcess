@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5597] on 18 December 2022 at 9:02:01 pm'!
+'From Cuis 6.0 [latest update: #6017] on 15 September 2023 at 7:45:42 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 31!
+!provides: 'OSProcess' 1 32!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: 'OSProcess-Base'!
@@ -123,6 +123,16 @@ AsyncFileReadStream subclass: #BufferedAsyncFileReadStream
 BufferedAsyncFileReadStream class
 	instanceVariableNames: ''!
 
+!classDefinition: #ResettableBufferStream category: 'OSProcess-Base'!
+ReadWriteStream subclass: #ResettableBufferStream
+	instanceVariableNames: 'resetLimit'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'ResettableBufferStream class' category: 'OSProcess-Base'!
+ResettableBufferStream class
+	instanceVariableNames: ''!
+
 !classDefinition: #ExternalPipe category: 'OSProcess-Base'!
 Stream subclass: #ExternalPipe
 	instanceVariableNames: 'writer reader blocking'
@@ -191,6 +201,16 @@ TestCase subclass: #OSPipeTestCase
 	category: 'OSProcess-Tests'!
 !classDefinition: 'OSPipeTestCase class' category: 'OSProcess-Tests'!
 OSPipeTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #ResettableBufferStreamTest category: 'OSProcess-Tests'!
+TestCase subclass: #ResettableBufferStreamTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'ResettableBufferStreamTest class' category: 'OSProcess-Tests'!
+ResettableBufferStreamTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #UnixProcessAccessorTestCase category: 'OSProcess-Tests'!
@@ -452,6 +472,10 @@ BufferedAsyncFileReadStream adds output buffering behavior to an event driven fi
 A BufferedAsyncFileReadStream may be set for either blocking or nonblocking reads. When in blocking mode, a Smalltalk Process that requests a read will be blocked until data is available, but the VM will not be blocked and other Smalltalk Processes can proceed normally.
 
 Whenever data becomes available, a dataAvailableSemaphore is signalled and a #changed event is generated.!
+
+!ResettableBufferStream commentStamp: 'dtl 7/30/2023 21:16' prior: 0!
+A ResettableBufferStream can trim all previously read elements to save space in its collection. This allows a writer to add continuously to the stream as long as the stream collection is periodically trimmed by a readerthat calls pruneCollection after reading.
+!
 
 !ExternalPipe commentStamp: 'dtl 3/10/2006 11:06' prior: 0!
 I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
@@ -5036,15 +5060,26 @@ isPipe
 	^ false
 ! !
 
-!AttachableFileStream methodsFor: 'attaching' stamp: 'KLG 9/9/2023 21:45:34'!
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 9/12/2023 18:55'!
 name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
 	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
 
 	name _ aSymbolOrString.
 	fileID _ anIOHandle.
 	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
-	self useCharacters.
+	self useEncoding.
 	self register.
+! !
+
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 9/12/2023 19:06'!
+useEncoding
+	"Adopt the Cuis idiom, falling back on #ascii if not present. A stream that
+	is not in binary mode is assumed to be using a character encoder. Traditionally
+	this simply referred to eight bit characters as opposed to uninterpreted bytes."
+
+	^ (self respondsTo: #useCharacters)
+		ifTrue: [ self perform: #useCharacters ]
+		ifFalse: [self perform: #ascii ]
 ! !
 
 !AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 8/20/2022 00:36'!
@@ -5279,18 +5314,15 @@ actAsExecutor
 	dataAvailableSemaphore _ nil
 ! !
 
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 10/1/2006 17:12'!
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/30/2023 15:54'!
 appendAllToBuffer: chars
 	"Append all chars to readBuffer, then signal dataAvailableSemaphore to inform
 	any blocked reader that the read can proceed. Also generate a #changed event
 	to inform any interested objects that new data has become available."
 
-	| pos |
 	self readSyncSemaphore critical:
-		[(self readBuffer position > self maxReadBufferSize) ifTrue:
-			["Read buffer is getting too large. Replace it."
-			self readBuffer: (ReadWriteStream on: readBuffer upToEnd)].
-		pos _ readBuffer position.
+		[ | pos |
+		pos _ self readBuffer position.
 		readBuffer setToEnd.
 		readBuffer nextPutAll: chars.
 		readBuffer position: pos].
@@ -5312,13 +5344,12 @@ appendToBuffer: aCharacter
 	self dataAvailableSemaphore signal.
 	self changed! !
 
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 8/20/2022 00:38'!
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/30/2023 14:09'!
 moveAvailableDataFrom: sqFile
 
 	| count bufferSize buffer |
-	(readBuffer notNil and: [readBuffer size > self readBufferMemoryWarningThreshold])
-		ifTrue: [self notify: 'buffer size ', readBuffer size asString.
-			^(Delay forSeconds: 2) wait].
+	[ readBuffer notNil and: [readBuffer size > self readBufferMemoryWarningThreshold] ]
+		whileTrue: [ (Delay forSeconds: 2) wait ]. "Spin wait until space becomes available"
 	bufferSize _ self readAheadChunkSize.
 	buffer _ String new: bufferSize.
 	count _ self readAvailableDataFrom: sqFile into: buffer.
@@ -5448,7 +5479,7 @@ basicNext
 			^ self readSyncSemaphore
 				critical: [readBuffer next]]! !
 
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 9/3/2010 17:01'!
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 7/30/2023 21:35'!
 next
 
 	((self readSyncSemaphore
@@ -5456,15 +5487,16 @@ next
 			and: [self isBlocking])
 		ifTrue: [self waitForDataReady].
 	^ self readSyncSemaphore
-		critical: [readBuffer next]! !
+		critical: [readBuffer next ifNotNil: [ :char | readBuffer pruneCollection. char]]! !
 
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 7/6/2003 10:15'!
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 7/30/2023 21:02'!
 next: n into: aString startingAt: startIndex
 	"Read n bytes into the given string.
 	Return aString or a partial copy if less than n elements have been read."
 
 	| count |
 	count _ self readInto: aString startingAt: startIndex count: n.
+	count > 0 ifTrue: [ self readBuffer pruneCollection ].
 	count = n
 		ifTrue: [^ aString]
 		ifFalse: [^ aString copyFrom: 1 to: startIndex+count-1]! !
@@ -5546,12 +5578,13 @@ nonBlockingMode: trueOrFalse
 	nonBlockingMode _ trueOrFalse
 ! !
 
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 2/24/2013 10:22'!
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/30/2023 20:53'!
 readBuffer
 	"Read ahead buffer, filled asynchronously as data becomes available on the IO channel"
 
-	^ readBuffer ifNil: [readBuffer _ ReadWriteStream on: String new]
-! !
+	^ readBuffer
+		ifNil: [readBuffer _ (ResettableBufferStream with: String new)
+						resetLimit: 20000]! !
 
 !BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/6/2003 10:15'!
 readBuffer: aStream
@@ -5620,6 +5653,42 @@ stdIn
 	"self stdIn"
 
 	^ super stdIn
+! !
+
+!ResettableBufferStream methodsFor: 'collections - accessing' stamp: 'dtl 7/30/2023 21:06'!
+pruneCollection
+	"Assume that position refers to the stream position of elements most recently
+	read from the stream, and that there wil be no further need to read those elements.
+	Remove collection elements prior to position to maintain a small collection size."
+
+	position > self resetLimit
+		ifTrue: [ self removePreviouslyRead ]
+! !
+
+!ResettableBufferStream methodsFor: 'collections - accessing' stamp: 'dtl 7/23/2023 11:51'!
+removePreviouslyRead
+
+	| newReadLimit newWriteLimit |
+	newReadLimit _ readLimit - position .
+	newWriteLimit _ writeLimit - position.
+	collection _ collection allButFirst: position..
+	readLimit _ newReadLimit.
+	writeLimit _ newWriteLimit.
+	position _ 0.
+! !
+
+!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 7/30/2023 13:03'!
+resetLimit
+	"Previously read entries will be discarded from the collection when this limit is exceeded"
+
+	^ resetLimit ifNil: [ resetLimit _ 20000 ]
+! !
+
+!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 7/30/2023 12:41'!
+resetLimit: count
+
+	resetLimit _ count
+
 ! !
 
 !ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
@@ -6074,32 +6143,6 @@ initialize
 
 	initialCompatibilitySetting
 		ifNil: [initialCompatibilitySetting _ OSProcess accessor emulateWin32FileLocking]! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/13/2006 09:36'!
-isValidUnlockResult: result
-
-	self subclassResponsibility
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/10/2006 07:04'!
-testLockPreviouslyLockedFile
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/10/2006 07:10'!
-testLockPreviouslyLockedFileRegion
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 06:53'!
-testUnlockPreviouslyLockedFile
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 06:54'!
-testUnlockPreviouslyLockedFileRegion
-
-	self subclassResponsibility! !
 
 !AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 1/15/2018 21:55:39'!
 setUp
@@ -6697,198 +6740,6 @@ testWin32LockEmulation04
 	self assert: (result isKindOf: OSFileRegionLock).
 	self assert: (result interval = (100 to: 199))! !
 
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 15:55'!
-testFailFileLockOnLockedFile
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail."
-
-	"(self selector: #testFailFileLockOnLockedFile) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 16:00'!
-testFailLockOnLockedOverlappedRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. Locked regions overlap by one character."
-
-	"(self selector: #testFailLockOnLockedOverlappedRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 104) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 104.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 15:51'!
-testFailLockOnLockedRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail."
-
-	"(self selector: #testFailLockOnLockedRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 100
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 16:01'!
-testFailLockOnLockedSupersetRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. Fail when requesting a lock on a subset of the locked region."
-
-	"(self selector: #testFailLockOnLockedSupersetRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 140.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 16:02'!
-testFailRegionLockOnLockedFile
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a file, the region lock attempt in parent
-	Squeak will fail."
-
-	"(self selector: #testFailRegionLockOnLockedFile) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 100
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 16:03'!
-testNoFailLockOnAdjacentLockedRegions
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. No failure occurs when the regions are adjacent but do not overlap."
-
-	"(self selector: #testNoFailLockOnAdjacentLockedRegions) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 103) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 103.
-			self quitImage]
-		doLocal:
-			[self shouldnt: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error]
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing - exclusive locking' stamp: 'dtl 8/30/2009 16:03'!
-testNoFailLockOnDifferentLockedRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. No failure occurs if the regions are different and do not overlap."
-
-	"(self selector: #testNoFailLockOnDifferentLockedRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 50 to: 80) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 50 to: 80.
-			self quitImage]
-		doLocal:
-			[self shouldnt: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error]
-! !
-
 !AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 5/11/2006 07:22'!
 testLockFileIfFail
 
@@ -6980,6 +6831,224 @@ tryUntil: aBlock
 	^ result
 ! !
 
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/13/2006 09:36'!
+isValidUnlockResult: result
+
+	self subclassResponsibility
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/10/2006 07:04'!
+testLockPreviouslyLockedFile
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/10/2006 07:10'!
+testLockPreviouslyLockedFileRegion
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 06:53'!
+testUnlockPreviouslyLockedFile
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 06:54'!
+testUnlockPreviouslyLockedFileRegion
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 15:55'!
+testFailFileLockOnLockedFile
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail."
+
+	"(self selector: #testFailFileLockOnLockedFile) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:00'!
+testFailLockOnLockedOverlappedRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. Locked regions overlap by one character."
+
+	"(self selector: #testFailLockOnLockedOverlappedRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 104) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 104.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 15:51'!
+testFailLockOnLockedRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail."
+
+	"(self selector: #testFailLockOnLockedRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 100
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:01'!
+testFailLockOnLockedSupersetRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. Fail when requesting a lock on a subset of the locked region."
+
+	"(self selector: #testFailLockOnLockedSupersetRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 140.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:02'!
+testFailRegionLockOnLockedFile
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a file, the region lock attempt in parent
+	Squeak will fail."
+
+	"(self selector: #testFailRegionLockOnLockedFile) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 100
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:03'!
+testNoFailLockOnAdjacentLockedRegions
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. No failure occurs when the regions are adjacent but do not overlap."
+
+	"(self selector: #testNoFailLockOnAdjacentLockedRegions) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 103) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 103.
+			self quitImage]
+		doLocal:
+			[self shouldnt: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error]
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:03'!
+testNoFailLockOnDifferentLockedRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. No failure occurs if the regions are different and do not overlap."
+
+	"(self selector: #testNoFailLockOnDifferentLockedRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 50 to: 80) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 50 to: 80.
+			self quitImage]
+		doLocal:
+			[self shouldnt: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error]
+! !
+
 !AbstractUnixProcessFileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 4/30/2006 13:49'!
 isAbstract
 	"Override to true if a TestCase subclass is Abstract and should not have
@@ -6987,7 +7056,16 @@ isAbstract
 
 	^ true! !
 
-!UnixProcessUnixFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/13/2006 09:38'!
+!UnixProcessUnixFileLockingTestCase methodsFor: 'running' stamp: 'dtl 4/30/2006 14:05'!
+setUp
+
+	"Set system to use Unix file locking semantics. The tearDown method is expected to restore the setting."
+
+	OSProcessAccessor emulateWin32FileLocking: false.
+	^ super setUp
+! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/13/2006 09:38'!
 isValidUnlockResult: result
 	"With no lock cache, the unlock requests will succeed even though there
 	is no lock to be removed."	
@@ -6995,7 +7073,7 @@ isValidUnlockResult: result
 	^ result isKindOf: OSFileLock
 ! !
 
-!UnixProcessUnixFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:12'!
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:12'!
 testLockPreviouslyLockedFile
 	"Locking a previously locked file is permitted"
 
@@ -7006,7 +7084,7 @@ testLockPreviouslyLockedFile
 	self should: ((accessor lockFile: fileStream) isKindOf: OSFileLock).
 	accessor unlockFile: fileStream! !
 
-!UnixProcessUnixFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:12'!
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:12'!
 testLockPreviouslyLockedFileRegion
 	"Locking a previously locked file region is permitted"
 
@@ -7030,7 +7108,7 @@ testLockPreviouslyLockedFileRegion
 		isKindOf: OSFileLock).
 	accessor unlockFile: fileStream! !
 
-!UnixProcessUnixFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:07'!
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:07'!
 testUnlockPreviouslyLockedFile
 	"The unlock operation will succeed even if no lock is in effect"
 
@@ -7041,7 +7119,7 @@ testUnlockPreviouslyLockedFile
 	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock)
 ! !
 
-!UnixProcessUnixFileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:07'!
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:07'!
 testUnlockPreviouslyLockedFileRegion
 	"The unlock operation will succeed even if no lock is in effect"
 
@@ -7064,15 +7142,6 @@ testUnlockPreviouslyLockedFileRegion
 		exclusive: true) isKindOf: OSFileLock)
 ! !
 
-!UnixProcessUnixFileLockingTestCase methodsFor: 'running' stamp: 'dtl 4/30/2006 14:05'!
-setUp
-
-	"Set system to use Unix file locking semantics. The tearDown method is expected to restore the setting."
-
-	OSProcessAccessor emulateWin32FileLocking: false.
-	^ super setUp
-! !
-
 !UnixProcessUnixFileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 1/13/2007 15:40'!
 isAbstract
 	"Override to true if a TestCase subclass is Abstract and should not have
@@ -7081,7 +7150,16 @@ isAbstract
 	^self name = #TestCase
 ! !
 
-!UnixProcessWin32FileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/13/2006 09:47'!
+!UnixProcessWin32FileLockingTestCase methodsFor: 'running' stamp: 'dtl 4/30/2006 14:06'!
+setUp
+
+	"Set system to use Windows file locking semantics. The tearDown method is expected to restore the setting."
+
+	OSProcessAccessor emulateWin32FileLocking: true.
+	^ super setUp
+! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/13/2006 09:47'!
 isValidUnlockResult: result
 	"With a lock cache, the unlock requests will fail when if there
 	is no lock to be removed."	
@@ -7089,7 +7167,7 @@ isValidUnlockResult: result
 	^ result == nil
 ! !
 
-!UnixProcessWin32FileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:13'!
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:13'!
 testLockPreviouslyLockedFile
 	"A previously locked file cannot be locked."
 
@@ -7100,7 +7178,7 @@ testLockPreviouslyLockedFile
 	self should: (accessor lockFile: fileStream) isNil.
 	accessor unlockFile: fileStream! !
 
-!UnixProcessWin32FileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:13'!
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:13'!
 testLockPreviouslyLockedFileRegion
 	"A previously locked file region cannot be locked."
 
@@ -7123,7 +7201,7 @@ testLockPreviouslyLockedFileRegion
 		exclusive: true) isNil).
 	accessor unlockFile: fileStream! !
 
-!UnixProcessWin32FileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/11/2006 07:08'!
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:08'!
 testUnlockPreviouslyLockedFile
 	"The unlock operation will fail if lock is in effect"
 
@@ -7135,7 +7213,7 @@ testUnlockPreviouslyLockedFile
 	self shouldnt: ((accessor unlockFile: fileStream) isKindOf: OSFileLock)
 ! !
 
-!UnixProcessWin32FileLockingTestCase methodsFor: 'testing - platform specific' stamp: 'dtl 5/12/2006 07:48'!
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/12/2006 07:48'!
 testUnlockPreviouslyLockedFileRegion
 	"The unlock operation will fail if a lock is in effect"
 
@@ -7163,15 +7241,6 @@ testUnlockPreviouslyLockedFileRegion
 		exclusive: true) isKindOf: OSFileLock)
 ! !
 
-!UnixProcessWin32FileLockingTestCase methodsFor: 'running' stamp: 'dtl 4/30/2006 14:06'!
-setUp
-
-	"Set system to use Windows file locking semantics. The tearDown method is expected to restore the setting."
-
-	OSProcessAccessor emulateWin32FileLocking: true.
-	^ super setUp
-! !
-
 !UnixProcessWin32FileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 1/13/2007 15:40'!
 isAbstract
 	"Override to true if a TestCase subclass is Abstract and should not have
@@ -7180,7 +7249,7 @@ isAbstract
 	^self name = #TestCase
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
 testEnableHandleAndDisable
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult aioDisableResult |
@@ -7235,7 +7304,7 @@ testEnableHandleAndDisable
 	OSProcess deleteFileNamed: 'delete.me'.
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
 testFileReadableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
@@ -7316,7 +7385,7 @@ testFileReadableEvent
 			Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
 testFileWritableEvent
 
 	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
@@ -7397,7 +7466,7 @@ testFileWritableEvent
 			Smalltalk unregisterExternalObject: sema.
 			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:26'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
 testHandleForFile
 
 	| eventHandler anOpenFile fileHandle |
@@ -7410,7 +7479,7 @@ testHandleForFile
 	self assert: (fileHandle isKindOf: Integer)
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 8/19/2022 23:28'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:28'!
 testHandleForSocket
 
 	| eventHandler socket socketHandle |
@@ -7422,7 +7491,7 @@ testHandleForSocket
 	self assert: (socketHandle ~= 0) "0 is stdin on unix, unlikely to be used on other platforms"
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 7/9/2005 16:41'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 7/9/2005 16:41'!
 testPrimAioModuleName
 
 	| eventHandler moduleName |
@@ -7431,7 +7500,7 @@ testPrimAioModuleName
 	self assert: ('AioPlugin*' match: moduleName)
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 7/9/2005 16:42'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 7/9/2005 16:42'!
 testPrimAioModuleVersionString
 
 	| eventHandler versionString |
@@ -7440,7 +7509,7 @@ testPrimAioModuleVersionString
 	self assert: (versionString isKindOf: String)
 ! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:15'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:15'!
 testSocketExceptionEvent
 	"Close the client socket to generate an event on the server socket"
 
@@ -7503,7 +7572,7 @@ testSocketExceptionEvent
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:15'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:15'!
 testSocketExceptionEvent2
 	"Close the client socket to generate an event on the server socket"
 
@@ -7556,7 +7625,7 @@ testSocketExceptionEvent2
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:16'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:16'!
 testSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
@@ -7640,7 +7709,7 @@ testSocketReadableEvent
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:16'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:16'!
 testSocketReadableEventWithMaskNotSet
 	"Same as testSocketReadableEvent, except that the mask bit for read events is not set,
 	so we expect to not receive the event notification. This is just a check to ensure that
@@ -7698,7 +7767,7 @@ testSocketReadableEventWithMaskNotSet
 			[Smalltalk unregisterExternalObject: sema.
 			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
 
-!AioEventHandlerTestCase methodsFor: 'testing' stamp: 'dtl 12/18/2022 20:17'!
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:17'!
 testSuspendAioForSocketReadableEvent
 
 	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
@@ -7861,7 +7930,7 @@ writeStuffOnThenClose: aPipe
 					do: ["Ignore error to avoid a debugger"]]]
 		forkAt: Processor userBackgroundPriority! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 4/12/2014 16:07'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 4/12/2014 16:07'!
 testBlocking
 
 	"(OSPipeTestCase selector: #testBlocking) run"
@@ -7886,7 +7955,7 @@ testBlocking
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:27'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 6/6/2015 09:27'!
 testBlockingBufferedPipe
 
 	"(OSPipeTestCase selector: #testBlockingBufferedPipe) run"
@@ -7911,7 +7980,7 @@ testBlockingBufferedPipe
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:55'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:55'!
 testBlockingPeek
 
 	"(OSPipeTestCase selector: #testBlockingPeek) run"
@@ -7933,7 +8002,7 @@ testBlockingPeek
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:56'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:56'!
 testBlockingPeekBufferedPipe
 
 	"(OSPipeTestCase selector: #testBlockingPeekBufferedPipe) run"
@@ -7955,7 +8024,7 @@ testBlockingPeekBufferedPipe
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 5/17/2006 23:36'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 5/17/2006 23:36'!
 testBufferedUpToEnd
 
 	"(OSPipeTestCase selector: #testBufferedUpToEnd) debug"
@@ -7974,7 +8043,7 @@ testBufferedUpToEnd
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:57'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:57'!
 testIsAtEndOfFile
 
 	"(OSPipeTestCase selector: #testIsAtEndOfFile) debug"
@@ -8013,7 +8082,7 @@ testIsAtEndOfFile
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 6/6/2015 09:23'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 6/6/2015 09:23'!
 testIsAtEndOfFile2
 
 	"(OSPipeTestCase selector: #testIsAtEndOfFile2) debug"
@@ -8032,7 +8101,7 @@ testIsAtEndOfFile2
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 3/25/2006 13:44'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 3/25/2006 13:44'!
 testNonBlocking
 
 	"(OSPipeTestCase selector: #testNonBlocking) run"
@@ -8046,7 +8115,7 @@ testNonBlocking
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 4/2/2006 21:40'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 4/2/2006 21:40'!
 testNonBlockingBufferedPipe
 
 	"(OSPipeTestCase selector: #testNonBlockingBufferedPipe) run"
@@ -8062,7 +8131,7 @@ testNonBlockingBufferedPipe
 		ensure: [p close]
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:57'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:57'!
 testNonBlockingPeek
 
 	"(OSPipeTestCase selector: #testNonBlockingPeek) run"
@@ -8083,7 +8152,7 @@ testNonBlockingPeek
 	p close
 ! !
 
-!OSPipeTestCase methodsFor: 'testing' stamp: 'dtl 12/16/2022 19:58'!
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:58'!
 testNonBlockingPeekBufferedPipe
 
 	"(OSPipeTestCase selector: #testNonBlockingPeekBufferedPipe) run"
@@ -8106,126 +8175,62 @@ testNonBlockingPeekBufferedPipe
 		ensure: [p close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 7/11/2005 19:00'!
-primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: count
-	"This primitive call exists only for purposes of testing the
-	fixPointersInArrayOfStrings:withOffsets:count: method. I believe it to be
-	reasonably machine and compiler independent, but have no way of verifying
-	this on a variety of machines, so I'll leave this test method here in case
-	someone runs into problems on other hardware or compilers. -dtl"
+!ResettableBufferStreamTest methodsFor: 'tests' stamp: 'dtl 7/23/2023 11:15'!
+testReadWrite
+	"Basic read and write behavior"
 
-	"| a |
-	a _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: UnixProcess env.
-	UnixProcessAccessorTestCase new
-		primFixPointersInArrayOfStrings: (a at: 1)
-		withOffsets: (a at: 2)
-		count: (a at: 2) size"
+	"(ResettableBufferStreamTest selector: #testReadWrite) debug"
 
-	<primitive: 'primitiveFixPointersInArrayOfStrings' module: 'UnixOSProcessPlugin'>
-	^ nil! !
+	| strm |
+	strm _ ResettableBufferStream with: 'some characters'.
+	self assert: 15 equals: strm position.
+	self assert: 15 equals: strm size.
+	self assert: 'some characters' equals: strm contents.
+	strm nextPutAll: ' XXX'.
+	self assert: 19 equals: strm position.
+	self assert: 19 equals: strm size.
+	self assert: 'some characters XXX' equals: strm contents.
+	self assert: '' equals: strm upToEnd.
+	strm position: 10.
+	self assert: 'cters XXX' equals: strm upToEnd.
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 12/18/2022 10:56'!
-testArgsAsFlatArrayAndOffsets
-	"Test conversion of an array of strings into the form used to create a C **char
-	in UnixOSProcessPlugin."
 
-	"(UnixProcessAccessorTestCase selector: #testArgsAsFlatArrayAndOffsets) debug"
-
-	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
-	pointerSize _ OSProcess accessor sizeOfPointer.
-	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character value: 0) asString ].
-	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
-	self assert: stringsAndOffsets size == 2.
-	self assert: stringsAndOffsets second size == 3.
-	lengthOfCStrings _ (a collect: [:e | e size]) sum.
-	totalLength _ 4 * pointerSize + lengthOfCStrings.
-	self assert: stringsAndOffsets first size == totalLength.
-	stringsAndOffsets second do: [:offset |
-		(stringsAndOffsets first at: offset) == (Character value: 0)].
-
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: 4 * pointerSize.
-	s _  rs next: 3.
-	rs next.
-	self assert: s = 'one' asByteArray.
-	s _  rs next: 3.
-	rs next.
-	self assert: s = 'two' asByteArray.
-	s _  rs next: 5.
-	rs next.
-	self assert: s = 'three' asByteArray.
-
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: (stringsAndOffsets second at: 1).
-	s _  rs next: 3.
-	self assert: s = 'one' asByteArray.
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: (stringsAndOffsets second at: 2).
-	s _  rs next: 3.
-	self assert: s = 'two' asByteArray.
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: (stringsAndOffsets second at: 3).
-	s _  rs next: 5.
-	self assert: s = 'three' asByteArray.
-
-	arrayWithMachineDependentPointers _ self
-		primFixPointersInArrayOfStrings: stringsAndOffsets first
-		withOffsets: stringsAndOffsets second
-		count: stringsAndOffsets second size.
-	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
-	rs _ ReadStream on: arrayWithMachineDependentPointers.
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
-	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - C string arrays' stamp: 'dtl 12/18/2022 11:14'!
-testEnvAsFlatArrayAndOffsets
-	"Test conversion of a dictionary of key-value environment variables into the
-	form used to create a C **char in UnixOSProcessPlugin."
+!ResettableBufferStreamTest methodsFor: 'tests' stamp: 'dtl 7/23/2023 11:51'!
+testRemovePreviouslyRead
+	"Basic read and write behavior"
 
-	"(UnixProcessAccessorTestCase selector: #testEnvAsFlatArrayAndOffsets) debug"
+	"(ResettableBufferStreamTest selector: #testRemovePreviouslyRead) debug"
 
-	| pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers d |
-	pointerSize _ OSProcess accessor sizeOfPointer.
-	d _ Dictionary new.
-	d at: #ONE put: 'one'.
-	d at: #TWO put: 'two'.
-	d at: #THREE put: 'three'.
-	stringsAndOffsets _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: d.
-	self assert: stringsAndOffsets size == 2.
-	self assert: stringsAndOffsets second size == 3.
+	| strm |
+	strm _ ResettableBufferStream with: 'some characters'.
+	self assert: 15 equals: strm position.
+	self assert: 15 equals: strm size.
+	self assert: 'some characters' equals: strm contents.
+	strm reset.
+	strm removePreviouslyRead.
+	self assert: 0 equals: strm position.
+	self assert: 15 equals: strm size.
+	self assert: 'some characters' equals: strm contents.
+	strm reset; next: 5.
+	strm removePreviouslyRead.
+	self assert: 0 equals: strm position.
+	self assert: 10 equals: strm size.
+	self assert: 'characters' equals: strm contents.
+	self assert: 'characters' equals: strm upToEnd.
+	self assert: 10 equals: strm position.
+	strm removePreviouslyRead.
+	self assert: 0 equals: strm position.
+	self assert: 0 equals: strm size.
+	self assert: '' equals: strm contents.
+	self assert: '' equals: strm upToEnd.
+	self assert: 0 equals: strm position.
+	strm nextPutAll: 'XXX'.
+	strm reset.
+	self assert: 'XXX' equals: strm contents.
+	self assert: 'XXX' equals: strm upToEnd.
 
-	lengthOfCStrings _ d keys
-		inject: 0
-		into: [:sum :e | sum + e size + '=' size + (d at: e) size + (String new: 1) size].
-
-	totalLength _ 4 * pointerSize + lengthOfCStrings.
-	self assert: stringsAndOffsets first size == totalLength.
-	stringsAndOffsets second do: [:offset |
-		(stringsAndOffsets first at: offset) == (Character value: 0)].
-
-	arrayWithMachineDependentPointers _ self
-		primFixPointersInArrayOfStrings: stringsAndOffsets first
-		withOffsets: stringsAndOffsets second
-		count: stringsAndOffsets second size.
-	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
-	rs _ ReadStream on: arrayWithMachineDependentPointers.
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
-	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
 ! !
 
 !UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 3/1/2002 18:02'!
@@ -8633,271 +8638,6 @@ testUnixFileNumber
 
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 6/10/2011 15:04'!
-testChDir
-
-	"(UnixProcessAccessorTestCase selector: #testChDir) run"
-
-	| cwd new |
-	cwd _ accessor primGetCurrentWorkingDirectory.
-	new _ '/bin'. "nb Do not use /tmp because OS X implements it as a sym link to private/tmp"
-	accessor chDir: new.
-	self should: [new = accessor primGetCurrentWorkingDirectory].
-	accessor chDir: cwd.
-	self should: [cwd = accessor primGetCurrentWorkingDirectory].
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 08:53'!
-testEnvironmentAt
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAt) run"
-
-	| path |
-	path _ accessor environmentAt: 'PATH'.
-	self should: [path notNil and: [path isEmpty not]]! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 2/24/2013 10:26'!
-testEnvironmentAtPut
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut) run"
-
-	| oldPath newPath resetPath s |
-	oldPath _ accessor environmentAt: 'PATH'.
-	newPath _ 'this is a test string'.
-	accessor environmentAt: 'PATH' put: newPath.
-	resetPath _ accessor environmentAt: 'PATH'.
-	self should: [newPath = resetPath].
-	accessor environmentAt: 'PATH' put: oldPath.
-	resetPath _ accessor environmentAt: 'PATH'.
-	self should: [oldPath = resetPath].
-	s _ WriteStream on: String new.
-	10000 timesRepeat: [s nextPutAll: 'Do something to provoke garbage collection'].
-	resetPath _ accessor environmentAt: 'PATH'.
-	self should: [oldPath = resetPath].
-
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/7/2001 11:47'!
-testEnvironmentAtPut1
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1) run"
-
-	| oldVal newVal resetVal |
-	oldVal _ accessor environmentAt: 'AAAA'.
-	newVal _ 'this is a test string'.
-	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal notNil and: [resetVal isEmpty not]].
-	self should: [newVal = resetVal].
-	accessor environmentAt: 'AAAA' put: oldVal.
-	self should: [oldVal = (accessor environmentAt: 'AAAA')]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/7/2001 12:14'!
-testEnvironmentAtPut2
-	"This looks for a bug in which the enviroment is successfully, but later gets
-	invalidated by memory moves or reallocation."
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2) run"
-
-	| oldVal newVal resetVal count ws goodResults notFound totallyBogus |
-	oldVal _ accessor environmentAt: 'AAAA'.
-	newVal _ 'this is a test string'.
-	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal notNil and: [resetVal isEmpty not]].
-	self should: [newVal = resetVal].
-
-	count _ 50000.
-	ws _ WriteStream on: Array new.
-	count timesRepeat: [ws nextPut: (accessor environmentAt: 'AAAA')].
-	goodResults _ ws contents select: [:e | e = newVal].
-	notFound _ ws contents select: [:e | e isNil].
-	totallyBogus _ ws contents select: [:e | e notNil and: [e ~= newVal]].
-
-	"Uncomment the following to see when the problem is happening"
-	"(Array with: goodResults with: notFound with: totallyBogus) inspect."
-
-	self should: [goodResults size == count].
-	self should: [notFound isEmpty].
-	self should: [totallyBogus isEmpty].
-
-	accessor environmentAt: 'AAAA' put: oldVal.
-	self should: [oldVal = (accessor environmentAt: 'AAAA')]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:36'!
-testGetStdErrHandle
-
-	"(UnixProcessAccessorTestCase selector: #testGetStdErrHandle) run"
-
-	| handle |
-	handle _ accessor primGetStdErrHandle.
-	self assert: handle notNil
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:36'!
-testGetStdInHandle
-
-	"(UnixProcessAccessorTestCase selector: #testGetStdInHandle) run"
-
-	| handle |
-	handle _ accessor primGetStdInHandle.
-	self assert: handle notNil
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:36'!
-testGetStdOutHandle
-
-	"(UnixProcessAccessorTestCase selector: #testGetStdOutHandle) run"
-
-	| handle |
-	handle _ accessor primGetStdOutHandle.
-	self assert: handle notNil
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:42'!
-testPrimArgumentAt
-
-	"(UnixProcessAccessorTestCase selector: #testPrimArgumentAt) run"
-
-	| progName |
-	progName _ accessor primArgumentAt: 1.
-	self should: [progName notNil and: [progName isEmpty not]]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:45'!
-testPrimErrorMessageAt
-
-	"(UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt) run"
-
-	| msg |
-	msg _ accessor primErrorMessageAt: 1.
-	self should: [msg notNil and: [msg isEmpty not]].
-	msg _ accessor primErrorMessageAt: 0.
-	self should: [msg notNil and: [msg isEmpty not]]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 08:45'!
-testPrimGetCurrentWorkingDirectory
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory) run"
-
-	| cwd |
-	cwd _ accessor primGetCurrentWorkingDirectory.
-	self should: [cwd notNil and: [cwd isEmpty not]]! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:49'!
-testPrimGetEGid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetEGid) run"
-
-	| id |
-	id _ accessor primGetEGid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:49'!
-testPrimGetEUid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetEUid) run"
-
-	| id |
-	id _ accessor primGetEUid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetGid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetGid) run"
-
-	| id |
-	id _ accessor primGetGid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetPPid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetPPid) run"
-
-	| id |
-	id _ accessor primGetPPid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetPid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetPid) run"
-
-	| id |
-	id _ accessor primGetPid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 8/19/2005 06:32'!
-testPrimGetSession
-	"As of OSPP version 4 and greater, the session ID should always be obtained from
-	the interpreter. Previously it was deduced by looking at the handle of an open file."
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetSession) run"
-
-	| id expectedSessionSize |
-	expectedSessionSize _ [OSProcess accessor sizeOfInt] on: Error do: [4].
-	id _ OSProcess accessor primGetSession.
-	self assert: (id isNil or: [id isKindOf: ByteArray]).
-	id _ OSProcess accessor getSessionIdentifier.
-	self assert: (id isKindOf: ByteArray).
-	self assert: (id size / expectedSessionSize) == 1
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetUid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetUid) run"
-
-	| id |
-	id _ accessor primGetUid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/7/2001 14:07'!
-testPrimUnsetEnv
-
-	"(UnixProcessAccessorTestCase selector: #testPrimUnsetEnv) run"
-
-	| oldVal newVal resetVal |
-	oldVal _ accessor environmentAt: 'AAAA'.
-	newVal _ 'this is a test string'.
-	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal notNil and: [resetVal isEmpty not]].
-	self should: [newVal = resetVal].
-
-	accessor primUnsetEnv: 'AAAA', (Character value: 0) asString.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal isNil].
-
-	accessor environmentAt: 'AAAA' put: oldVal.
-	self should: [oldVal = (accessor environmentAt: 'AAAA')]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing - external process access' stamp: 'dtl 10/6/2001 10:03'!
-testRealpath
-
-	"(UnixProcessAccessorTestCase selector: #testRealpath) run"
-
-	| p |
-	p _ accessor realpath: '/usr/bin'.
-	self should: [p notNil and: [p isEmpty not]].
-	p _ accessor realpath: '/bogus/path/name'.
-	self should: [p isNil]
-! !
-
 !UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:57:58'!
 testIsLockableFile
 
@@ -9125,7 +8865,394 @@ testUnlockFileWin32Compatible
 		fs close]
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - fork and exec' stamp: 'dtl 6/11/2011 12:25'!
+!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 7/11/2005 19:00'!
+primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: count
+	"This primitive call exists only for purposes of testing the
+	fixPointersInArrayOfStrings:withOffsets:count: method. I believe it to be
+	reasonably machine and compiler independent, but have no way of verifying
+	this on a variety of machines, so I'll leave this test method here in case
+	someone runs into problems on other hardware or compilers. -dtl"
+
+	"| a |
+	a _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: UnixProcess env.
+	UnixProcessAccessorTestCase new
+		primFixPointersInArrayOfStrings: (a at: 1)
+		withOffsets: (a at: 2)
+		count: (a at: 2) size"
+
+	<primitive: 'primitiveFixPointersInArrayOfStrings' module: 'UnixOSProcessPlugin'>
+	^ nil! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 12/18/2022 10:56'!
+testArgsAsFlatArrayAndOffsets
+	"Test conversion of an array of strings into the form used to create a C **char
+	in UnixOSProcessPlugin."
+
+	"(UnixProcessAccessorTestCase selector: #testArgsAsFlatArrayAndOffsets) debug"
+
+	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
+	pointerSize _ OSProcess accessor sizeOfPointer.
+	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character value: 0) asString ].
+	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
+	self assert: stringsAndOffsets size == 2.
+	self assert: stringsAndOffsets second size == 3.
+	lengthOfCStrings _ (a collect: [:e | e size]) sum.
+	totalLength _ 4 * pointerSize + lengthOfCStrings.
+	self assert: stringsAndOffsets first size == totalLength.
+	stringsAndOffsets second do: [:offset |
+		(stringsAndOffsets first at: offset) == (Character value: 0)].
+
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: 4 * pointerSize.
+	s _  rs next: 3.
+	rs next.
+	self assert: s = 'one' asByteArray.
+	s _  rs next: 3.
+	rs next.
+	self assert: s = 'two' asByteArray.
+	s _  rs next: 5.
+	rs next.
+	self assert: s = 'three' asByteArray.
+
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: (stringsAndOffsets second at: 1).
+	s _  rs next: 3.
+	self assert: s = 'one' asByteArray.
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: (stringsAndOffsets second at: 2).
+	s _  rs next: 3.
+	self assert: s = 'two' asByteArray.
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: (stringsAndOffsets second at: 3).
+	s _  rs next: 5.
+	self assert: s = 'three' asByteArray.
+
+	arrayWithMachineDependentPointers _ self
+		primFixPointersInArrayOfStrings: stringsAndOffsets first
+		withOffsets: stringsAndOffsets second
+		count: stringsAndOffsets second size.
+	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
+	rs _ ReadStream on: arrayWithMachineDependentPointers.
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
+	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 12/18/2022 11:14'!
+testEnvAsFlatArrayAndOffsets
+	"Test conversion of a dictionary of key-value environment variables into the
+	form used to create a C **char in UnixOSProcessPlugin."
+
+	"(UnixProcessAccessorTestCase selector: #testEnvAsFlatArrayAndOffsets) debug"
+
+	| pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers d |
+	pointerSize _ OSProcess accessor sizeOfPointer.
+	d _ Dictionary new.
+	d at: #ONE put: 'one'.
+	d at: #TWO put: 'two'.
+	d at: #THREE put: 'three'.
+	stringsAndOffsets _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: d.
+	self assert: stringsAndOffsets size == 2.
+	self assert: stringsAndOffsets second size == 3.
+
+	lengthOfCStrings _ d keys
+		inject: 0
+		into: [:sum :e | sum + e size + '=' size + (d at: e) size + (String new: 1) size].
+
+	totalLength _ 4 * pointerSize + lengthOfCStrings.
+	self assert: stringsAndOffsets first size == totalLength.
+	stringsAndOffsets second do: [:offset |
+		(stringsAndOffsets first at: offset) == (Character value: 0)].
+
+	arrayWithMachineDependentPointers _ self
+		primFixPointersInArrayOfStrings: stringsAndOffsets first
+		withOffsets: stringsAndOffsets second
+		count: stringsAndOffsets second size.
+	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
+	rs _ ReadStream on: arrayWithMachineDependentPointers.
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
+	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/10/2011 15:04'!
+testChDir
+
+	"(UnixProcessAccessorTestCase selector: #testChDir) run"
+
+	| cwd new |
+	cwd _ accessor primGetCurrentWorkingDirectory.
+	new _ '/bin'. "nb Do not use /tmp because OS X implements it as a sym link to private/tmp"
+	accessor chDir: new.
+	self should: [new = accessor primGetCurrentWorkingDirectory].
+	accessor chDir: cwd.
+	self should: [cwd = accessor primGetCurrentWorkingDirectory].
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 08:53'!
+testEnvironmentAt
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAt) run"
+
+	| path |
+	path _ accessor environmentAt: 'PATH'.
+	self should: [path notNil and: [path isEmpty not]]! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 2/24/2013 10:26'!
+testEnvironmentAtPut
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut) run"
+
+	| oldPath newPath resetPath s |
+	oldPath _ accessor environmentAt: 'PATH'.
+	newPath _ 'this is a test string'.
+	accessor environmentAt: 'PATH' put: newPath.
+	resetPath _ accessor environmentAt: 'PATH'.
+	self should: [newPath = resetPath].
+	accessor environmentAt: 'PATH' put: oldPath.
+	resetPath _ accessor environmentAt: 'PATH'.
+	self should: [oldPath = resetPath].
+	s _ WriteStream on: String new.
+	10000 timesRepeat: [s nextPutAll: 'Do something to provoke garbage collection'].
+	resetPath _ accessor environmentAt: 'PATH'.
+	self should: [oldPath = resetPath].
+
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/7/2001 11:47'!
+testEnvironmentAtPut1
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1) run"
+
+	| oldVal newVal resetVal |
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
+	accessor environmentAt: 'AAAA' put: newVal.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal notNil and: [resetVal isEmpty not]].
+	self should: [newVal = resetVal].
+	accessor environmentAt: 'AAAA' put: oldVal.
+	self should: [oldVal = (accessor environmentAt: 'AAAA')]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/7/2001 12:14'!
+testEnvironmentAtPut2
+	"This looks for a bug in which the enviroment is successfully, but later gets
+	invalidated by memory moves or reallocation."
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2) run"
+
+	| oldVal newVal resetVal count ws goodResults notFound totallyBogus |
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
+	accessor environmentAt: 'AAAA' put: newVal.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal notNil and: [resetVal isEmpty not]].
+	self should: [newVal = resetVal].
+
+	count _ 50000.
+	ws _ WriteStream on: Array new.
+	count timesRepeat: [ws nextPut: (accessor environmentAt: 'AAAA')].
+	goodResults _ ws contents select: [:e | e = newVal].
+	notFound _ ws contents select: [:e | e isNil].
+	totallyBogus _ ws contents select: [:e | e notNil and: [e ~= newVal]].
+
+	"Uncomment the following to see when the problem is happening"
+	"(Array with: goodResults with: notFound with: totallyBogus) inspect."
+
+	self should: [goodResults size == count].
+	self should: [notFound isEmpty].
+	self should: [totallyBogus isEmpty].
+
+	accessor environmentAt: 'AAAA' put: oldVal.
+	self should: [oldVal = (accessor environmentAt: 'AAAA')]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:36'!
+testGetStdErrHandle
+
+	"(UnixProcessAccessorTestCase selector: #testGetStdErrHandle) run"
+
+	| handle |
+	handle _ accessor primGetStdErrHandle.
+	self assert: handle notNil
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:36'!
+testGetStdInHandle
+
+	"(UnixProcessAccessorTestCase selector: #testGetStdInHandle) run"
+
+	| handle |
+	handle _ accessor primGetStdInHandle.
+	self assert: handle notNil
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:36'!
+testGetStdOutHandle
+
+	"(UnixProcessAccessorTestCase selector: #testGetStdOutHandle) run"
+
+	| handle |
+	handle _ accessor primGetStdOutHandle.
+	self assert: handle notNil
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:42'!
+testPrimArgumentAt
+
+	"(UnixProcessAccessorTestCase selector: #testPrimArgumentAt) run"
+
+	| progName |
+	progName _ accessor primArgumentAt: 1.
+	self should: [progName notNil and: [progName isEmpty not]]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:45'!
+testPrimErrorMessageAt
+
+	"(UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt) run"
+
+	| msg |
+	msg _ accessor primErrorMessageAt: 1.
+	self should: [msg notNil and: [msg isEmpty not]].
+	msg _ accessor primErrorMessageAt: 0.
+	self should: [msg notNil and: [msg isEmpty not]]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 08:45'!
+testPrimGetCurrentWorkingDirectory
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory) run"
+
+	| cwd |
+	cwd _ accessor primGetCurrentWorkingDirectory.
+	self should: [cwd notNil and: [cwd isEmpty not]]! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:49'!
+testPrimGetEGid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetEGid) run"
+
+	| id |
+	id _ accessor primGetEGid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:49'!
+testPrimGetEUid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetEUid) run"
+
+	| id |
+	id _ accessor primGetEUid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
+testPrimGetGid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetGid) run"
+
+	| id |
+	id _ accessor primGetGid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
+testPrimGetPPid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetPPid) run"
+
+	| id |
+	id _ accessor primGetPPid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
+testPrimGetPid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetPid) run"
+
+	| id |
+	id _ accessor primGetPid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 8/19/2005 06:32'!
+testPrimGetSession
+	"As of OSPP version 4 and greater, the session ID should always be obtained from
+	the interpreter. Previously it was deduced by looking at the handle of an open file."
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetSession) run"
+
+	| id expectedSessionSize |
+	expectedSessionSize _ [OSProcess accessor sizeOfInt] on: Error do: [4].
+	id _ OSProcess accessor primGetSession.
+	self assert: (id isNil or: [id isKindOf: ByteArray]).
+	id _ OSProcess accessor getSessionIdentifier.
+	self assert: (id isKindOf: ByteArray).
+	self assert: (id size / expectedSessionSize) == 1
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
+testPrimGetUid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetUid) run"
+
+	| id |
+	id _ accessor primGetUid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/7/2001 14:07'!
+testPrimUnsetEnv
+
+	"(UnixProcessAccessorTestCase selector: #testPrimUnsetEnv) run"
+
+	| oldVal newVal resetVal |
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
+	accessor environmentAt: 'AAAA' put: newVal.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal notNil and: [resetVal isEmpty not]].
+	self should: [newVal = resetVal].
+
+	accessor primUnsetEnv: 'AAAA', (Character value: 0) asString.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal isNil].
+
+	accessor environmentAt: 'AAAA' put: oldVal.
+	self should: [oldVal = (accessor environmentAt: 'AAAA')]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 10:03'!
+testRealpath
+
+	"(UnixProcessAccessorTestCase selector: #testRealpath) run"
+
+	| p |
+	p _ accessor realpath: '/usr/bin'.
+	self should: [p notNil and: [p isEmpty not]].
+	p _ accessor realpath: '/bogus/path/name'.
+	self should: [p isNil]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - fork and exec' stamp: 'dtl 6/11/2011 12:25'!
 testPrimForkAndExec
 	"These methods can only be tested properly from UnixProcess, which knows how
 	to set up the parameters on the stack."
@@ -9141,7 +9268,7 @@ testPrimForkAndExec
 
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing - fork and exec' stamp: 'dtl 10/6/2001 10:44'!
+!UnixProcessAccessorTestCase methodsFor: 'tests - fork and exec' stamp: 'dtl 10/6/2001 10:44'!
 testPrimGetChildExitStatus
 	"Cannot really test this here, because it needs to be wired into the interrupt
 	handler. Just make sure it returns nil when there is nothing to do."
@@ -9194,161 +9321,161 @@ tearDown
 	fileStream close.
 	OSProcess deleteFileNamed: fileStream fullName! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:27'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:27'!
 testDistinctExclusiveRegionWithExclusiveRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
 		lock: (self regionLockFrom: 30 to: 40 exclusive: true)
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:27'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:27'!
 testDistinctExclusiveRegionWithSharedRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
 		lock: (self regionLockFrom: 30 to: 40 exclusive: false)
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:27'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:27'!
 testDistinctSharedRegionWithExclusiveRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
 		lock: (self regionLockFrom: 30 to: 40 exclusive: true)
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:26'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
 testDistinctSharedRegionWithSharedRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
 		lock: (self regionLockFrom: 30 to: 40 exclusive: false)
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:12'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:12'!
 testEntireExclusiveWithEntireExclusive
 	self
 		assertLock: self entireExclusiveLock
 		lock: self entireExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:16'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:16'!
 testEntireExclusiveWithExclusiveRegion
 	self
 		assertLock: self entireExclusiveLock
 		lock: self regionExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:17'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:17'!
 testEntireExclusiveWithSharedRegion
 	self
 		assertLock: self entireExclusiveLock
 		lock: self regionSharedLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:12'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:12'!
 testEntireSharedWithEntireExclusive
 	self
 		assertLock: self entireSharedLock
 		lock: self entireExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:12'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:12'!
 testEntireSharedWithEntireShared
 	self
 		assertLock: self entireSharedLock
 		lock: self entireSharedLock
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:14'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:14'!
 testEntireSharedWithExclusiveRegion
 	self
 		assertLock: self entireSharedLock
 		lock: self regionExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:15'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:15'!
 testEntireSharedWithSharedRegion
 	self
 		assertLock: self entireSharedLock
 		lock: self regionSharedLock
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:18'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:18'!
 testExclusiveRegionWithExclusiveRegion
 	self
 		assertLock: self regionExclusiveLock
 		lock: self regionExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:25'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:25'!
 testIdenticalExclusiveRegionWithExclusiveRegion
 	self
 		assertLock: self regionExclusiveLock
 		lock: self regionExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:24'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:24'!
 testIdenticalSharedRegionWithExclusiveRegion
 	self
 		assertLock: self regionSharedLock
 		lock: self regionExclusiveLock
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:24'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:24'!
 testIdenticalSharedRegionWithSharedRegion
 	self
 		assertLock: self regionSharedLock
 		lock: self regionSharedLock
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:25'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:25'!
 testOverlappingExclusiveRegionWithExclusiveRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:26'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
 testOverlappingExclusiveRegionWithSharedRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:26'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
 testOverlappingSharedRegionWithExclusiveRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:26'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
 testOverlappingSharedRegionWithSharedRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
 		conflicts: false! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:21'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:21'!
 testSupersetExclusiveRegionWithExclusiveRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 40 exclusive: true)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:23'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:23'!
 testSupersetExclusiveRegionWithSharedRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 40 exclusive: true)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:23'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:23'!
 testSupersetSharedRegionWithExclusiveRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 40 exclusive: false)
 		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
 		conflicts: true! !
 
-!UnixProcessFileLockTestCase methodsFor: 'testing' stamp: 'jf 2/22/2004 19:24'!
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:24'!
 testSupersetSharedRegionWithSharedRegion
 	self
 		assertLock: (self regionLockFrom: 10 to: 40 exclusive: false)
@@ -9433,7 +9560,7 @@ setUp
 	thisOSProcess _ OSProcess thisOSProcess
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 6/11/2011 12:26'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/11/2011 12:26'!
 testCatAFile
 
 	"(UnixProcessTestCase selector: #testCatAFile) run"
@@ -9453,7 +9580,7 @@ testCatAFile
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 1/15/2018 22:14:01'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 1/15/2018 22:14:01'!
 testCatFromFileToFiles
 
 	"(UnixProcessTestCase selector: #testCatFromFileToFiles) run"
@@ -9481,7 +9608,7 @@ testCatFromFileToFiles
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 6/10/2011 15:55'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/10/2011 15:55'!
 testEightLeafSqueakTree
 
 	"(UnixProcessTestCase selector: #testEightLeafSqueakTree) run"
@@ -9498,7 +9625,7 @@ testEightLeafSqueakTree
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'NM 10/16/2021 16:09:26'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'NM 10/16/2021 16:09:26'!
 testExitCode 
 
 	"The exit code you expect in POSIX systems. "
@@ -9510,7 +9637,7 @@ testExitCode
 
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 6/29/2005 14:32'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/29/2005 14:32'!
 testHeadlessChild
 
 	"(UnixProcessTestCase selector: #testHeadlessChild) run"
@@ -9525,7 +9652,7 @@ testHeadlessChild
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 10/12/2001 08:32'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 10/12/2001 08:32'!
 testPipe
 
 	"(UnixProcessTestCase selector: #testPipe) run"
@@ -9536,7 +9663,7 @@ testPipe
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 10/12/2001 08:32'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 10/12/2001 08:32'!
 testPipeLine
 
 	"(UnixProcessTestCase selector: #testPipeLine) run"
@@ -9547,7 +9674,7 @@ testPipeLine
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 1/15/2018 22:14:16'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 1/15/2018 22:14:16'!
 testRunCommand
 
 	"(UnixProcessTestCase selector: #testRunCommand) run"
@@ -9579,7 +9706,7 @@ testRunCommand
 
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class examples' stamp: 'dtl 6/29/2005 14:33'!
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/29/2005 14:33'!
 testSpawnTenHeadlessChildren
 
 	"(UnixProcessTestCase selector: #testSpawnTenHeadlessChildren) run"
@@ -9594,7 +9721,7 @@ testSpawnTenHeadlessChildren
 	self assert: self numberOfOpenFiles == openFileCount
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class side methods' stamp: 'dtl 6/29/2005 14:24'!
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/29/2005 14:24'!
 testClassForkHeadlessSqueakAndDo
 
 	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDo) run"
@@ -9617,7 +9744,7 @@ testClassForkHeadlessSqueakAndDo
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class side methods' stamp: 'dtl 6/29/2005 14:26'!
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/29/2005 14:26'!
 testClassForkHeadlessSqueakAndDoThenQuit
 
 	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDoThenQuit) run"
@@ -9639,7 +9766,7 @@ testClassForkHeadlessSqueakAndDoThenQuit
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class side methods' stamp: 'dtl 6/10/2011 15:38'!
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/10/2011 15:38'!
 testClassForkSqueak
 
 	"(UnixProcessTestCase selector: #testClassForkSqueak) run"
@@ -9664,7 +9791,7 @@ testClassForkSqueak
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class side methods' stamp: 'dtl 6/10/2011 15:43'!
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/10/2011 15:43'!
 testClassForkSqueakAndDo
 
 	"(UnixProcessTestCase selector: #testClassForkSqueakAndDo) run"
@@ -9687,7 +9814,7 @@ testClassForkSqueakAndDo
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - class side methods' stamp: 'dtl 6/10/2011 15:43'!
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/10/2011 15:43'!
 testClassForkSqueakAndDoThenQuit
 
 	"(UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit) run"
@@ -9709,7 +9836,7 @@ testClassForkSqueakAndDoThenQuit
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 6/10/2011 15:47'!
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:47'!
 testForkHeadlessSqueakAndDo
 
 	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDo) run"
@@ -9732,7 +9859,7 @@ testForkHeadlessSqueakAndDo
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 6/10/2011 15:47'!
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:47'!
 testForkHeadlessSqueakAndDoThenQuit
 
 	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDoThenQuit) run"
@@ -9754,7 +9881,7 @@ testForkHeadlessSqueakAndDoThenQuit
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 6/29/2005 14:30'!
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/29/2005 14:30'!
 testForkSqueak
 
 	"(UnixProcessTestCase selector: #testForkSqueak) run"
@@ -9779,7 +9906,7 @@ testForkSqueak
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 6/10/2011 15:45'!
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:45'!
 testForkSqueakAndDo
 
 	"(UnixProcessTestCase selector: #testForkSqueakAndDo) run"
@@ -9802,7 +9929,7 @@ testForkSqueakAndDo
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 6/10/2011 15:46'!
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:46'!
 testForkSqueakAndDoThenQuit
 
 	"(UnixProcessTestCase selector: #testForkSqueakAndDoThenQuit) run"
@@ -9824,7 +9951,7 @@ testForkSqueakAndDoThenQuit
 			self assert: self numberOfOpenFiles == openFileCount]
 ! !
 
-!UnixProcessTestCase methodsFor: 'testing - child process creation' stamp: 'dtl 12/5/2020 11:33'!
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 12/5/2020 11:33'!
 testIsExternalProcess
 	self deny: ThisOSProcess thisOSProcess isExternalProcess.
 	self deny: OSProcess thisOSProcess isExternalProcess.
@@ -10691,12 +10818,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 12/18/2022 14:43'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 9/15/2023 19:22'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.7.3'! !
+	^ '4.7.5'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
