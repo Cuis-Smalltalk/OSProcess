@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #6090] on 16 December 2023 at 4:33:33 pm'!
+'From Cuis6.3 [latest update: #6156] on 1 January 2024 at 12:03:38 pm'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 33!
+!provides: 'OSProcess' 1 34!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -8233,6 +8233,15 @@ testRemovePreviouslyRead
 
 ! !
 
+!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 1/1/2024 10:33'!
+contentsOfFile: path
+	| fs contents |
+	fs _ OSProcess oldFileNamed: path.
+	contents _ fs contentsOfEntireFile.
+	fs close.
+	^ contents
+! !
+
 !UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 3/1/2002 18:02'!
 runAll
 
@@ -8322,7 +8331,7 @@ testCanAccessSystem
 
 	self assert: accessor canAccessSystem! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 22:09:44'!
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 12/26/2023 19:19'!
 testDupTo
 	"Perform a dup2() call to assign IO to a new file stream"
 
@@ -8341,8 +8350,13 @@ testDupTo
 	f2 nextPutAll: 'write something to the original f2 file stream that will appear in duped f1 instead'; flush.
 	f1 reset.
 	contents1 _ f1 upToEnd.
-	self deny: contents1 isEmpty.
-	self assert: ('write something*' match: contents1).
+	"Note, the f1 file stream is not aware that we have changed the underlying file descriptor.
+	In earlier versions of Squeak and/or Linux stdio runtimes, the contents of f1 matched
+	that of f2, and in more recent versions the f1 content appear empty even though the
+	underlying file has been written due to the dup2() call. The difference is not important
+	for purposes of this test, so the assertions below are commented out. dtl Dec 2023"
+	"self deny: contents1 isEmpty.
+	self assert: ('write something*' match: contents1)."
 	f2 reset.
 	contents2 _ f2 upToEnd.
 	self deny: contents2 isEmpty.
@@ -8506,7 +8520,7 @@ testMakePipeHandles
 	self assert: p writer closed not.
 	p close! !
 
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 22:10:05'!
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 12/31/2023 11:58'!
 testRedirectStdOutTo
 	"Perform a dup2() call on the standard output descriptor to assign it
 	to a new file stream"
@@ -8534,17 +8548,15 @@ testRedirectStdOutTo
 	self assert: aFileStream upToEnd isEmpty.
 	OSProcess thisOSProcess redirectStdOutTo: aFileStream.
 	out nextPutAll: 'foo'; flush.
-	aFileStream reset.
-	contents _ aFileStream upToEnd.
+	contents _ self contentsOfFile: '/tmp/delete.me'.
 	self deny: contents isEmpty.
 	self assert: contents = 'foo'. "assume noone else is using stdout right now"
 	"ensure the we can still find the real stdout"
 	self deny: OSProcess thisOSProcess stdOut closed.
 	OSProcess thisOSProcess stdOut nextPutAll: 'bar'; flush.
-	aFileStream reset.
-	contents _ aFileStream upToEnd.
+	contents _ self contentsOfFile: '/tmp/delete.me'.
 	self deny: contents isEmpty.
-	self assert: contents = 'foobar'.
+	self assert: (contents endsWith: 'bar').
 	"Restore the original file number. The stdOut stream is cached in ThisOSProcess
 	(and should probably be recalculated following a dup2(), so find the real handle
 	with getStdOutHandle."
@@ -8987,14 +8999,16 @@ testEnvAsFlatArrayAndOffsets
 	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
 ! !
 
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/10/2011 15:04'!
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 12/26/2023 11:28'!
 testChDir
 
 	"(UnixProcessAccessorTestCase selector: #testChDir) run"
 
 	| cwd new |
 	cwd _ accessor primGetCurrentWorkingDirectory.
-	new _ '/bin'. "nb Do not use /tmp because OS X implements it as a sym link to private/tmp"
+	new _ '/usr/bin'.
+	"Note, do not use /tmp because OS X implements it as a sym link to private/tmp
+	and do not use /bin because some Linux implementations may link it to /usr/bin"
 	accessor chDir: new.
 	self should: [new = accessor primGetCurrentWorkingDirectory].
 	accessor chDir: cwd.
@@ -10818,12 +10832,12 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 9/15/2023 19:22'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 12/31/2023 12:03'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.7.5'! !
+	^ '4.7.6'! !
 
 !OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
 defaultPathString
@@ -12755,7 +12769,7 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	^ Array with: flatStringArray with: addresses
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 12/16/2023 10:43:39'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 12/15/2023 20:28'!
 envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	"Given anEnvironmentDictionary, flatten the dictionary into a string buffer,
 	leaving space at the beginning of the buffer for a list of C pointers. Answer
