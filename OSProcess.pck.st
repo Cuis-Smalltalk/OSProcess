@@ -1,6 +1,6 @@
-'From Cuis6.3 [latest update: #6156] on 1 January 2024 at 12:03:38 pm'!
+'From Cuis6.3 [latest update: #6156] on 2 January 2024 at 9:45:41 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 34!
+!provides: 'OSProcess' 1 35!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -5690,6 +5690,17 @@ resetLimit: count
 	resetLimit _ count
 
 ! !
+
+!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 1/2/2024 09:27:43'!
+upToEnd
+	"Answer a subcollection from the current access position through the last element of the receiver."
+	
+	"Copied from Squeak PositionableStream>>upToEnd which is not currently implemented in Cuis"
+
+	| newStream |
+	newStream := WriteStream on: (self collectionSpecies new: 100).
+	[self atEnd] whileFalse: [ newStream nextPut: self next ].
+	^ newStream contents! !
 
 !ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
 printOn: aStream
