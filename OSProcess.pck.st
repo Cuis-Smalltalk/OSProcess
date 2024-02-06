@@ -1,6 +1,6 @@
 'From Cuis6.3 [latest update: #6156] on 2 January 2024 at 9:45:41 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 35!
+!provides: 'OSProcess' 1 36!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -1076,7 +1076,7 @@ primForkAndExec: executableFile
 	stdErr: errorFileHandle
 	"Parameters are expected to have been properly prepared by the caller,
 	including string values which are to be null terminated strings.
-	In other words, all strings should have (Character value: 0) as the
+	In other words, all strings should have (Character null) as the
 	last element in the string."! !
 
 !RiscOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/23/2002 05:56'!
@@ -1443,7 +1443,7 @@ putPath: aString
 	"Convenience method. Set the environment PATH variable to aString."
 
 	| pathString |
-	pathString _ 'PATH=', aString, ((Character value: 0) asString). 
+	pathString _ 'PATH=', aString, ((Character null) asString). 
 	^ self environmentPut: pathString
 
 
@@ -1582,7 +1582,7 @@ environmentPut: aString
 	"OSProcess thisOSProcess processAccessor environmentPut: 'SOMEKEY=somevalue'"
 
 	| cString |
-	cString _ aString, (Character value: 0) asString.
+	cString _ aString, (Character null) asString.
 	^ self primPutEnv: cString
 ! !
 
@@ -1985,7 +1985,7 @@ primUnlockFileRegion: aSQFileStruct offset: begin length: len
 primUnsetEnv: aKeyString
 	"Remove an environment variable from the external OS process environment."
 
-	^ self primUnsetEnvPrivate: (aKeyString, (Character value: 0) asString) asByteArray! !
+	^ self primUnsetEnvPrivate: (aKeyString, (Character null) asString) asByteArray! !
 
 !UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 12/9/2022 19:32:28'!
 primUnsetEnvPrivate: aByteString
@@ -2248,7 +2248,7 @@ forkAndExec: executableFile
 
 	"Parameters are expected to have been properly prepared by the caller, including string
 	values which are to be null terminated strings. In other words, all strings should have
-	(Character value: 0) as the last element in the string.
+	(Character null) as the last element in the string.
 
 	Parameters should be:
 		executableFile: a string with the name of a file to execute.
@@ -2319,7 +2319,7 @@ primForkExec: executableFile
 
 	"Parameters are expected to have been properly prepared by the caller, including string
 	values which are to be null terminated strings. In other words, all strings should have
-	(Character value: 0) as the last element in the string.
+	(Character null) as the last element in the string.
 
 	Parameters should be:
 		executableFile: a string with the name of a file to execute.
@@ -8915,7 +8915,7 @@ testArgsAsFlatArrayAndOffsets
 
 	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
 	pointerSize _ OSProcess accessor sizeOfPointer.
-	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character value: 0) asString ].
+	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character null) asString ].
 	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
 	self assert: stringsAndOffsets size == 2.
 	self assert: stringsAndOffsets second size == 3.
@@ -8923,7 +8923,7 @@ testArgsAsFlatArrayAndOffsets
 	totalLength _ 4 * pointerSize + lengthOfCStrings.
 	self assert: stringsAndOffsets first size == totalLength.
 	stringsAndOffsets second do: [:offset |
-		(stringsAndOffsets first at: offset) == (Character value: 0)].
+		(stringsAndOffsets first at: offset) == (Character null)].
 
 	rs _ ReadStream on: stringsAndOffsets first.
 	rs next: 4 * pointerSize.
@@ -8991,7 +8991,7 @@ testEnvAsFlatArrayAndOffsets
 	totalLength _ 4 * pointerSize + lengthOfCStrings.
 	self assert: stringsAndOffsets first size == totalLength.
 	stringsAndOffsets second do: [:offset |
-		(stringsAndOffsets first at: offset) == (Character value: 0)].
+		(stringsAndOffsets first at: offset) == (Character null)].
 
 	arrayWithMachineDependentPointers _ self
 		primFixPointersInArrayOfStrings: stringsAndOffsets first
@@ -9257,7 +9257,7 @@ testPrimUnsetEnv
 	self should: [resetVal notNil and: [resetVal isEmpty not]].
 	self should: [newVal = resetVal].
 
-	accessor primUnsetEnv: 'AAAA', (Character value: 0) asString.
+	accessor primUnsetEnv: 'AAAA', (Character null) asString.
 	resetVal _ accessor environmentAt: 'AAAA'.
 	self should: [resetVal isNil].
 
@@ -12756,7 +12756,7 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 
 	"OSProcess thisOSProcess argsAsFlatArrayAndOffsets:
 		(UnixProcess arguments collect:
-			[:e | e, (Character value: 0) asString])"
+			[:e | e, (Character null) asString])"
 
 	| offset arraySize flatStringArray ws addresses stringBytes |
 	stringBytes _ anArrayOfNullTerminatedStrings collect: [ :e | e asByteArray].
@@ -13269,13 +13269,13 @@ processProxy: anExternalProcess forkAndExec: executableFile arguments: arrayOfSt
 	| nullString progName args argVecAndOffsets argVec argOffsets
 	envVecAndOffsets envVec envOffsets in out err childPid pwd |
 	stdOut ifNil: [^ nil].
-	nullString _ (Character value: 0) asString.
+	nullString _ (Character null) asString.
 	progName _ (executableFile, nullString) asByteArray. "Null terminated string"
 	arrayOfStrings isNil							"Should be a (possibly empty) array"
 		ifTrue:
 			[args _ Array with: progName]		"First argument is the program name (Unix convention)"
 		ifFalse:
-			[args _ (OrderedCollection new: arrayOfStrings size + 2)
+			[args _ (OrderedCollection new)
 						add: progName;
 						addAll: (arrayOfStrings collect: [:e | e, nullString ]);	"Null terminate each string"
 						yourself;
