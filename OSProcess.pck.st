@@ -1,6 +1,6 @@
-'From Cuis6.3 [latest update: #6156] on 2 January 2024 at 9:45:41 am'!
+'From Cuis7.9 [latest update: #8206] on 28 September 2026 at 8:34:20 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 36!
+!provides: 'OSProcess' 1 37!
 !requires: 'Network-Kernel' 1 1 nil!
 !requires: 'SqueakCompatibility' 1 4 nil!
 SystemOrganization addCategory: #'OSProcess-Base'!
@@ -12,6 +12,86 @@ SystemOrganization addCategory: #'OSProcess-Win32'!
 SystemOrganization addCategory: #'OSProcess-AIO'!
 SystemOrganization addCategory: #'OSProcess-Tests'!
 
+
+!classDefinition: #ResettableBufferStream category: #'OSProcess-Base'!
+ReadWriteStream subclass: #ResettableBufferStream
+	instanceVariableNames: 'resetLimit'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'ResettableBufferStream class' category: #'OSProcess-Base'!
+ResettableBufferStream class
+	instanceVariableNames: ''!
+
+!classDefinition: #AttachableFileStream category: #'OSProcess-Base'!
+StandardFileStream subclass: #AttachableFileStream
+	instanceVariableNames: 'autoClose'
+	classVariableNames: 'UseIOHandle'
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'AttachableFileStream class' category: #'OSProcess-Base'!
+AttachableFileStream class
+	instanceVariableNames: ''!
+
+!classDefinition: #AsyncFileReadStream category: #'OSProcess-Base'!
+AttachableFileStream subclass: #AsyncFileReadStream
+	instanceVariableNames: 'eventHandler'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'AsyncFileReadStream class' category: #'OSProcess-Base'!
+AsyncFileReadStream class
+	instanceVariableNames: ''!
+
+!classDefinition: #BufferedAsyncFileReadStream category: #'OSProcess-Base'!
+AsyncFileReadStream subclass: #BufferedAsyncFileReadStream
+	instanceVariableNames: 'nonBlockingMode readBuffer readSyncSemaphore dataAvailableSemaphore'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'BufferedAsyncFileReadStream class' category: #'OSProcess-Base'!
+BufferedAsyncFileReadStream class
+	instanceVariableNames: ''!
+
+!classDefinition: #ExternalPipe category: #'OSProcess-Base'!
+Stream subclass: #ExternalPipe
+	instanceVariableNames: 'writer reader blocking'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'ExternalPipe class' category: #'OSProcess-Base'!
+ExternalPipe class
+	instanceVariableNames: ''!
+
+!classDefinition: #OSPipe category: #'OSProcess-Base'!
+ExternalPipe subclass: #OSPipe
+	instanceVariableNames: 'nextChar'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Base'!
+!classDefinition: 'OSPipe class' category: #'OSProcess-Base'!
+OSPipe class
+	instanceVariableNames: ''!
+
+!classDefinition: #AioEventHandler category: #'OSProcess-AIO'!
+Model subclass: #AioEventHandler
+	instanceVariableNames: 'semaphore semaIndex handlerProc descriptor'
+	classVariableNames: 'AioPluginPresent'
+	poolDictionaries: ''
+	category: 'OSProcess-AIO'!
+!classDefinition: 'AioEventHandler class' category: #'OSProcess-AIO'!
+AioEventHandler class
+	instanceVariableNames: ''!
+
+!classDefinition: #PseudoAioEventHandler category: #'OSProcess-AIO'!
+Model subclass: #PseudoAioEventHandler
+	instanceVariableNames: 'eventGenerator'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-AIO'!
+!classDefinition: 'PseudoAioEventHandler class' category: #'OSProcess-AIO'!
+PseudoAioEventHandler class
+	instanceVariableNames: ''!
 
 !classDefinition: #OSProcessAccessor category: #'OSProcess-Base'!
 Model subclass: #OSProcessAccessor
@@ -73,174 +153,14 @@ OSProcessAccessor subclass: #WindowsOSProcessAccessor
 WindowsOSProcessAccessor class
 	instanceVariableNames: ''!
 
-!classDefinition: #AioEventHandler category: #'OSProcess-AIO'!
-Model subclass: #AioEventHandler
-	instanceVariableNames: 'semaphore semaIndex handlerProc descriptor'
-	classVariableNames: 'AioPluginPresent'
-	poolDictionaries: ''
-	category: 'OSProcess-AIO'!
-!classDefinition: 'AioEventHandler class' category: #'OSProcess-AIO'!
-AioEventHandler class
-	instanceVariableNames: ''!
-
-!classDefinition: #PseudoAioEventHandler category: #'OSProcess-AIO'!
-Model subclass: #PseudoAioEventHandler
-	instanceVariableNames: 'eventGenerator'
+!classDefinition: #AioEventHandlerExample category: #'OSProcess-AIO'!
+Object subclass: #AioEventHandlerExample
+	instanceVariableNames: 'handler ioStream'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'OSProcess-AIO'!
-!classDefinition: 'PseudoAioEventHandler class' category: #'OSProcess-AIO'!
-PseudoAioEventHandler class
-	instanceVariableNames: ''!
-
-!classDefinition: #AttachableFileStream category: #'OSProcess-Base'!
-StandardFileStream subclass: #AttachableFileStream
-	instanceVariableNames: 'autoClose'
-	classVariableNames: 'UseIOHandle'
-	poolDictionaries: ''
-	category: 'OSProcess-Base'!
-!classDefinition: 'AttachableFileStream class' category: #'OSProcess-Base'!
-AttachableFileStream class
-	instanceVariableNames: ''!
-
-!classDefinition: #AsyncFileReadStream category: #'OSProcess-Base'!
-AttachableFileStream subclass: #AsyncFileReadStream
-	instanceVariableNames: 'eventHandler'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Base'!
-!classDefinition: 'AsyncFileReadStream class' category: #'OSProcess-Base'!
-AsyncFileReadStream class
-	instanceVariableNames: ''!
-
-!classDefinition: #BufferedAsyncFileReadStream category: #'OSProcess-Base'!
-AsyncFileReadStream subclass: #BufferedAsyncFileReadStream
-	instanceVariableNames: 'nonBlockingMode readBuffer readSyncSemaphore dataAvailableSemaphore'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Base'!
-!classDefinition: 'BufferedAsyncFileReadStream class' category: #'OSProcess-Base'!
-BufferedAsyncFileReadStream class
-	instanceVariableNames: ''!
-
-!classDefinition: #ResettableBufferStream category: #'OSProcess-Base'!
-ReadWriteStream subclass: #ResettableBufferStream
-	instanceVariableNames: 'resetLimit'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Base'!
-!classDefinition: 'ResettableBufferStream class' category: #'OSProcess-Base'!
-ResettableBufferStream class
-	instanceVariableNames: ''!
-
-!classDefinition: #ExternalPipe category: #'OSProcess-Base'!
-Stream subclass: #ExternalPipe
-	instanceVariableNames: 'writer reader blocking'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Base'!
-!classDefinition: 'ExternalPipe class' category: #'OSProcess-Base'!
-ExternalPipe class
-	instanceVariableNames: ''!
-
-!classDefinition: #OSPipe category: #'OSProcess-Base'!
-ExternalPipe subclass: #OSPipe
-	instanceVariableNames: 'nextChar'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Base'!
-!classDefinition: 'OSPipe class' category: #'OSProcess-Base'!
-OSPipe class
-	instanceVariableNames: ''!
-
-!classDefinition: #AbstractUnixProcessFileLockingTestCase category: #'OSProcess-Tests'!
-TestCase subclass: #AbstractUnixProcessFileLockingTestCase
-	instanceVariableNames: 'accessor fileStream delay remoteProcess initialCompatibilitySetting'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'AbstractUnixProcessFileLockingTestCase class' category: #'OSProcess-Tests'!
-AbstractUnixProcessFileLockingTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #UnixProcessUnixFileLockingTestCase category: #'OSProcess-Tests'!
-AbstractUnixProcessFileLockingTestCase subclass: #UnixProcessUnixFileLockingTestCase
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessUnixFileLockingTestCase class' category: #'OSProcess-Tests'!
-UnixProcessUnixFileLockingTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #UnixProcessWin32FileLockingTestCase category: #'OSProcess-Tests'!
-AbstractUnixProcessFileLockingTestCase subclass: #UnixProcessWin32FileLockingTestCase
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessWin32FileLockingTestCase class' category: #'OSProcess-Tests'!
-UnixProcessWin32FileLockingTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #AioEventHandlerTestCase category: #'OSProcess-Tests'!
-TestCase subclass: #AioEventHandlerTestCase
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'AioEventHandlerTestCase class' category: #'OSProcess-Tests'!
-AioEventHandlerTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #OSPipeTestCase category: #'OSProcess-Tests'!
-TestCase subclass: #OSPipeTestCase
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'OSPipeTestCase class' category: #'OSProcess-Tests'!
-OSPipeTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #ResettableBufferStreamTest category: #'OSProcess-Tests'!
-TestCase subclass: #ResettableBufferStreamTest
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'ResettableBufferStreamTest class' category: #'OSProcess-Tests'!
-ResettableBufferStreamTest class
-	instanceVariableNames: ''!
-
-!classDefinition: #UnixProcessAccessorTestCase category: #'OSProcess-Tests'!
-TestCase subclass: #UnixProcessAccessorTestCase
-	instanceVariableNames: 'accessor'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessAccessorTestCase class' category: #'OSProcess-Tests'!
-UnixProcessAccessorTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #UnixProcessFileLockTestCase category: #'OSProcess-Tests'!
-TestCase subclass: #UnixProcessFileLockTestCase
-	instanceVariableNames: 'fileStream'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessFileLockTestCase class' category: #'OSProcess-Tests'!
-UnixProcessFileLockTestCase class
-	instanceVariableNames: ''!
-
-!classDefinition: #UnixProcessTestCase category: #'OSProcess-Tests'!
-TestCase subclass: #UnixProcessTestCase
-	instanceVariableNames: 'thisOSProcess'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'OSProcess-Tests'!
-!classDefinition: 'UnixProcessTestCase class' category: #'OSProcess-Tests'!
-UnixProcessTestCase class
+!classDefinition: 'AioEventHandlerExample class' category: #'OSProcess-AIO'!
+AioEventHandlerExample class
 	instanceVariableNames: ''!
 
 !classDefinition: #OSFileLock category: #'OSProcess-Base'!
@@ -413,16 +333,131 @@ Object subclass: #WindowsThread
 WindowsThread class
 	instanceVariableNames: ''!
 
-!classDefinition: #AioEventHandlerExample category: #'OSProcess-AIO'!
-Object subclass: #AioEventHandlerExample
-	instanceVariableNames: 'handler ioStream'
+!classDefinition: #AbstractUnixProcessFileLockingTestCase category: #'OSProcess-Tests'!
+TestCase subclass: #AbstractUnixProcessFileLockingTestCase
+	instanceVariableNames: 'accessor fileStream delay remoteProcess initialCompatibilitySetting'
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'OSProcess-AIO'!
-!classDefinition: 'AioEventHandlerExample class' category: #'OSProcess-AIO'!
-AioEventHandlerExample class
+	category: 'OSProcess-Tests'!
+!classDefinition: 'AbstractUnixProcessFileLockingTestCase class' category: #'OSProcess-Tests'!
+AbstractUnixProcessFileLockingTestCase class
 	instanceVariableNames: ''!
 
+!classDefinition: #UnixProcessUnixFileLockingTestCase category: #'OSProcess-Tests'!
+AbstractUnixProcessFileLockingTestCase subclass: #UnixProcessUnixFileLockingTestCase
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'UnixProcessUnixFileLockingTestCase class' category: #'OSProcess-Tests'!
+UnixProcessUnixFileLockingTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnixProcessWin32FileLockingTestCase category: #'OSProcess-Tests'!
+AbstractUnixProcessFileLockingTestCase subclass: #UnixProcessWin32FileLockingTestCase
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'UnixProcessWin32FileLockingTestCase class' category: #'OSProcess-Tests'!
+UnixProcessWin32FileLockingTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #AioEventHandlerTestCase category: #'OSProcess-Tests'!
+TestCase subclass: #AioEventHandlerTestCase
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'AioEventHandlerTestCase class' category: #'OSProcess-Tests'!
+AioEventHandlerTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #OSPipeTestCase category: #'OSProcess-Tests'!
+TestCase subclass: #OSPipeTestCase
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'OSPipeTestCase class' category: #'OSProcess-Tests'!
+OSPipeTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #ResettableBufferStreamTest category: #'OSProcess-Tests'!
+TestCase subclass: #ResettableBufferStreamTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'ResettableBufferStreamTest class' category: #'OSProcess-Tests'!
+ResettableBufferStreamTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnixProcessAccessorTestCase category: #'OSProcess-Tests'!
+TestCase subclass: #UnixProcessAccessorTestCase
+	instanceVariableNames: 'accessor'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'UnixProcessAccessorTestCase class' category: #'OSProcess-Tests'!
+UnixProcessAccessorTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnixProcessFileLockTestCase category: #'OSProcess-Tests'!
+TestCase subclass: #UnixProcessFileLockTestCase
+	instanceVariableNames: 'fileStream'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'UnixProcessFileLockTestCase class' category: #'OSProcess-Tests'!
+UnixProcessFileLockTestCase class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnixProcessTestCase category: #'OSProcess-Tests'!
+TestCase subclass: #UnixProcessTestCase
+	instanceVariableNames: 'thisOSProcess'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'OSProcess-Tests'!
+!classDefinition: 'UnixProcessTestCase class' category: #'OSProcess-Tests'!
+UnixProcessTestCase class
+	instanceVariableNames: ''!
+
+
+!ResettableBufferStream commentStamp: 'dtl 7/30/2023 21:16' prior: 0!
+A ResettableBufferStream can trim all previously read elements to save space in its collection. This allows a writer to add continuously to the stream as long as the stream collection is periodically trimmed by a readerthat calls pruneCollection after reading.
+!
+
+!AttachableFileStream commentStamp: '<historical>' prior: 0!
+I am a stream on an input or output channel provided by the underlying operating system. I behave like an ordinary file stream, except that I can attach myself to an input or output stream which has already been opened by the underlying operating system.!
+
+!AsyncFileReadStream commentStamp: 'dtl 7/9/2003 21:04' prior: 0!
+AsyncFileReadStream implements event-driven read behavior on a file stream. Whenever data is available, a #changed event is generated. An AsyncFileReadStream expects to have a client object respond immediately to the change notification by reading the available data, otherwise a possibly endless stream of change notifications will be generated.
+
+AsyncFileReadStream requires aio support in the AioPlugin module.!
+
+!BufferedAsyncFileReadStream commentStamp: 'dtl 3/7/2006 06:55' prior: 0!
+BufferedAsyncFileReadStream adds output buffering behavior to an event driven file stream, permitting blocking reads without risk of blocking the Squeak VM. This is useful for OS pipes, for which Squeak may wish to read and write the pipe without concern for VM deadlocks.
+
+A BufferedAsyncFileReadStream may be set for either blocking or nonblocking reads. When in blocking mode, a Smalltalk Process that requests a read will be blocked until data is available, but the VM will not be blocked and other Smalltalk Processes can proceed normally.
+
+Whenever data becomes available, a dataAvailableSemaphore is signalled and a #changed event is generated.!
+
+!ExternalPipe commentStamp: 'dtl 3/10/2006 11:06' prior: 0!
+I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
+
+Subclasses implement buffering behavior for the reader end of a pipe.!
+
+!OSPipe commentStamp: 'dtl 3/8/2006 07:27' prior: 0!
+I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
+
+I use a single-character buffer to implement #peek without losing data from the external OS pipe.!
+
+!AioEventHandler commentStamp: 'dtl 11/25/2006 15:55' prior: 0!
+AioEventHandler responds to external IO events, such as data available on a file descriptor. When an external IO event is received, an instance of AioEventHandler sends #changed to itself to notify its dependents that the event has occurred.!
+
+!PseudoAioEventHandler commentStamp: 'dtl 11/25/2006 10:42' prior: 0!
+PseudoAioEventHandler is a replacement for AioEventHandler for use when an AioPlugin is not present. It creates a polling loop by generating #changed: events periodically. With a real AioEventHandler, events are generated only when actual IO activity occurs, while the PseudoAioEventHandler produces regularly timed events regardless of whether any actual IO changes have happened.!
 
 !OSProcessAccessor commentStamp: 'dtl 7/7/2010 07:58' prior: 0!
 I am an abstract class whose subclasses provide access to an operating system process, such as the process in which the Squeak VM is currently running. My subclasses collaborate with instances of OSProcess subclasses.
@@ -452,70 +487,8 @@ I know how to create child processes. I use a semaphore to receive signals when 
 !WindowsOSProcessAccessor commentStamp: '<historical>' prior: 0!
 I provide access to an operating system process, such as the process in which the Squeak VM is currently running. I am based on the Win32 process model for Windows and Windows NT.!
 
-!AioEventHandler commentStamp: 'dtl 11/25/2006 15:55' prior: 0!
-AioEventHandler responds to external IO events, such as data available on a file descriptor. When an external IO event is received, an instance of AioEventHandler sends #changed to itself to notify its dependents that the event has occurred.!
-
-!PseudoAioEventHandler commentStamp: 'dtl 11/25/2006 10:42' prior: 0!
-PseudoAioEventHandler is a replacement for AioEventHandler for use when an AioPlugin is not present. It creates a polling loop by generating #changed: events periodically. With a real AioEventHandler, events are generated only when actual IO activity occurs, while the PseudoAioEventHandler produces regularly timed events regardless of whether any actual IO changes have happened.!
-
-!AttachableFileStream commentStamp: '<historical>' prior: 0!
-I am a stream on an input or output channel provided by the underlying operating system. I behave like an ordinary file stream, except that I can attach myself to an input or output stream which has already been opened by the underlying operating system.!
-
-!AsyncFileReadStream commentStamp: 'dtl 7/9/2003 21:04' prior: 0!
-AsyncFileReadStream implements event-driven read behavior on a file stream. Whenever data is available, a #changed event is generated. An AsyncFileReadStream expects to have a client object respond immediately to the change notification by reading the available data, otherwise a possibly endless stream of change notifications will be generated.
-
-AsyncFileReadStream requires aio support in the AioPlugin module.!
-
-!BufferedAsyncFileReadStream commentStamp: 'dtl 3/7/2006 06:55' prior: 0!
-BufferedAsyncFileReadStream adds output buffering behavior to an event driven file stream, permitting blocking reads without risk of blocking the Squeak VM. This is useful for OS pipes, for which Squeak may wish to read and write the pipe without concern for VM deadlocks.
-
-A BufferedAsyncFileReadStream may be set for either blocking or nonblocking reads. When in blocking mode, a Smalltalk Process that requests a read will be blocked until data is available, but the VM will not be blocked and other Smalltalk Processes can proceed normally.
-
-Whenever data becomes available, a dataAvailableSemaphore is signalled and a #changed event is generated.!
-
-!ResettableBufferStream commentStamp: 'dtl 7/30/2023 21:16' prior: 0!
-A ResettableBufferStream can trim all previously read elements to save space in its collection. This allows a writer to add continuously to the stream as long as the stream collection is periodically trimmed by a readerthat calls pruneCollection after reading.
-!
-
-!ExternalPipe commentStamp: 'dtl 3/10/2006 11:06' prior: 0!
-I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
-
-Subclasses implement buffering behavior for the reader end of a pipe.!
-
-!OSPipe commentStamp: 'dtl 3/8/2006 07:27' prior: 0!
-I represent a pipe provided by the underlying operating system, such as a Unix pipe. I have a reader stream and a writer stream which behave similarly to a read-only FileStream and a writeable FileStream.
-
-I use a single-character buffer to implement #peek without losing data from the external OS pipe.!
-
-!AbstractUnixProcessFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:02' prior: 0!
-Test file locking with the UnixOSProcessPlugin. The test suite requires that OSProcess and CommandShell be loaded in the image.
-
-These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
-
-!UnixProcessUnixFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
-Test file locking with the UnixOSProcessPlugin using Unix file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
-
-These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
-
-!UnixProcessWin32FileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
-Test file locking with the UnixOSProcessPlugin using Windows file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
-
-These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
-
-!AioEventHandlerTestCase commentStamp: 'dtl 7/10/2005 15:41' prior: 0!
-Test AioEventHandler and AioPlugin. Provides fair coverage of IO readable events, minimal coverage of IO writable events, and no real coverage for IO exception events. The writable events and exception events probably work, but this test suite will not prove it.!
-
-!OSPipeTestCase commentStamp: '<historical>' prior: 0!
-Test operation of OSPipe in blocking and nonBlocking mode.!
-
-!UnixProcessAccessorTestCase commentStamp: '<historical>' prior: 0!
-Unit tests for the UnixProcessAccessor.!
-
-!UnixProcessFileLockTestCase commentStamp: 'dtl 3/7/2005 21:57' prior: 0!
-This test case was provided by Julian Fitzell. It provides more file locking tests in addition to those in UnitProcessFileLockingTestCase.!
-
-!UnixProcessTestCase commentStamp: '<historical>' prior: 0!
-Unit tests for the Unix portion of OSProcess.!
+!AioEventHandlerExample commentStamp: 'dtl 7/5/2003 18:38' prior: 0!
+Demonstrate asynchronous read handers for file streams, OS pipes, standard input, and sockets. See class category "examples". Some examples require OSProcess.!
 
 !OSFileLock commentStamp: 'dtl 2/23/2004 19:36' prior: 0!
 I describe the region representing the entire addressable space of an external file, including regions that have not yet been allocated for use by the file. On platforms that support file locking, an OSFileLock is used to describe a lock on the entire file.
@@ -592,10 +565,1695 @@ I represent a thread of execution within a Windows process. May threadID is a un
 identifier for the thread, and my handle is a Windows HANDLE to the thread. My handle
 should be closed when the thread exits.!
 
-!AioEventHandlerExample commentStamp: 'dtl 7/5/2003 18:38' prior: 0!
-Demonstrate asynchronous read handers for file streams, OS pipes, standard input, and sockets. See class category "examples". Some examples require OSProcess.!
+!AbstractUnixProcessFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:02' prior: 0!
+Test file locking with the UnixOSProcessPlugin. The test suite requires that OSProcess and CommandShell be loaded in the image.
 
-!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
+These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
+
+!UnixProcessUnixFileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
+Test file locking with the UnixOSProcessPlugin using Unix file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
+
+These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
+
+!UnixProcessWin32FileLockingTestCase commentStamp: 'dtl 4/30/2006 14:03' prior: 0!
+Test file locking with the UnixOSProcessPlugin using Windows file locking semantics. The test suite requires that OSProcess and CommandShell be loaded in the image.
+
+These tests rely on a remote Squeak image to test file locks between cooperating Unix processes. This may be timing dependent (see #delay, set in #setUp, and cleanup in #tearDown). In case of intermittent failures, try running the failed test individually. In some cases it may be necessary to restart Squeak in order to clear leftover file locks from previous failed tests.!
+
+!AioEventHandlerTestCase commentStamp: 'dtl 7/10/2005 15:41' prior: 0!
+Test AioEventHandler and AioPlugin. Provides fair coverage of IO readable events, minimal coverage of IO writable events, and no real coverage for IO exception events. The writable events and exception events probably work, but this test suite will not prove it.!
+
+!OSPipeTestCase commentStamp: '<historical>' prior: 0!
+Test operation of OSPipe in blocking and nonBlocking mode.!
+
+!UnixProcessAccessorTestCase commentStamp: '<historical>' prior: 0!
+Unit tests for the UnixProcessAccessor.!
+
+!UnixProcessFileLockTestCase commentStamp: 'dtl 3/7/2005 21:57' prior: 0!
+This test case was provided by Julian Fitzell. It provides more file locking tests in addition to those in UnitProcessFileLockingTestCase.!
+
+!UnixProcessTestCase commentStamp: '<historical>' prior: 0!
+Unit tests for the Unix portion of OSProcess.!
+
+!ResettableBufferStream methodsFor: 'collections - accessing' stamp: 'dtl 31/Jul/2023, 1:06:00 am (UTC)'!
+pruneCollection
+	"Assume that position refers to the stream position of elements most recently
+	read from the stream, and that there wil be no further need to read those elements.
+	Remove collection elements prior to position to maintain a small collection size."
+
+	position > self resetLimit
+		ifTrue: [ self removePreviouslyRead ]
+! !
+
+!ResettableBufferStream methodsFor: 'collections - accessing' stamp: 'dtl 23/Jul/2023, 3:51:00 pm (UTC)'!
+removePreviouslyRead
+
+	| newReadLimit newWriteLimit |
+	newReadLimit _ readLimit - position .
+	newWriteLimit _ writeLimit - position.
+	collection _ collection allButFirst: position..
+	readLimit _ newReadLimit.
+	writeLimit _ newWriteLimit.
+	position _ 0.
+! !
+
+!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 30/Jul/2023, 5:03:00 pm (UTC)'!
+resetLimit
+	"Previously read entries will be discarded from the collection when this limit is exceeded"
+
+	^ resetLimit ifNil: [ resetLimit _ 20000 ]
+! !
+
+!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 30/Jul/2023, 4:41:00 pm (UTC)'!
+resetLimit: count
+
+	resetLimit _ count
+
+! !
+
+!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 2/Jan/2024, 1:27:43 pm (UTC)'!
+upToEnd
+	"Answer a subcollection from the current access position through the last element of the receiver."
+	
+	"Copied from Squeak PositionableStream>>upToEnd which is not currently implemented in Cuis"
+
+	| newStream |
+	newStream := WriteStream on: (self collectionSpecies new: 100).
+	[self atEnd] whileFalse: [ newStream nextPut: self next ].
+	^ newStream contents! !
+
+!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 20/Aug/2022, 5:00:00 am (UTC)'!
+asAsyncFileReadStream
+	"Answer a replacement for this object, with asynchronous event handling.
+	Do not close the fileID when this object is finalized."
+
+	self keepOpen.
+	^ AsyncFileReadStream
+		name: self name
+		attachTo: fileID
+		writable: self isReadOnly not
+! !
+
+!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 16/Sep/2002, 9:59:00 pm (UTC)'!
+asAttachableFileStream
+
+	^ self
+! !
+
+!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 20/Aug/2022, 5:00:00 am (UTC)'!
+asBufferedAsyncFileReadStream
+	"Answer a replacement for this object, with asynchronous event handling
+	and buffered output. Do not close the fileID when this object is finalized."
+
+	self keepOpen.
+	^ BufferedAsyncFileReadStream
+		name: self name
+		attachTo: fileID
+		writable: self isReadOnly not
+! !
+
+!AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 17/Sep/2002, 12:08:00 pm (UTC)'!
+autoClose
+	"Private. Answer true if the file should be automatically closed when 
+	this object is finalized."
+
+	^ autoClose
+		ifNil: [autoClose _ true]! !
+
+!AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 7/Jul/2006, 2:17:00 am (UTC)'!
+finalize
+
+	self autoClose
+		ifTrue: [[self primCloseNoError: fileID] on: Error do: []]! !
+
+!AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 17/Sep/2002, 12:05:00 pm (UTC)'!
+keepOpen
+	"Do not allow the file to be closed when this object is finalized."
+
+	autoClose _ false
+! !
+
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 20/Aug/2022, 4:36:00 am (UTC)'!
+close
+	"Close this file."
+
+	fileID ifNotNil:
+		[self primCloseNoError: fileID.
+			self unregister.
+			fileID _ nil]
+! !
+
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 12/Jun/1999, 8:00:00 pm (UTC)'!
+ensureOpen
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 12/Jun/1999, 8:00:00 pm (UTC)'!
+open
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 12/Jun/1999, 8:01:00 pm (UTC)'!
+open: fileName forWrite: writeMode
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 12/Jun/1999, 8:02:00 pm (UTC)'!
+openReadOnly
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 12/Jun/1999, 8:02:00 pm (UTC)'!
+reopen
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream methodsFor: 'initialize-release' stamp: 'dtl 14/Apr/2006, 1:34:00 pm (UTC)'!
+disableEventHandling
+	"Subclasses may disable event handling"! !
+
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 20/Aug/2022, 4:36:00 am (UTC)'!
+flush
+	"Flush the external OS stream (the one in the C library)."
+
+	OSProcess accessor flushExternalStream: fileID! !
+
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 10/Dec/2022, 2:01:51 am (UTC)'!
+nextPutAll: aString
+	^ super nextPutAll: aString asByteString! !
+
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 17/May/2009, 6:11:00 pm (UTC)'!
+position
+	"Return the receiver's current file position. If the stream is not positionable,
+	as in the case of a Unix pipe stream, answer 0."
+
+	^ [super position]
+		on: Error
+		do: [0]
+! !
+
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 2/Sep/2006, 9:17:00 pm (UTC)'!
+upToEnd
+	"Answer a subcollection from the current access position through the last element
+	of the receiver. This is slower than the method in StandardFileStream, but it
+	works with pipes which answer false to #atEnd when no further input is
+	currently available, but the pipe is not yet closed."
+
+	| newStream buffer nextBytes |
+	buffer _ buffer1 species new: 1000.
+	newStream _ WriteStream on: (buffer1 species new: 100).
+	[self atEnd or: [(nextBytes _ self nextInto: buffer) isEmpty]]
+		whileFalse: [newStream nextPutAll: nextBytes].
+	^ newStream contents
+! !
+
+!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 4/Jun/2006, 8:02:00 pm (UTC)'!
+upToEndOfFile
+	"Answer a subcollection from the current access position through
+	the last element of the receiver.  Use #atEndOfFile to determine end
+	of file status with feof(), required for reliable end of file test on
+	OS pipes."
+
+	| newStream buffer |
+	buffer _ buffer1 species new: 1000.
+	newStream _ WriteStream on: (buffer1 species new: 100).
+	[self atEndOfFile] whileFalse: [newStream nextPutAll: (self nextInto: buffer)].
+	^ newStream contents! !
+
+!AttachableFileStream methodsFor: 'testing' stamp: 'dtl 26/Mar/2006, 7:52:00 pm (UTC)'!
+isPipe
+
+	^ false
+! !
+
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 12/Sep/2023, 10:55:00 pm (UTC)'!
+name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
+	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
+
+	name _ aSymbolOrString.
+	fileID _ anIOHandle.
+	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
+	self useEncoding.
+	self register.
+! !
+
+!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 12/Sep/2023, 11:06:00 pm (UTC)'!
+useEncoding
+	"Adopt the Cuis idiom, falling back on #ascii if not present. A stream that
+	is not in binary mode is assumed to be using a character encoder. Traditionally
+	this simply referred to eight bit characters as opposed to uninterpreted bytes."
+
+	^ (self respondsTo: #useCharacters)
+		ifTrue: [ self perform: #useCharacters ]
+		ifFalse: [self perform: #ascii ]
+! !
+
+!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 20/Aug/2022, 4:36:00 am (UTC)'!
+setBlocking
+
+	OSProcess accessor setBlocking: fileID! !
+
+!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 20/Aug/2022, 4:36:00 am (UTC)'!
+setNonBlocking
+
+	OSProcess accessor setNonBlocking: fileID! !
+
+!AttachableFileStream methodsFor: 'deprecated' stamp: 'dtl 20/Aug/2022, 4:53:00 am (UTC)'!
+ioHandle
+
+	"Deprecated, retained for support of older versions of CommandShell (19-Aug-2022)"
+
+	^ fileID! !
+
+!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 12/Jun/1999, 7:53:00 pm (UTC)'!
+fileNamed: fileName
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 12/Jun/1999, 7:53:00 pm (UTC)'!
+isAFileNamed: fileName
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 12/Jun/1999, 7:54:00 pm (UTC)'!
+newFileNamed: fileName
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 12/Jun/1999, 7:55:00 pm (UTC)'!
+oldFileNamed: fileName
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 12/Jun/1999, 7:56:00 pm (UTC)'!
+readOnlyFileNamed: fileName
+
+	self shouldNotImplement
+! !
+
+!AttachableFileStream class methodsFor: 'initialize-release' stamp: 'dtl 20/Oct/2001, 1:53:00 am (UTC)'!
+initialize
+
+	"AttachableFileStream initialize"
+
+	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle)
+! !
+
+!AttachableFileStream class methodsFor: 'instance creation' stamp: 'dtl 15/Mar/2006, 11:50:00 pm (UTC)'!
+name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag 
+	"Create a new instance attached to anIOHandle, where anIOHandle
+	represents an open IO channel. For write streams, this represents two
+	Smalltalk streams which write to the same OS file or output stream,
+	presumably with interleaved output. The purpose of this method is to
+	permit a FileStream to be attached to an existing IOHandle, such as
+	the IOHandle for standard input, standard output, and standard error."
+
+	^ (super basicNew
+		name: aSymbolOrString
+		attachTo: anIOHandle
+		writable: readWriteFlag) initialize! !
+
+!AttachableFileStream class methodsFor: 'registry' stamp: 'dtl 25/Aug/2006, 10:15:00 pm (UTC)'!
+register: anObject
+	"An attachable file stream is generally either a second reference to an
+	existing file stream, or a reference to a transient object such as a pipe
+	endpoint. There is no need to register it for finalization."
+
+	^ anObject! !
+
+!AttachableFileStream class methodsFor: 'registry' stamp: 'dtl 25/Aug/2006, 10:15:00 pm (UTC)'!
+unregister: anObject
+	"An attachable file stream is generally either a second reference to an
+	existing file stream, or a reference to a transient object such as a pipe
+	endpoint. There is no need to register it for finalization."
+
+	^ anObject! !
+
+!AttachableFileStream class methodsFor: 'examples' stamp: 'dtl 20/Aug/2022, 4:37:00 am (UTC)'!
+stdIn
+
+	"self stdIn"
+
+	^ self name: 'stdIn' attachTo: OSProcess thisOSProcess stdIn fileID writable: false
+! !
+
+!AsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 17/Jun/2006, 12:08:00 pm (UTC)'!
+actAsExecutor
+
+	super actAsExecutor.
+	eventHandler _ nil! !
+
+!AsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 3/Sep/2010, 8:57:00 pm (UTC)'!
+finalize
+	"Shut the the event handler before closing the file, otherwise aio
+	functions may reference a closed file handle."
+
+	eventHandler ifNotNil: [eventHandler finalize].
+	super finalize
+! !
+
+!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 9/Jul/2003, 12:53:00 am (UTC)'!
+asAsyncFileReadStream
+
+	^ self
+! !
+
+!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 20/Aug/2022, 5:00:00 am (UTC)'!
+asAttachableFileStream
+	"Answer a replacement for this object, with no asynchronous event handling.
+	Do not close the fileID when this object is finalized."
+
+	self keepOpen.
+	^ AttachableFileStream
+		name: self name
+		attachTo: fileID
+		writable: self isReadOnly not
+! !
+
+!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 20/Aug/2022, 4:33:00 am (UTC)'!
+asBufferedAsyncFileReadStream
+	"Answer a replacement for this object, with buffered output."
+
+	^ BufferedAsyncFileReadStream
+		name: self name
+		attachTo: fileID
+		writable: self isReadOnly not
+! !
+
+!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 9/Jul/2003, 1:48:00 am (UTC)'!
+close
+
+	self disableEventHandling.
+	^ super close! !
+
+!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 4:33:00 am (UTC)'!
+initialize
+
+	super initialize.
+	self readOnly.
+	OSProcess accessor setNonBlocking: fileID.
+	self enableEventHandling
+! !
+
+!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 9/Jul/2003, 1:48:00 am (UTC)'!
+open
+
+	^ super open initialize
+! !
+
+!AsyncFileReadStream methodsFor: 'read event handling' stamp: 'dtl 3/Sep/2010, 8:50:00 pm (UTC)'!
+disableEventHandling
+
+	eventHandler
+		ifNotNil: [eventHandler removeDependent: self; close].
+	self eventHandler: nil! !
+
+!AsyncFileReadStream methodsFor: 'read event handling' stamp: 'dtl 25/Nov/2006, 2:56:00 pm (UTC)'!
+enableEventHandling
+
+	self eventHandler: (AioEventHandler aioPluginPresent
+		ifTrue: [AioEventHandler
+				forFileStream: self
+				exceptions: true
+				readEvents: true
+				writeEvents: false]
+		ifFalse: [PseudoAioEventHandler new]).
+	self eventHandler addDependent: self! !
+
+!AsyncFileReadStream methodsFor: 'read event handling' stamp: 'dtl 8/Jul/2003, 11:29:00 pm (UTC)'!
+hasValidHandler
+
+	^ self eventHandler notNil and: [eventHandler hasValidHandler]
+! !
+
+!AsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 8/Jul/2003, 11:26:00 pm (UTC)'!
+eventHandler
+	"The aio event handler. Provides notification whenever external data is available."
+
+	^ eventHandler! !
+
+!AsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 8/Jul/2003, 11:26:00 pm (UTC)'!
+eventHandler: anAioEventHandler
+	"The aio event handler. Provides notification whenever external data is available."
+
+	eventHandler _ anAioEventHandler! !
+
+!AsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 2/Sep/2006, 1:58:00 pm (UTC)'!
+upToEndOfFile
+	"Answer a subcollection from the current access position through
+	the last element of the receiver.  Use #atEndOfFile to determine end
+	of file status with feof(), required for reliable end of file test on
+	OS pipes. Close the file when end of file is detected."
+
+	| b |
+	b _ super upToEndOfFile.
+	self isReadOnly
+		ifTrue: [self close].
+	^ b! !
+
+!AsyncFileReadStream methodsFor: 'updating' stamp: 'dtl 9/Jul/2003, 1:22:00 am (UTC)'!
+update: aParameter
+
+	(aParameter == self eventHandler)
+		ifTrue: [self changed]
+! !
+
+!AsyncFileReadStream class methodsFor: 'examples' stamp: 'dtl 10/Jul/2003, 12:16:00 am (UTC)'!
+stdIn
+
+	"self stdIn"
+
+	^ super stdIn initialize
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 17/Jun/2006, 12:10:00 pm (UTC)'!
+actAsExecutor
+
+	super actAsExecutor.
+	nonBlockingMode _ nil.
+	readBuffer _ nil.
+	readSyncSemaphore _ nil.
+	dataAvailableSemaphore _ nil
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 30/Jul/2023, 7:54:00 pm (UTC)'!
+appendAllToBuffer: chars
+	"Append all chars to readBuffer, then signal dataAvailableSemaphore to inform
+	any blocked reader that the read can proceed. Also generate a #changed event
+	to inform any interested objects that new data has become available."
+
+	self readSyncSemaphore critical:
+		[ | pos |
+		pos _ self readBuffer position.
+		readBuffer setToEnd.
+		readBuffer nextPutAll: chars.
+		readBuffer position: pos].
+	self dataAvailableSemaphore signal.
+	self changed! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 1/Oct/2006, 9:12:00 pm (UTC)'!
+appendToBuffer: aCharacter
+	"Append aCharacter to readBuffer, then signal dataAvailableSemaphore to inform
+	any blocked reader that the read can proceed, and trigger a #dataReady event to
+	inform any interested objects that new data has become available."
+
+	| pos |
+	self readSyncSemaphore critical:
+		[pos _ self readBuffer position.
+		readBuffer setToEnd.
+		readBuffer nextPut: aCharacter.
+		readBuffer position: pos].
+	self dataAvailableSemaphore signal.
+	self changed! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 30/Jul/2023, 6:09:00 pm (UTC)'!
+moveAvailableDataFrom: sqFile
+
+	| count bufferSize buffer |
+	[ readBuffer notNil and: [readBuffer size > self readBufferMemoryWarningThreshold] ]
+		whileTrue: [ (Delay forSeconds: 2) wait ]. "Spin wait until space becomes available"
+	bufferSize _ self readAheadChunkSize.
+	buffer _ String new: bufferSize.
+	count _ self readAvailableDataFrom: sqFile into: buffer.
+	count > 0
+		ifTrue:
+			[count == bufferSize
+				ifTrue:
+					[self appendAllToBuffer: buffer]
+				ifFalse:
+					[self appendAllToBuffer: (buffer copyFrom: 1 to: count)]]
+		ifFalse:
+			[(self closed or: [OSProcess accessor isAtEndOfFile: fileID])
+				ifTrue:
+					[self disableEventHandling]]
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 20/Aug/2022, 4:38:00 am (UTC)'!
+moveAvailableDataToBuffer
+
+	^ self moveAvailableDataFrom: fileID.
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 4/Mar/2017, 6:06:00 pm (UTC)'!
+readAvailableDataFrom: sqFile into: buffer
+	"Some implementations of the read primitive may read character by character
+	from standard input. Handle that case by looping while data available. Answer
+	the number of bytes read into the buffer."
+
+	| bytesRead |
+	bytesRead _ 0.
+	[ | count |
+		[count _ self primRead: sqFile
+				into: buffer
+				startingAt: 1 + bytesRead
+				count: self readAheadChunkSize - bytesRead]
+			on: Error	"Could fail if closed"
+			do: [count _ 0].
+	bytesRead _ bytesRead + count.
+	count > 0] whileTrue.
+	^ bytesRead.
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+waitForBufferAvailable
+	"Block if the readBuffer has grown too large. No-op for now, but add
+	this later if large pipes prove to be a problem."! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+waitForDataReady
+	"Block until at least one character is available in the readBuffer. This is not
+	thread safe, and only one Process is permitted to send this message."
+
+	self dataAvailableSemaphore wait
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 22/Feb/2007, 12:09:00 pm (UTC)'!
+waitForDataReady: count 
+	"Block until at least count characters are available in the readBuffer"
+
+	[self readSyncSemaphore
+		critical: [self readBuffer size - readBuffer position < count]]
+		whileTrue: [self waitForDataReady]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 20/Aug/2022, 4:37:00 am (UTC)'!
+asAsyncFileReadStream
+	"Answer a replacement for this object, with asynchronous event handling but
+	no buffering."
+
+	^ AsyncFileReadStream
+		name: self name
+		attachTo: fileID
+		writable: self isReadOnly not
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 9/Jul/2003, 12:55:00 am (UTC)'!
+asBufferedAsyncFileReadStream
+
+	^ self! !
+
+!BufferedAsyncFileReadStream methodsFor: 'testing' stamp: 'dtl 22/Feb/2007, 12:00:00 pm (UTC)'!
+atEnd
+	"Answer whether the receiver can access any more objects.
+
+	Warning: If this instance represents the reader end of an OS pipe, it
+	is possible for the #atEnd test to give a false negative. In particular, after
+	closing the writer end of an empty OSPipe, the reader may not appear to
+	be atEnd until some time has elapsed, or until an explicit read on the pipe
+	causes the status to be updated. To illustrate the problem:
+
+		(OSPipe new setBufferedReader; yourself) closeWriter; atEnd>>false
+		(OSPipe new ) closeWriter; next; yourself; atEnd>>true
+		(OSPipe new setBufferedReader; yourself) closeWriter; next; yourself; atEnd>>true"
+
+	^ self readSyncSemaphore
+		critical: [self readBuffer atEnd
+				and: [super atEnd]]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'testing' stamp: 'dtl 22/Feb/2007, 12:01:00 pm (UTC)'!
+atEndOfFile
+	"Answer whether the receiver is at its end based on the result of
+	the last read operation. This uses feof() to test the underlying file
+	stream status, and can be used as an alternative to #atEnd, which
+	does not properly report end of file status for an OSPipe."
+
+	^ self readSyncSemaphore
+		critical: [self readBuffer atEnd
+				and: [fileID isNil
+						or: [OSProcess accessor isAtEndOfFile: fileID]]]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'testing' stamp: 'dtl 10/Jul/2003, 12:59:00 am (UTC)'!
+isBlocking
+	"Answer true if set to blocking mode."
+
+	^ self nonBlockingMode not! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 22/Feb/2007, 12:02:00 pm (UTC)'!
+basicNext
+	"Answer the next byte from this file, or nil if at the end of the file.
+	If the readBuffer is empty, force a basicNext in order to ensure that
+	the end of file flag is updated (in stdio stream)."
+
+	(self readSyncSemaphore
+			critical: [self readBuffer atEnd])
+		ifTrue: [^ super basicNext]
+		ifFalse: [[self isBlocking]
+				ifTrue: [self waitForDataReady].
+			^ self readSyncSemaphore
+				critical: [readBuffer next]]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 31/Jul/2023, 1:35:00 am (UTC)'!
+next
+
+	((self readSyncSemaphore
+				critical: [self readBuffer atEnd])
+			and: [self isBlocking])
+		ifTrue: [self waitForDataReady].
+	^ self readSyncSemaphore
+		critical: [readBuffer next ifNotNil: [ :char | readBuffer pruneCollection. char]]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 31/Jul/2023, 1:02:00 am (UTC)'!
+next: n into: aString startingAt: startIndex
+	"Read n bytes into the given string.
+	Return aString or a partial copy if less than n elements have been read."
+
+	| count |
+	count _ self readInto: aString startingAt: startIndex count: n.
+	count > 0 ifTrue: [ self readBuffer pruneCollection ].
+	count = n
+		ifTrue: [^ aString]
+		ifFalse: [^ aString copyFrom: 1 to: startIndex+count-1]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 3/Sep/2010, 9:01:00 pm (UTC)'!
+peek
+	"Answer what would be returned if the message next were sent to the
+	receiver. If the receiver is at the end, answer nil. "
+
+	((self readSyncSemaphore
+				critical: [self readBuffer atEnd])
+			and: [self isBlocking])
+		ifTrue: [self waitForDataReady].
+	^ self readSyncSemaphore
+		critical: [readBuffer peek]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 22/Mar/2007, 1:56:00 am (UTC)'!
+readInto: byteArray startingAt: startIndex count: count 
+	"Read into the given array as specified, and return the count actually
+	transferred. "
+
+	| s size |
+	self isBlocking
+		ifTrue: [self waitForDataReady: count.
+			s _ self readSyncSemaphore
+						critical: [self readBuffer next: count].
+			size _ count]
+		ifFalse: [size _ self readBuffer size - readBuffer position min: count.
+			s _ self readSyncSemaphore
+						critical: [self readBuffer next: size]].
+	byteArray
+		replaceFrom: startIndex
+		to: startIndex + size - 1
+		with: s.
+	^ size! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 19/Mar/2007, 10:28:00 pm (UTC)'!
+upTo: delim 
+
+	^ self readSyncSemaphore critical: [self readBuffer upTo: delim]
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 21/Dec/2007, 5:14:00 pm (UTC)'!
+upToEndOfFile
+	"Answer a subcollection from the current access position through
+	the last element of the receiver.  Use #atEndOfFile to determine end
+	of file status with feof(), required for reliable end of file test on
+	OS pipes. Close the file when end of file is detected."
+
+	| newStream buffer |
+	buffer _ buffer1 species new: 1000.
+	newStream _ WriteStream on: (buffer1 species new: 100).
+	[self atEndOfFile] whileFalse:
+		[self moveAvailableDataToBuffer.
+		newStream nextPutAll: (self nextInto: buffer)].
+	self isReadOnly ifTrue: [self close].
+	^ newStream contents
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+dataAvailableSemaphore
+	"Signalled one or more times when data becomes available. Only one Process
+	is permitted to wait on this Semaphore."
+
+	^ dataAvailableSemaphore ifNil: [dataAvailableSemaphore _ Semaphore new]
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 10/Jul/2003, 12:57:00 am (UTC)'!
+nonBlockingMode
+	"True if nonblocking read behavior should be implemented"
+
+	^ nonBlockingMode ifNil: [nonBlockingMode _ true]
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 10/Jul/2003, 12:58:00 am (UTC)'!
+nonBlockingMode: trueOrFalse
+	"True if nonblocking read behavior should be implemented"
+
+	nonBlockingMode _ trueOrFalse
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 31/Jul/2023, 12:53:00 am (UTC)'!
+readBuffer
+	"Read ahead buffer, filled asynchronously as data becomes available on the IO channel"
+
+	^ readBuffer
+		ifNil: [readBuffer _ (ResettableBufferStream with: String new)
+						resetLimit: 20000]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+readBuffer: aStream
+
+	readBuffer _ aStream! !
+
+!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+readSyncSemaphore
+	"A semaphore for synchronizing access to readBuffer"
+
+	^ readSyncSemaphore ifNil: [readSyncSemaphore _ Semaphore forMutualExclusion]! !
+
+!BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+maxReadBufferSize
+	"Replace readBuffer when position exceeds this."
+
+	^ 40000
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 6/Jul/2003, 2:15:00 pm (UTC)'!
+readAheadChunkSize
+	"The async read ahead process will read at most this many characters.
+	Notes: On my system (dtl), a chunk size of 2000 leads to ExternalCommandShell
+	overdriving the stdout stream when doing (for example) a long directory listing.
+	I have added error handling to accommodate this, but I do know know how
+	reliable it is, so I would prefer to avoid generating the condition. A chunk
+	size of 200 is small enough that performance is noticably impacted in a
+	CommandShell window. A chunk size of 1000 seems to produce good overall
+	behavior."
+
+	^ 1000! !
+
+!BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 7/Dec/2012, 11:54:00 pm (UTC)'!
+readBufferMemoryWarningThreshold
+	"A read buffer larger that this may start causing problems. Issue a warning
+	before the object memory becomes too large." 
+
+	^self maxReadBufferSize * 1000
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 10/Jul/2003, 12:54:00 am (UTC)'!
+setBlocking
+	"Set for blocking reads. Default is nonblocking mode."
+
+	self nonBlockingMode: false
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 10/Jul/2003, 12:55:00 am (UTC)'!
+setNonBlocking
+	"Set for nonblocking reads. This is the default mode."
+
+	self nonBlockingMode: true
+! !
+
+!BufferedAsyncFileReadStream methodsFor: 'updating' stamp: 'dtl 9/Jul/2003, 2:06:00 am (UTC)'!
+update: aParameter
+	"A #changed event is generated as a side effect of this method"
+
+	(aParameter == self eventHandler)
+		ifTrue: [self moveAvailableDataToBuffer]
+! !
+
+!BufferedAsyncFileReadStream class methodsFor: 'examples' stamp: 'dtl 10/Jul/2003, 12:24:00 am (UTC)'!
+stdIn
+
+	"self stdIn"
+
+	^ super stdIn
+! !
+
+!ExternalPipe methodsFor: 'printing' stamp: 'dtl 2/Apr/2006, 3:40:00 pm (UTC)'!
+printOn: aStream
+	"The implementation of Stream>>printOn: has bad side effects when used
+	for OSPipe. This implementation is copied from Object."
+
+	| title |
+	title _ self class name.
+	aStream
+		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
+		nextPutAll: title! !
+
+!ExternalPipe methodsFor: 'testing' stamp: 'dtl 3/Apr/2006, 1:14:00 am (UTC)'!
+atEnd
+	"Answer whether the receiver can access any more objects."
+
+	^ writer closed and: [self peek == nil]
+! !
+
+!ExternalPipe methodsFor: 'testing' stamp: 'dtl 4/Jun/2006, 8:01:00 pm (UTC)'!
+atEndOfFile
+	"Answer whether the receiver is at its end based on the result of
+	the last read operation. This uses feof() to test the underlying file
+	stream status, and can be used as an alternative to #atEnd, which
+	does not properly report end of file status for an OSPipe."
+
+	^ reader atEndOfFile
+! !
+
+!ExternalPipe methodsFor: 'testing' stamp: 'dtl 16/Sep/2002, 9:35:00 pm (UTC)'!
+closed
+
+	^ reader closed! !
+
+!ExternalPipe methodsFor: 'testing' stamp: 'dtl 26/Mar/2006, 7:48:00 pm (UTC)'!
+isPipe
+
+	^ true
+! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 8/Mar/2006, 12:00:00 am (UTC)'!
+blocking
+	"True if reader end is set to blocking mode."
+
+	^ blocking ifNil: [blocking _ true]! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 8/Mar/2006, 12:00:00 am (UTC)'!
+blocking: trueOrFalse
+	"True if reader end is set to blocking mode."
+
+	blocking _ trueOrFalse! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 16/Apr/2003, 10:01:00 am (UTC)'!
+contents
+	"Answer contents of the pipe, and return the contents to the pipe so it can still be read."
+
+	"ExternalPipe new nextPutAll: 'hello'; contents"
+
+	| s |
+	self closed ifTrue:
+		[self notify: self printString, ' ', self reader printString, ' closed'.
+		^ nil].
+	s _ self reader upToEnd.
+	s isEmpty ifFalse:
+		[self writer closed
+			ifTrue: [self notify: self printString, ' ', self writer printString,
+								' closed, cannot replace contents']
+			ifFalse: [self nextPutAll: s]].
+	^ s! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 12/Apr/2014, 8:04:00 pm (UTC)'!
+flush
+	^writer flush! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 16/Sep/2002, 9:33:00 pm (UTC)'!
+next
+	"Answer the next object accessible by the receiver."
+
+	^ reader next! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 16/Sep/2002, 9:33:00 pm (UTC)'!
+next: anInteger 
+	"Answer the next anInteger elements of my collection."
+
+	^ reader next: anInteger
+! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+nextPut: anObject 
+	"Insert the argument, anObject, as the next object accessible by the 
+	receiver. Answer anObject."
+
+	^ writer nextPut: anObject! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+nextPutAll: aCollection 
+	"Append the elements of aCollection to the sequence of objects accessible 
+	by the receiver. Answer aCollection."
+
+	^ writer nextPutAll: aCollection! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 16/Sep/2002, 9:34:00 pm (UTC)'!
+peek
+
+	^ reader peek! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+reader
+	"Answer a stream on the read end of the pipe."
+
+	^ reader! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+reader: aReadStream
+
+	reader _ aReadStream! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 19/Sep/2002, 12:29:00 am (UTC)'!
+upToEnd
+	"Answer the remaining elements in the string"
+
+	reader closed
+		ifTrue: [^ '']
+		ifFalse: [^ reader upToEnd]! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 11/Nov/2011, 1:27:00 pm (UTC)'!
+upToEndOfFile
+	"Answer the remaining elements in the pipe.  Use #isAtEndOfFile: to
+	determine end of file status with feof(), required for reliable end of
+	file test on OS pipes."
+
+	reader closed
+		ifTrue: [^ '']
+		ifFalse: [^ reader upToEndOfFile]! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+writer
+	"Answer a stream on the write end of the pipe."
+
+	^ writer! !
+
+!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+writer: aWriteStream
+
+	writer _ aWriteStream! !
+
+!ExternalPipe methodsFor: 'finalization' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+close
+
+	self closeWriter; closeReader
+! !
+
+!ExternalPipe methodsFor: 'finalization' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+closeReader
+
+	reader ifNotNil: [reader close]
+! !
+
+!ExternalPipe methodsFor: 'finalization' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+closeWriter
+
+	writer ifNotNil: [writer close]
+! !
+
+!ExternalPipe methodsFor: 'character writing' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+cr
+	"Append a return character to the receiver."
+
+	self writer cr! !
+
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 25/Mar/2006, 6:08:00 pm (UTC)'!
+initialize
+
+	^ self makePipe
+! !
+
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 19/Aug/2022, 11:35:00 pm (UTC)'!
+makePipe
+	"Create an OS pipe and attach it to my input and output streams."
+
+	| handleArray |
+	handleArray _ OSProcess accessor primCreatePipe.
+	handleArray isNil
+		ifTrue:
+			[self error: 'cannot create OS pipe']
+		ifFalse:
+			[self reader: (AttachableFileStream
+							name: 'pipeReader'
+							attachTo: (handleArray at: 1)
+							writable: false).
+			self writer: (AttachableFileStream
+							name: 'pipeWriter'
+							attachTo: (handleArray at: 2)
+							writable: true)]
+! !
+
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 4:38:00 am (UTC)'!
+setBlocking
+	"Set the reader side of the pipe for blocking reads."
+
+	reader ifNotNil: [OSProcess accessor setBlocking: reader fileID].
+	self blocking: true
+! !
+
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 2/Apr/2006, 11:06:00 pm (UTC)'!
+setBufferedReader
+	"Use an event driven AsyncFileReadStream to represent the reader end of the pipe.
+	This should be used if the pipe will be read by a Smalltalk process. It should not
+	be used if the pipe is to be read by an external OS process."
+
+	reader ifNotNil:
+		[reader removeDependent: self.
+		reader unregister.
+		self reader: reader asBufferedAsyncFileReadStream.
+		self setNonBlocking.
+		reader addDependent: self.
+		^ true].
+	^ false
+! !
+
+!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 4:38:00 am (UTC)'!
+setNonBlocking
+	"Set the reader side of the pipe for non-blocking reads."
+
+	reader ifNotNil: [OSProcess accessor setNonBlocking: reader fileID].
+	self blocking: false
+! !
+
+!ExternalPipe methodsFor: 'updating' stamp: 'dtl 15/Mar/2006, 11:17:00 am (UTC)'!
+triggerDataReady
+	"Notify any object waiting for data ready on the pipe."
+
+	self triggerEvent: #dataReady.
+! !
+
+!ExternalPipe methodsFor: 'updating' stamp: 'dtl 18/Jan/2003, 6:31:00 pm (UTC)'!
+update: aParameter
+	"Notify any object waiting for data ready on the pipe."
+
+	self changed.
+	self triggerDataReady.
+	^ super update: aParameter
+! !
+
+!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 3/Apr/2006, 1:34:00 am (UTC)'!
+blockingPipe
+	"Warning: a read on a blocking pipe will hang the VM if there is insufficient
+	data in the pipe to fulfill the read request."
+
+	"OSPipe blockingPipe"
+
+	^ super basicNew initialize; setBlocking
+! !
+
+!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 3/Apr/2006, 1:34:00 am (UTC)'!
+bufferedBlockingPipe
+	"Warning: a read on a blocking pipe will hang the VM if there is insufficient
+	data in the pipe to fulfill the read request."
+
+	"OSPipe bufferedBlockingPipe"
+
+	^ (super basicNew initialize; setBlocking) setBufferedReader; yourself
+! !
+
+!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 3/Apr/2006, 1:33:00 am (UTC)'!
+bufferedNonBlockingPipe
+
+	"OSPipe bufferedNonBlockingPipe"
+
+	^ (super basicNew initialize; setNonBlocking) setBufferedReader; yourself
+! !
+
+!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 3/Apr/2006, 1:35:00 am (UTC)'!
+new
+
+	"ExternalPipe new"
+
+	^ self nonBlockingPipe
+! !
+
+!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 25/Mar/2006, 6:14:00 pm (UTC)'!
+nonBlockingPipe
+
+	"OSPipe nonBlockingPipe"
+
+	^ super basicNew initialize; setNonBlocking
+! !
+
+!ExternalPipe class methodsFor: 'examples' stamp: 'dtl 7/Mar/2006, 11:44:00 pm (UTC)'!
+testPipe
+	"OSPipe testPipe inspect"
+
+	| pipe result |
+	pipe _ self new.
+	pipe nextPutAll: 'string to send through an OSPipe'.
+	pipe writer close.
+	result _ pipe upToEnd.
+	pipe close.
+	^ result
+! !
+
+!OSPipe methodsFor: 'accessing' stamp: 'dtl 14/Oct/2001, 4:16:00 pm (UTC)'!
+next
+	"Answer the next object accessible by the receiver."
+
+	| c |
+	nextChar isNil
+		ifTrue:
+			[^ [reader next]
+				on: Error
+				do: [nil]]
+		ifFalse:
+			[c _ nextChar.
+			nextChar _ nil.
+			^ c]
+! !
+
+!OSPipe methodsFor: 'accessing' stamp: 'dtl 24/Feb/2013, 2:24:00 pm (UTC)'!
+next: anInteger 
+	"Answer the next anInteger elements of my collection."
+
+	| c strm |
+	strm _ WriteStream on: String new.
+	(1 to: anInteger) do:
+		[:index |
+		c _ self next.
+		c isNil
+			ifTrue: [^ strm contents]	
+			ifFalse: [strm nextPut: c. false]].
+	^ strm contents
+! !
+
+!OSPipe methodsFor: 'accessing' stamp: 'dtl 16/May/2006, 10:52:00 am (UTC)'!
+peek
+
+	^ nextChar isNil
+		ifTrue: [reader closed
+				ifFalse: [nextChar _ reader next]]
+		ifFalse: [nextChar]! !
+
+!OSPipe methodsFor: 'accessing' stamp: 'dtl 24/Feb/2013, 2:24:00 pm (UTC)'!
+upToEnd
+	"Answer the remaining elements in the string. This method is retained for backward
+	compatibility with older versions of CommandShell."
+
+	| strm s |
+	strm _ WriteStream on: String new.
+	[(s _ self next: 2000) isEmpty
+		ifTrue: [^ strm contents]
+		ifFalse: [strm nextPutAll: s]] repeat
+! !
+
+!OSPipe methodsFor: 'accessing' stamp: 'dtl 24/Feb/2013, 2:24:00 pm (UTC)'!
+upToEndOfFile
+	"Answer the remaining elements in the pipe. Use #atEndOfFile to
+	determine end of file status with feof(), required for reliable end of
+	file test on OS pipes. Compare #upToEnd, which uses the generic end
+	of file test in FilePlugin."
+
+	| strm d s |
+	strm _ WriteStream on: String new.
+	d _ Delay forMilliseconds: 200.
+	[(s _ self next: 2000) isEmpty
+		ifTrue: [self atEndOfFile
+			ifTrue: [^ strm contents]
+			ifFalse: [d wait]]
+		ifFalse: [strm nextPutAll: s]] repeat
+! !
+
+!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 4/Jul/2003, 11:10:00 pm (UTC)'!
+aioDisable: ioDescriptor
+	"Definitively disable asynchronous event notification for a descriptor. The ioDescriptor
+	parameter is an object representing a low level OS file or socket descriptor."
+
+	^ self primAioDisable: ioDescriptor
+! !
+
+!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 1/Sep/2003, 8:58:00 pm (UTC)'!
+aioEnable: ioDescriptor forSemaphore: semaphoreIndex externalObject: trueOrFalse
+	"Enable asynchronous notification for a descriptor. Send this message one time
+	prior to beginning event handling for ioDescriptor. The ioDescriptor parameter is an
+	object representing a low level OS file or socket descriptor. The semaphoreIndex is
+	the index of a Semaphore to be notified, and the third parameter is a flag indicating
+	that ioDescriptor represents an external object which should not be closed on termination
+	of aio handling."
+
+	^ (self primAioEnable: ioDescriptor forSemaphore: semaphoreIndex externalObject: trueOrFalse)
+			ifNil: [self notify: 'aio event forwarding not supported']
+! !
+
+!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 4/Jul/2003, 10:52:00 pm (UTC)'!
+aioHandle: ioDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
+	"Enable asynchronous notification for a descriptor. Send this message one time to
+	enable a single event notification. Send it again after each event has been received
+	and handled (in other words, the process which waits on the event semaphore is
+	responsible for re-enabling the handler by calling this method each time an event
+	is handled). The ioDescriptor parameter is an object representing a low level OS file or
+	socket descriptor. The remaining three parameters are Boolean flags representing the
+	types of events for which notification is being requested: handle exceptions, handle
+	for read, and handle for write. It is common to watch for read events and exception
+	events, or to watch for write events and exception events."
+
+	^ self primAioHandle: ioDescriptor
+		exceptionEvents: exceptionFlag
+		readEvents: readFlag
+		writeEvents: writeFlag
+! !
+
+!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 4/Jul/2003, 11:10:00 pm (UTC)'!
+aioSuspend: ioDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
+
+	"Temporarily suspend asynchronous event notification for a descriptor. The
+	ioDescriptor parameter is an object representing a low level OS file or socket
+	descriptor. The remaining three parameters are Boolean flags representing the
+	types of events for which notification is being requested: handle exceptions,
+	handle for read, and handle for write."
+
+	^ self primAioSuspend: ioDescriptor
+		exceptionEvents: exceptionFlag
+		readEvents: readFlag
+		writeEvents: writeFlag
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2006, 10:43:00 pm (UTC)'!
+close
+	"When the FileStream or Socket handled by this aio handler is closed,
+	it should send #close to this handler."
+
+	| p |
+	self breakDependents.
+	Smalltalk unregisterExternalObject: semaphore.
+	self aioDisable: self descriptor.
+	semaphore _ nil.
+	semaIndex _ nil.
+	p _ handlerProc.
+	handlerProc _ nil.
+	p ifNotNil: [p terminate] "p may be the active process, do this last"
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 5/Jul/2003, 1:15:00 pm (UTC)'!
+for: aSocketOrFileStream
+	"Answer an event handler for any kind of IO stream that can be associated
+	with an OS handle for aio events. Currently, subclasses of FileStream and
+	Socket can have aio event handlers."
+
+	(aSocketOrFileStream isKindOf: Socket)
+		ifTrue: [^ self forSocket: aSocketOrFileStream].
+	(aSocketOrFileStream isKindOf: FileStream)
+		ifTrue: [^ self forFileStream: aSocketOrFileStream].
+	self error: 'expected a FileStream or Socket subclass'! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 5/Jul/2003, 3:03:00 pm (UTC)'!
+for: aSocketOrFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+	"Answer an event handler for any kind of IO stream that can be associated
+	with an OS handle for aio events. Currently, subclasses of FileStream and
+	Socket can have aio event handlers."
+
+	(aSocketOrFileStream isKindOf: Socket)
+		ifTrue: [^ self forSocket: aSocketOrFileStream
+					exceptions: exceptionEventFlag
+					readEvents: readEventFlag
+					writeEvents: writeEventFlag].
+	(aSocketOrFileStream isKindOf: FileStream)
+		ifTrue: [^ self forFileStream: aSocketOrFileStream
+					exceptions: exceptionEventFlag
+					readEvents: readEventFlag
+					writeEvents: writeEventFlag].
+	self error: 'expected a FileStream or Socket subclass'! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 3:25:00 am (UTC)'!
+forFileStream: aFileStream
+
+	self descriptor: (self descriptorForFile: aFileStream).
+	self setDefaultEventMask.
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 3:25:00 am (UTC)'!
+forFileStream: aFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+
+	self descriptor: (self descriptorForFile: aFileStream).
+	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 3:27:00 am (UTC)'!
+forSocket: aSocket
+	"Any existing event handling for aSocket will be disabled. Note that this
+	will make the socket useless for any applications that expect the prior
+	event handling behavior."
+
+	self descriptor: (self desriptorForSocket: aSocket).
+	self aioDisable: self descriptor.
+	self setDefaultEventMask.
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 3:27:00 am (UTC)'!
+forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+	"Any existing event handling for aSocket will be disabled. Note that this
+	will make the socket useless for any applications that expect the prior
+	event handling behavior."
+
+	self descriptor: (self desriptorForSocket: aSocket).
+	self aioDisable: self descriptor.
+	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 23/Jan/2022, 3:31:00 pm (UTC)'!
+initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+
+	semaphore _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: semaphore.
+	(AioPluginPresent = true) ifTrue: [
+		([self aioEnable: self descriptor forSemaphore: self semaIndex externalObject: true]
+			on: Warning
+			do: [:e |
+				self close. "unregister the semaphore"
+				OSProcess trace: e messageText asString. nil])
+			ifNotNil:
+				[handlerProc _ self
+					handleExceptions: exceptionEventFlag
+					readEvents: readEventFlag
+					writeEvents: writeEventFlag]]
+! !
+
+!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 9/Jul/2005, 6:00:00 pm (UTC)'!
+setDefaultEventMask
+	"Default initialization for read events and exception events"
+
+	^ self initializeForExceptions: true readEvents: true writeEvents: false
+
+! !
+
+!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 5/Jul/2003, 2:50:00 pm (UTC)'!
+defaultHandlerProcess
+	"Generate a #changed notification whenever an external aio event occurs"
+
+	^ self handleReadAndExceptionsEvents! !
+
+!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 13/Nov/2011, 1:25:00 am (UTC)'!
+handleExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+	"Generate a #changed notification whenever the requested type of external aio event occurs."
+
+	| p sema handler |
+	sema _ Semaphore new.
+	handler _ [[self hasValidHandler] whileTrue:
+		[self aioHandle: self descriptor
+			exceptionEvents: exceptionEventFlag
+			readEvents: readEventFlag
+			writeEvents: writeEventFlag.
+		sema signal. "event handler is ready"
+		self semaphore wait.
+		self changed]].
+	p _ handler forkAt: Processor userBackgroundPriority.
+	sema wait. "until process has been started and events are being handled"
+	^p! !
+
+!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 5/Jul/2003, 2:49:00 pm (UTC)'!
+handleReadAndExceptionsEvents
+	"Generate a #changed notification whenever data is available for reading or an exception
+	occurs on the external IO channel."
+
+	^ self handleExceptions: true readEvents: true writeEvents: false
+! !
+
+!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 5/Jul/2003, 2:49:00 pm (UTC)'!
+handleReadEvents
+	"Generate a #changed notification whenever data is available for reading"
+
+	^ self handleExceptions: false readEvents: true writeEvents: false
+! !
+
+!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 23/Apr/2012, 10:45:00 am (UTC)'!
+hasValidHandler
+	"True if the event handler is running, and if it refers to the correct external
+	object semaphore. For protection following an image restart."
+
+	^ semaIndex notNil
+		and: [Smalltalk externalObjects size >= semaIndex
+			and: [(Smalltalk externalObjects at: semaIndex) == semaphore]]! !
+
+!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 30/Mar/2003, 11:05:00 pm (UTC)'!
+descriptor
+
+	^ descriptor! !
+
+!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 30/Mar/2003, 11:05:00 pm (UTC)'!
+descriptor: aLowLevelIODescriptor
+
+	descriptor _ aLowLevelIODescriptor! !
+
+!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 30/Mar/2003, 11:04:00 pm (UTC)'!
+handlerProc
+
+	^ handlerProc! !
+
+!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 30/Mar/2003, 11:04:00 pm (UTC)'!
+semaIndex
+
+	^ semaIndex! !
+
+!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 30/Mar/2003, 11:04:00 pm (UTC)'!
+semaphore
+
+	^ semaphore! !
+
+!AioEventHandler methodsFor: 'finalization' stamp: 'dtl 4/Sep/2003, 10:54:00 am (UTC)'!
+finalize
+	"Note: An aio handler will not be garbage collected until the semaphore
+	is unregistered. When the FileStream or Socket handled by this aio
+	handler is closed, it should send #close to this handler."
+
+	self close
+! !
+
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 20/Aug/2022, 3:24:00 am (UTC)'!
+descriptorForFile: aFileStream
+
+	"self new descriptorForFile: SourceFiles first"
+
+	^ self primOSFileHandle: aFileStream fileID
+! !
+
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 20/Aug/2022, 3:25:00 am (UTC)'!
+desriptorForSocket: aSocket
+
+	"self new desriptorForSocket: Socket newTCP"
+
+	^ self primOSSocketHandle: aSocket socketHandle
+! !
+
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 4/Sep/2003, 10:40:00 am (UTC)'!
+handleForFile: aFileStream
+
+	"self new handleForFile: SourceFiles first"
+
+	| ioHandle |
+	ioHandle _ self useIOHandle
+		ifTrue: [aFileStream ioHandle]
+		ifFalse: [aFileStream fileID].
+	^ self primOSFileHandle: ioHandle
+! !
+
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 4/Jul/2003, 7:16:00 pm (UTC)'!
+handleForSocket: aSocket
+
+	"self new handleForSocket: Socket newTCP"
+
+	| ioHandle |
+	ioHandle _ self useIOHandle
+		ifTrue: [aSocket ioHandle]
+		ifFalse: [aSocket socketHandle].
+	^ self primOSSocketHandle: ioHandle
+! !
+
+!AioEventHandler methodsFor: 'private' stamp: 'dtl 30/Mar/2003, 11:26:00 pm (UTC)'!
+useIOHandle
+
+	^ Smalltalk hasClassNamed: #IOHandle! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:53:00 pm (UTC)'!
+primAioDisable: aDescriptor
+	"Definitively disable asynchronous event notification for a descriptor. The descriptor
+	parameter is an object representing a low level OS file or socket descriptor."
+
+	<primitive: 'primitiveAioDisable' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:53:00 pm (UTC)'!
+primAioEnable: aDescriptor forSemaphore: semaphoreIndex externalObject: trueOrFalse
+	"Enable asynchronous notification for a descriptor. The descriptor parameter is an
+	object representing a low level OS file or socket descriptor. The semaphoreIndex
+	is the index of a Semaphore to be notified, and the third parameter is a flag indicating
+	that descriptor represents an external object which should not be closed on termination
+	of aio handling."
+
+	<primitive: 'primitiveAioEnable' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:53:00 pm (UTC)'!
+primAioHandle: aDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
+	"Enable asynchronous notification for a descriptor. The descriptor parameter is an
+	object representing a low level OS file or socket descriptor. The second parameter is
+	the index of a Semaphore to be notified, the remaining three parameters are Boolean
+	flags representing the types of events for which notification is being requested:
+	handle exceptions, handle for read, and handle for write. It is common to watch for
+	read events and exception events, or to watch for write events and exception events."
+
+	<primitive: 'primitiveAioHandle' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:26:00 pm (UTC)'!
+primAioModuleName
+	"Module name of the installed plugin, if any."
+
+	"self new primAioModuleName"
+
+	<primitive: 'primitiveModuleName' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:28:00 pm (UTC)'!
+primAioModuleVersionString
+	"Module name of the installed plugin, if any."
+
+	"self new primAioModuleVersionString"
+
+	<primitive: 'primitiveVersionString' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:54:00 pm (UTC)'!
+primAioSuspend: aDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
+	"Temporarily suspend asynchronous event notification for a descriptor. The
+	descriptor parameter is an object representing a low level OS file or socket
+	descriptor. The remaining three parameters are Boolean flags representing the
+	types of events for which notification is being requested: handle exceptions,
+	handle for read, and handle for write."
+
+	<primitive: 'primitiveAioSuspend' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:54:00 pm (UTC)'!
+primOSFileHandle: sqFile
+	"Answer the low level file descriptor for a file IO handle."
+
+	<primitive: 'primitiveOSFileHandle' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 1/Sep/2003, 9:54:00 pm (UTC)'!
+primOSSocketHandle: sqFile
+	"Answer the low level socket descriptor for a socket IO handle."
+
+	<primitive: 'primitiveOSSocketHandle' module: 'AioPlugin'>
+	^ nil
+! !
+
+!AioEventHandler class methodsFor: 'system startup' stamp: 'dtl 25/Nov/2006, 2:04:00 pm (UTC)'!
+startUp: resuming
+	"Clear the value of AioPluginPresent. The value will be set once when
+	#aioPluginPresent is first sent, and will remain set to that value for the
+	duration of this Squeak session.
+	This method is called by ThisOSProcess>>startUp. AioEventHandler does
+	not need to be registered in the system startup list."
+
+	resuming ifTrue: [AioPluginPresent _ nil]
+! !
+
+!AioEventHandler class methodsFor: 'testing' stamp: 'dtl 18/Dec/2016, 10:06:00 pm (UTC)'!
+aioPluginPresent
+	"Answer true if an AIO plugin is available. The value of AioPluginPresent
+	is cleared at startup time, and is reestablished once for each Squeak session.
+	See initializeAioPluginPresent to initialize after an image startup if warning
+	dialog is not desired."
+
+	"AioEventHandler aioPluginPresent"
+
+	^ AioPluginPresent
+		ifNil: [AioPluginPresent _ self basicNew primAioModuleVersionString notNil.
+			AioPluginPresent ifFalse:
+				[OSProcess trace: ' AioPlugin not present, AioEventHandler will use polling input'].
+			^ AioPluginPresent]! !
+
+!AioEventHandler class methodsFor: 'testing' stamp: 'dtl 4/Oct/2012, 12:24:00 am (UTC)'!
+initializeAioPluginPresent
+	"Initialize the AioPluginPresent flag silently without invoking a warning
+	if the plugin is not present, and answer the value of the flag. Send this
+	to prevent a warning dialog from being presented after image startup,
+	as may be preferred if the image is to be run headless."
+
+	"AioEventHandler initializeAioPluginPresent"
+
+	^ AioPluginPresent
+		ifNil: [AioPluginPresent _ self basicNew primAioModuleVersionString notNil]! !
+
+!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 5/Jul/2003, 1:16:00 pm (UTC)'!
+for: aSocketOrFileStream
+
+	"self for: SourceFiles first"
+	"self for: Socket new"
+	"self for: OSProcess thisOSProcess stdIn"
+
+	^ self new for: aSocketOrFileStream! !
+
+!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 5/Jul/2003, 3:14:00 pm (UTC)'!
+for: aSocketOrFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+	"Flag parameters are true or false, indicating types of events to be handled."
+
+	^ self new for: aSocketOrFileStream
+			exceptions: exceptionEventFlag
+			readEvents: readEventFlag
+			writeEvents: writeEventFlag! !
+
+!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 4/Jul/2003, 10:47:00 pm (UTC)'!
+forFileStream: aFileStream
+
+	"self forFileStream: SourceFiles first"
+
+	^ self new forFileStream: aFileStream
+
+! !
+
+!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 5/Jul/2003, 3:14:00 pm (UTC)'!
+forFileStream: aFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+	"Flag parameters are true or false, indicating types of events to be handled."
+
+	"self forFileStream: SourceFiles first"
+
+	^ self new forFileStream: aFileStream
+			exceptions: exceptionEventFlag
+			readEvents: readEventFlag
+			writeEvents: writeEventFlag
+! !
+
+!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 4/Jul/2003, 11:01:00 pm (UTC)'!
+forSocket: aSocket
+
+	"self forSocket: Socket new"
+
+	^ self new forSocket: aSocket
+
+! !
+
+!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 5/Jul/2003, 3:14:00 pm (UTC)'!
+forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
+	"Flag parameters are true or false, indicating types of events to be handled."
+
+	"self forSocket: Socket new"
+
+	^ self new forSocket: aSocket
+			exceptions: exceptionEventFlag
+			readEvents: readEventFlag
+			writeEvents: writeEventFlag
+! !
+
+!PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 25/Nov/2006, 2:49:00 pm (UTC)'!
+close
+	"When the FileStream or Socket handled by this aio handler is closed,
+	it should send #close to this handler."
+
+	eventGenerator ifNotNil: [eventGenerator terminate]! !
+
+!PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'RB 3/Sep/2010, 3:52:00 pm (UTC)'!
+eventGeneratorProcess
+	"A process that generates periodic #changed events"
+
+	| d p|
+	d _ Delay forMilliseconds: 125.
+	p _ [[self changed.
+	d wait] repeat] newProcess.
+	^p resume.! !
+
+!PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 25/Nov/2006, 5:15:00 pm (UTC)'!
+initialize
+
+	self eventGenerator.
+	^ super initialize! !
+
+!PseudoAioEventHandler methodsFor: 'accessing' stamp: 'dtl 25/Nov/2006, 5:17:00 pm (UTC)'!
+eventGenerator
+	"Answer the value of eventGenerator"
+
+	^ eventGenerator ifNil: [eventGenerator _ self eventGeneratorProcess]! !
+
+!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:41:00 pm (UTC)'!
 aioModuleName
 	"Answer a string containing the module name string for the AIO plugin."
 
@@ -603,7 +2261,7 @@ aioModuleName
 
 	^ self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
+!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:41:00 pm (UTC)'!
 aioVersionString
 	"Answer a string containing the version string for the AIO plugin."
 
@@ -611,7 +2269,7 @@ aioVersionString
 
 	^ self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
+!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:41:00 pm (UTC)'!
 osppModuleName
 	"Answer a string containing the module name string for the OSPP plugin."
 
@@ -619,7 +2277,7 @@ osppModuleName
 
 	^ self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
+!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:41:00 pm (UTC)'!
 osppModuleVersionString
 	"Answer a string containing the version string for the OSPP plugin."
 
@@ -627,7 +2285,7 @@ osppModuleVersionString
 
 	^ self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:41'!
+!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:41:00 pm (UTC)'!
 xdcpModuleName
 	"Answer a string containing the module name string for the display control plugin."
 
@@ -635,7 +2293,7 @@ xdcpModuleName
 
 	^ self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:42'!
+!OSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:42:00 pm (UTC)'!
 xdcpVersionString
 	"Answer a string containing the version string for the display control plugin."
 
@@ -643,7 +2301,7 @@ xdcpVersionString
 
 	^ self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'testing' stamp: 'dtl 10/18/2001 22:58'!
+!OSProcessAccessor methodsFor: 'testing' stamp: 'dtl 19/Oct/2001, 2:58:00 am (UTC)'!
 canAccessSystem
 	"Answer true if it is possible to access the external process. Concrete subclasses should
 	know how to answer true."
@@ -651,20 +2309,20 @@ canAccessSystem
 	^ false
 ! !
 
-!OSProcessAccessor methodsFor: 'testing' stamp: 'dtl 2/14/2004 11:43'!
+!OSProcessAccessor methodsFor: 'testing' stamp: 'dtl 14/Feb/2004, 3:43:00 pm (UTC)'!
 canForwardExternalSignals
 	"Answer true if it is possible to forward OS signals to a Smalltalk Semaphore."
 
 	^ false
 ! !
 
-!OSProcessAccessor methodsFor: 'testing' stamp: 'dtl 8/8/2002 15:13'!
+!OSProcessAccessor methodsFor: 'testing' stamp: 'dtl 8/Aug/2002, 7:13:00 pm (UTC)'!
 handlesOsSignals
 	"True if OS signals can be handled and forwarded to the image"
 
 	^ false! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 4/9/2005 22:44'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 10/Apr/2005, 2:44:00 am (UTC)'!
 canAcquireLock: anOSFileLockDescriptor
 	"Answer true if the file lock cache will permit fileLock to be acquired. This method
 	does not guarantee that the underlying OS will grant the lock."
@@ -672,19 +2330,19 @@ canAcquireLock: anOSFileLockDescriptor
 	^ (self fileLockRegistry anySatisfy:
 			[:ld | ld isActive and: [ld conflictsWith: anOSFileLockDescriptor]]) not! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:21'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 5/Mar/2005, 5:21:00 pm (UTC)'!
 emulateWin32FileLocking
 	"Answer the current value of this preference"
 
 	^ EmulateWin32FileLocking! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 9/24/2009 21:36'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 25/Sep/2009, 1:36:00 am (UTC)'!
 fileLockRegistry
 
 	^ FileLockRegistry ifNil: [FileLockRegistry _ Set new]
 ! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:06'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 5/Mar/2005, 5:06:00 pm (UTC)'!
 register: fileRegionLock
 	"If an object equal to fileRegionLock exists in the registry, answer it. Otherwise, add
 	fileRegionLock to the registry and answer fileRegionLock."
@@ -693,21 +2351,21 @@ register: fileRegionLock
 		ifNil: [self fileLockRegistry add: fileRegionLock]
 ! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 4/10/2005 15:05'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 10/Apr/2005, 7:05:00 pm (UTC)'!
 registeredLocksForFile: aFileStream
 	"Answer all lock descriptors associated with aFileStream"
 
 	^ self fileLockRegistry select: [:ea | ea fileStream = aFileStream]
 ! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 1/20/2018 19:20:59'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 20/Jan/2018, 11:20:59 pm (UTC)'!
 removeInactiveLocks
 	"Go through the lock cache and remove any that have been left
 	behind after their streams were closed."
 
 	^ self fileLockRegistry copy do: [:ea | ea isActive ifFalse: [self fileLockRegistry remove: ea]]! !
 
-!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:07'!
+!OSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 5/Mar/2005, 5:07:00 pm (UTC)'!
 unregister: fileRegionLock
 	"If an object equal to fileRegionLock exists in the registry, remove it and
 	answer the object. Otherwise answer nil."
@@ -716,38 +2374,38 @@ unregister: fileRegionLock
 	^ self fileLockRegistry remove: fileRegionLock ifAbsent: [nil]
 ! !
 
-!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 4/7/2007 10:19'!
+!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 7/Apr/2007, 2:19:00 pm (UTC)'!
 canObtainSessionIdentifierFromPlugin
 
 	^ canObtainSessionIdentifierFromPlugin
 		ifNil: [canObtainSessionIdentifierFromPlugin _ self primGetSession notNil]! !
 
-!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/27/2015 19:54'!
+!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 27/Feb/2015, 11:54:00 pm (UTC)'!
 grimReaper
 	"Answer the value of grimReaper"
 
 	^ grimReaper! !
 
-!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/27/2015 19:54'!
+!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 27/Feb/2015, 11:54:00 pm (UTC)'!
 grimReaper: anObject
 	"Set the value of grimReaper"
 
 	grimReaper _ anObject! !
 
-!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 3/2/2002 08:32'!
+!OSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/Mar/2002, 12:32:00 pm (UTC)'!
 sessionIdentifier
 
 	^ sessionIdentifier ifNil: [sessionIdentifier _ self getSessionIdentifier]
 ! !
 
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 8/20/2022 01:22'!
+!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 20/Aug/2022, 5:22:00 am (UTC)'!
 getSessionIdentifier
 	"Answer the unique identifier for this Squeak session"
 
 	^ self primGetSession.
 ! !
 
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 1/20/2018 19:21:57'!
+!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 20/Jan/2018, 11:21:57 pm (UTC)'!
 getSessionIdentifierFromSourcesFile
 	"Deduce the session identifier from an existing open FileStream on the sources file.
 	This is an unreliable method, because it assumes knowledge of the internal structure
@@ -770,13 +2428,13 @@ getSessionIdentifierFromSourcesFile
 		ifFalse: [(id _ s fileID) ifNotNil: [id copyFrom: 5 to: 8]]
 ! !
 
-!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 3/2/2002 09:07'!
+!OSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 2/Mar/2002, 1:07:00 pm (UTC)'!
 primGetSession
 	"Subclasses should override if they know how to obtain the session identifier."
 
 	^ nil! !
 
-!OSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/25/2005 16:07'!
+!OSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 25/Sep/2005, 8:07:00 pm (UTC)'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
@@ -784,7 +2442,7 @@ getStdErrHandle
 	^ self subclassResponsibility
 ! !
 
-!OSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/25/2005 16:07'!
+!OSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 25/Sep/2005, 8:07:00 pm (UTC)'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
@@ -792,7 +2450,7 @@ getStdInHandle
 	^ self subclassResponsibility
 ! !
 
-!OSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 9/25/2005 16:06'!
+!OSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 25/Sep/2005, 8:06:00 pm (UTC)'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
@@ -800,7 +2458,7 @@ getStdOutHandle
 	^ self subclassResponsibility
 ! !
 
-!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:22:28'!
+!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 20/Jan/2018, 11:22:28 pm (UTC)'!
 handleFromAccessor: aByteArrayOrIOAccessor
 
 	UseIOHandle
@@ -809,7 +2467,7 @@ handleFromAccessor: aByteArrayOrIOAccessor
 			ifFalse: [^ aByteArrayOrIOAccessor perform: #asSQFileStruct]]
 		ifFalse: [^ aByteArrayOrIOAccessor]! !
 
-!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 1/3/2004 21:21'!
+!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 4/Jan/2004, 1:21:00 am (UTC)'!
 handleFromFileStream: aFileStream
 
 	^ UseIOHandle
@@ -817,7 +2475,7 @@ handleFromFileStream: aFileStream
 		ifFalse: [aFileStream fileID]
 ! !
 
-!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:18:06'!
+!OSProcessAccessor methodsFor: 'private - IOHandle' stamp: 'dtl 20/Jan/2018, 11:18:06 pm (UTC)'!
 ioAccessorFromSQFile: aByteArray
 	"Answer an object which represents an IO channel. If IOHandle is present in
 	this image, use it; otherwise just answer aByteArray."
@@ -826,7 +2484,7 @@ ioAccessorFromSQFile: aByteArray
 		ifTrue: [^ (Smalltalk at: #IOHandle) perform: #newFromSqFileStruct: with: aByteArray]
 		ifFalse: [^ aByteArray]! !
 
-!OSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 2/27/2015 19:51'!
+!OSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 27/Feb/2015, 11:51:00 pm (UTC)'!
 initialize
 
 	canObtainSessionIdentifierFromPlugin _ nil.
@@ -835,7 +2493,7 @@ initialize
 	self sessionIdentifier.
 ! !
 
-!OSProcessAccessor methodsFor: 'initialize - release' stamp: 'ThierryGoubier 7/27/2017 22:37'!
+!OSProcessAccessor methodsFor: 'initialize - release' stamp: 'ThierryGoubier 28/Jul/2017, 2:37:00 am (UTC)'!
 newPid
 	"This image is now being run in a new VM process with different pid. Pause the handling
 	of child processes, and remove references to child processes that no longer pertain to
@@ -847,11 +2505,11 @@ newPid
 	self changed: #pid.
 	self restartChildWatcherProcess! !
 
-!OSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 2/28/2015 18:31'!
+!OSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 28/Feb/2015, 10:31:00 pm (UTC)'!
 restartChildWatcherProcess
 	self subclassResponsibility! !
 
-!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 8/19/2022 19:10'!
+!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 19/Aug/2022, 11:10:00 pm (UTC)'!
 isAtEndOfFile: ioHandle 
 	"Answer whether the file represented by ioHandle is at end of file, as determined
 	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
@@ -861,7 +2519,7 @@ isAtEndOfFile: ioHandle
 	in the sense of a conventional disk file."
 	^ (self primTestEndOfFileFlag: ioHandle) = true! !
 
-!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 4/8/2007 10:49'!
+!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 8/Apr/2007, 2:49:00 pm (UTC)'!
 primTestEndOfFileFlag: aSqFileStruct
 	"Answer whether the file represented by aSqFileStruct is at end of file, as determined
 	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
@@ -873,7 +2531,7 @@ primTestEndOfFileFlag: aSqFileStruct
 	^ self subclassResponsibility
 ! !
 
-!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 1/31/2020 00:14'!
+!OSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 31/Jan/2020, 4:14:00 am (UTC)'!
 spaceFor: bytesRequired inDirectoryPath: dirPath
 	"Given a file size requirement in bytes, and a path specifying a location
 	within a file system, answer true if that file system has sufficient free
@@ -889,7 +2547,7 @@ spaceFor: bytesRequired inDirectoryPath: dirPath
 	^ self primSpaceFor: bytesRequired InDirectoryPath: dirPath
 ! !
 
-!OSProcessAccessor methodsFor: 'platform identification' stamp: 'dtl 8/24/2003 09:18'!
+!OSProcessAccessor methodsFor: 'platform identification' stamp: 'dtl 24/Aug/2003, 1:18:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -897,7 +2555,7 @@ isResponsibleForThisPlatform
 
 	^ self class isResponsibleForThisPlatform! !
 
-!OSProcessAccessor methodsFor: 'pipe open' stamp: 'ThierryGoubier 7/19/2017 22:00'!
+!OSProcessAccessor methodsFor: 'pipe open' stamp: 'ThierryGoubier 20/Jul/2017, 2:00:00 am (UTC)'!
 makePipeHandles
 	"Create a pipe, and answer an array of two IO accessors for the pipe 
 	reader and writer."
@@ -910,14 +2568,14 @@ makePipeHandles
 		ifFalse: [ ^ p collect: [ :e | self ioAccessorFromSQFile: e ] ].
 	^ nil! !
 
-!OSProcessAccessor methodsFor: 'file control' stamp: 'dtl 2/11/2001 15:37'!
+!OSProcessAccessor methodsFor: 'file control' stamp: 'dtl 11/Feb/2001, 7:37:00 pm (UTC)'!
 setNonBlocking: anIOHandle
 	"Convert anIOHandle to an SQFile data structure and call primitive to set it non-blocking."
 
 	^ self subclassResponsibility
 ! !
 
-!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/17/2020 16:56'!
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 17/Oct/2020, 8:56:00 pm (UTC)'!
 confstr: optionIndex
 	"Answer the string result of confstr() for the supplied option index, an
 	integer value defined in unistd.h. On some platforms, the available index
@@ -927,7 +2585,7 @@ confstr: optionIndex
 
 	^self primConfstr: optionIndex! !
 
-!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/17/2020 23:44'!
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 18/Oct/2020, 3:44:00 am (UTC)'!
 fpathconf: fileStream index: optionIndex
 	"Answer the result of fpathconf() for the file descriptor fo a FileStream,
 	and the supplied option index, an integer value defined in unistd.h.
@@ -939,7 +2597,7 @@ fpathconf: fileStream index: optionIndex
 	^self primFpathconf: fileStream fileID index: optionIndex
 ! !
 
-!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/18/2020 11:33'!
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 18/Oct/2020, 3:33:00 pm (UTC)'!
 pathconf: path index: optionIndex
 	"Answer the result of pathconf() for file path string and the
 	supplied option index, an integer value defined in unistd.h. On
@@ -951,7 +2609,7 @@ pathconf: path index: optionIndex
 	^self primPathconf: path index: optionIndex
 ! !
 
-!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 10/17/2020 16:32'!
+!OSProcessAccessor methodsFor: 'system configuration access' stamp: 'dtl 17/Oct/2020, 8:32:00 pm (UTC)'!
 sysconf: optionIndex
 	"Answer the result of sysconf() for the supplied option index, and integer
 	value typically defined in unistd.h or limits.h"
@@ -961,7 +2619,7 @@ sysconf: optionIndex
 	^self primSysconf: optionIndex
 ! !
 
-!OSProcessAccessor class methodsFor: 'concrete subclasses' stamp: 'dtl 3/5/2005 12:04'!
+!OSProcessAccessor class methodsFor: 'concrete subclasses' stamp: 'dtl 5/Mar/2005, 4:04:00 pm (UTC)'!
 concreteClass
 
 	"OSProcessAccessor concreteClass"
@@ -975,7 +2633,7 @@ concreteClass
 
 ! !
 
-!OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 3/5/2005 13:24'!
+!OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 5/Mar/2005, 5:24:00 pm (UTC)'!
 emulateWin32FileLocking: trueOrFalse
 	"This is a preference that controls whether file locking will attempt to emulation
 	Win32 behavior, in which a lock request will fail if the requested region overlaps
@@ -993,7 +2651,7 @@ emulateWin32FileLocking: trueOrFalse
 	EmulateWin32FileLocking _ trueOrFalse
 ! !
 
-!OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:58'!
+!OSProcessAccessor class methodsFor: 'initialize-release' stamp: 'dtl 20/Aug/2022, 4:58:00 am (UTC)'!
 initialize
 
 	"OSProcessAccessor initialize"
@@ -1003,7 +2661,7 @@ initialize
 	self allSubInstances do: [:e | e finalize]
 ! !
 
-!OSProcessAccessor class methodsFor: 'instance creation' stamp: 'dtl 12/14/2013 09:15'!
+!OSProcessAccessor class methodsFor: 'instance creation' stamp: 'dtl 14/Dec/2013, 1:15:00 pm (UTC)'!
 forThisOSProcess
 	"Answer a single instance corresponding to the OS process in which this 
 	Smalltalk image is executing."
@@ -1022,27 +2680,27 @@ forThisOSProcess
 	^ ThisOSProcessAccessor _ self concreteClass basicNew initialize
 ! !
 
-!OSProcessAccessor class methodsFor: 'instance creation' stamp: 'dtl 3/2/2002 08:29'!
+!OSProcessAccessor class methodsFor: 'instance creation' stamp: 'dtl 2/Mar/2002, 12:29:00 pm (UTC)'!
 new
 
 	self inform: 'use OSProcessAccessor>>forThisOSProcess to create or obtain the OSProcess instance for this Smalltalk session.'.
 	^ nil! !
 
-!OSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/24/2003 09:17'!
+!OSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 24/Aug/2003, 1:17:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if an instance of this class is responsible for representing the
 	OS process for the Squeak VM running on the current platform."
 
 	^ self subclassResponsibility! !
 
-!MacOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/23/2002 05:57'!
+!MacOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 23/Feb/2002, 9:57:00 am (UTC)'!
 primGetSession
 	"Answer the unique identifier for this session of Smalltalk running in this OS Process."
 
 	^ nil
 ! !
 
-!MacOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:44'!
+!MacOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:44:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for the
 	Squeak VM running on the current platform."
@@ -1050,14 +2708,14 @@ isResponsibleForThisPlatform
 	^ OSProcess isNonUnixMac
 ! !
 
-!OS2OSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/23/2002 05:56'!
+!OS2OSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 23/Feb/2002, 9:56:00 am (UTC)'!
 primGetSession
 	"Answer the unique identifier for this session of Smalltalk running in this OS Process."
 
 	^ nil
 ! !
 
-!OS2OSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:47'!
+!OS2OSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:47:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for the
 	Squeak VM running on the current platform."
@@ -1065,7 +2723,7 @@ isResponsibleForThisPlatform
 	^ OSProcess isOS2
 ! !
 
-!RiscOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 1/6/2001 23:15'!
+!RiscOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 7/Jan/2001, 3:15:00 am (UTC)'!
 primForkAndExec: executableFile
 	withArgs: anArrayOfArgumentStrings
 	argCount: numberOfArgumentStrings
@@ -1079,14 +2737,14 @@ primForkAndExec: executableFile
 	In other words, all strings should have (Character null) as the
 	last element in the string."! !
 
-!RiscOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/23/2002 05:56'!
+!RiscOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 23/Feb/2002, 9:56:00 am (UTC)'!
 primGetSession
 	"Answer the unique identifier for this session of Smalltalk running in this OS Process."
 
 	^ nil
 ! !
 
-!RiscOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:48'!
+!RiscOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:48:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for the
 	Squeak VM running on the current platform."
@@ -1094,7 +2752,7 @@ isResponsibleForThisPlatform
 	^ OSProcess isRiscOS
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 9/10/2000 10:16'!
+!UnixOSProcessAccessor methodsFor: 'printing' stamp: 'dtl 10/Sep/2000, 2:16:00 pm (UTC)'!
 printOn: aStream
 	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
 	treats $U as a vowel."
@@ -1106,7 +2764,7 @@ printOn: aStream
 		nextPutAll: self primGetPid printString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:43'!
+!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:43:00 pm (UTC)'!
 aioModuleName
 	"Answer a string containing the module name string for the AIO plugin."
 
@@ -1115,7 +2773,7 @@ aioModuleName
 	^ self primAioPluginModuleName
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:44'!
+!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:44:00 pm (UTC)'!
 aioVersionString
 	"Answer a string containing the version string for the AIO plugin."
 
@@ -1124,7 +2782,7 @@ aioVersionString
 	^ self primAioPluginVersionString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 11:48'!
+!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 3:48:00 pm (UTC)'!
 osppModuleName
 	"Answer a string containing the module name string for the OSPP plugin."
 
@@ -1133,7 +2791,7 @@ osppModuleName
 	^ self primOSProcessPluginModuleName
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 11:49'!
+!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 3:49:00 pm (UTC)'!
 osppModuleVersionString
 	"Answer a string containing the version string for the OSPP plugin."
 
@@ -1142,7 +2800,7 @@ osppModuleVersionString
 	^ self primOSProcessPluginModuleVersionString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:45'!
+!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:45:00 pm (UTC)'!
 xdcpModuleName
 	"Answer a string containing the module name string for the display control plugin."
 
@@ -1151,7 +2809,7 @@ xdcpModuleName
 	^ self primXDisplayControlPluginModuleName
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 10:46'!
+!UnixOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 2:46:00 pm (UTC)'!
 xdcpVersionString
 	"Answer a string containing the version string for the display control plugin."
 
@@ -1160,7 +2818,7 @@ xdcpVersionString
 	^ self primXDisplayControlPluginModuleVersionString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 10/7/2000 13:39'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 7/Oct/2000, 5:39:00 pm (UTC)'!
 canAccessChildProcess: anExternalProcess
 	"Is the child process still there? Maybe not if we have restarted the image
 	and anExternalProcess refers to a process which died while we were not
@@ -1168,7 +2826,7 @@ canAccessChildProcess: anExternalProcess
 
 	^ self primCanReceiveSignals: anExternalProcess pid! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 9/9/2000 15:45'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 9/Sep/2000, 7:45:00 pm (UTC)'!
 canAccessSystem
 	"Answer true if it is possible to access the external process, else false. Failure
 	to access the external process is probably due to lack of a UnixOSProcessPlugin
@@ -1177,7 +2835,7 @@ canAccessSystem
 	^ self primGetPid notNil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 8/30/2003 18:43'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 17/Apr/2024, 12:19:00 am (UTC)'!
 canControlXDisplay
 	"True if the XDisplayControlPlugin is accessible. Older versions of OSProcess relied on
 	the X display control to be embedded in the OSProcessPlugin module. This has been
@@ -1186,35 +2844,36 @@ canControlXDisplay
 
 	"OSProcess accessor canControlXDisplay"
 
-	^ self primXDisplayControlPluginModuleName notNil
+	^ 'X11' = (OSProcess getSystemAttribute: 1005) "VM display module vm-display-X11 is active"
+		and: [self primXDisplayControlPluginModuleName notNil] "and plugin is available"
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 2/14/2004 12:17'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 14/Feb/2004, 4:17:00 pm (UTC)'!
 canForwardExternalSignals
 	"Answer true if it is possible to forward OS signals to a Smalltalk Semaphore."
 
 	^ true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 8/8/2002 15:13'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 8/Aug/2002, 7:13:00 pm (UTC)'!
 handlesOsSignals
 	"True if OS signals can be handled and forwarded to the image"
 
 	^ true! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 3/25/2001 15:34'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 25/Mar/2001, 7:34:00 pm (UTC)'!
 sizeOfInt
 	"Size of an integer on this machine with this C compiler."
 
 	^ self primSizeOfInt! !
 
-!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 3/25/2001 20:55'!
+!UnixOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 26/Mar/2001, 12:55:00 am (UTC)'!
 sizeOfPointer
 	"Size of a void pointer on this machine with this C compiler."
 
 	^ self primSizeOfPointer! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/18/2022 11:49'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 18/Dec/2022, 3:49:00 pm (UTC)'!
 chDir: pathString
 	"Change current working directory. The $PWD environment variable is not updated (but
 	see UnixProcess>>chDir:). Answer nil for success, or an error message."
@@ -1233,7 +2892,7 @@ chDir: pathString
 			^ message]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/18/2022 11:49'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 18/Dec/2022, 3:49:00 pm (UTC)'!
 environmentAt: aSymbolOrString
 	"Get an environment variable from the external OS process."
 
@@ -1242,7 +2901,7 @@ environmentAt: aSymbolOrString
 	^ self primEnvironmentAtSymbol: aSymbolOrString asByteArray
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/18/2022 12:11'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 18/Dec/2022, 4:11:00 pm (UTC)'!
 environmentAt: aSymbolOrString put: aString
 	"Add or update an environment variable in the external OS process. Convert aSymbol
 	and aString into a KEY=value string and pass this to the OS process environment.
@@ -1263,7 +2922,7 @@ environmentAt: aSymbolOrString put: aString
 			^ newStringBytes asString]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 11:21'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 20/Jan/2019, 3:21:00 pm (UTC)'!
 primArgumentAsBytesAt: index
 	"Answer the argument string in the argument OS process argument list at position index.
 	In Unix, the first element of the list is the program name, and any additional elements
@@ -1274,7 +2933,7 @@ primArgumentAsBytesAt: index
 	<primitive: 'primitiveArgumentAtAsBytes' module: 'UnixOSProcessPlugin'>
 	self primitiveFailed! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:19'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Jul/2000, 9:19:00 pm (UTC)'!
 primArgumentAt: index
 	"Answer the argument string in the argument OS process argument list at position index.
 	In Unix, the first element of the list is the program name, and any additional elements
@@ -1285,7 +2944,7 @@ primArgumentAt: index
 	<primitive: 'primitiveArgumentAt' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 12:26'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 20/Jan/2019, 4:26:00 pm (UTC)'!
 primEnvironmentAsBytesAt: index
 	"Answer the environment string at index position in the OS process environment list.
 	This returns a 'KEY=value' string, which the caller is expected to parse into #KEY
@@ -1294,7 +2953,7 @@ primEnvironmentAsBytesAt: index
 	<primitive: 'primitiveEnvironmentAtAsBytes' module: 'UnixOSProcessPlugin'>
 	self primitiveFailed! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:20'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Jul/2000, 9:20:00 pm (UTC)'!
 primEnvironmentAt: index
 	"Answer the environment string at index position in the OS process environment list.
 	This returns a 'KEY=value' string, which the caller is expected to parse into #KEY
@@ -1303,7 +2962,7 @@ primEnvironmentAt: index
 	<primitive: 'primitiveEnvironmentAt' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/31/2001 11:03'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 31/Mar/2001, 3:03:00 pm (UTC)'!
 primErrorMessageAt: anInteger
 	"Answer an error message string from the sys_errlist array, indexed by anInteger."
 
@@ -1315,7 +2974,7 @@ primErrorMessageAt: anInteger
 	<primitive: 'primitiveErrorMessageAt' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:20'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Jul/2000, 9:20:00 pm (UTC)'!
 primGetCurrentWorkingDirectory
 	"Call getcwd() to get the current working directory."
 
@@ -1325,7 +2984,7 @@ primGetCurrentWorkingDirectory
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 12:27'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 20/Jan/2019, 4:27:00 pm (UTC)'!
 primGetCurrentWorkingDirectoryAsBytes
 	"Call getcwd() to get the current working directory."
 
@@ -1335,7 +2994,7 @@ primGetCurrentWorkingDirectoryAsBytes
 	self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 4/30/2001 21:07'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/May/2001, 1:07:00 am (UTC)'!
 primGetEGid
 	"Answer the effective group ID for the OS process in which I am currently executing."
 
@@ -1344,7 +3003,7 @@ primGetEGid
 	<primitive: 'primitiveGetEGid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 4/30/2001 21:01'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/May/2001, 1:01:00 am (UTC)'!
 primGetEUid
 	"Answer the effective user ID for the OS process in which I am currently executing."
 
@@ -1353,7 +3012,7 @@ primGetEUid
 	<primitive: 'primitiveGetEUid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 4/30/2001 21:01'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/May/2001, 1:01:00 am (UTC)'!
 primGetGid
 	"Answer the group ID for the OS process in which I am currently executing."
 
@@ -1362,21 +3021,21 @@ primGetGid
 	<primitive: 'primitiveGetGid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/15/2007 19:43'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 15/Mar/2007, 11:43:00 pm (UTC)'!
 primGetPGid: pid
 	"Answer the process group ID of the process identified by pid"
 
 	<primitive: 'primitiveGetPGid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/15/2007 19:39'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 15/Mar/2007, 11:39:00 pm (UTC)'!
 primGetPGrp
 	"Answer the process group ID of this OS process"
 
 	<primitive: 'primitiveGetPGrp' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:20'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Jul/2000, 9:20:00 pm (UTC)'!
 primGetPPid
 	"Answer the OS process ID for the parent process of the OS process in which I am
 	currently executing."
@@ -1384,14 +3043,14 @@ primGetPPid
 	<primitive: 'primitiveGetPPid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 7/22/2000 17:20'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Jul/2000, 9:20:00 pm (UTC)'!
 primGetPid
 	"Answer the OS process ID for the OS process in which I am currently executing."
 
 	<primitive: 'primitiveGetPid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/2/2002 08:15'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/Mar/2002, 12:15:00 pm (UTC)'!
 primGetSession
 	"Answer the unique identifier for this session of Smalltalk running in this OS Process."
 
@@ -1401,7 +3060,7 @@ primGetSession
 
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 4/30/2001 21:00'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/May/2001, 1:00:00 am (UTC)'!
 primGetUid
 	"Answer the user ID for the OS process in which I am currently executing."
 
@@ -1410,7 +3069,7 @@ primGetUid
 	<primitive: 'primitiveGetUid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/15/2007 19:47'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 15/Mar/2007, 11:47:00 pm (UTC)'!
 primSet: pid pGid: processGroupId
 	"Set the process group ID of the process identified by pid to a new process
 	group ID."
@@ -1418,7 +3077,7 @@ primSet: pid pGid: processGroupId
 	<primitive: 'primitiveSetPGid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/15/2007 19:40'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 15/Mar/2007, 11:40:00 pm (UTC)'!
 primSetPGrp
 	"Set a new process group for this OS process. Newly created child processes
 	will be members of the new process group."
@@ -1426,7 +3085,7 @@ primSetPGrp
 	<primitive: 'primitiveSetPGrp' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/18/2007 10:50'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 18/Mar/2007, 2:50:00 pm (UTC)'!
 primSetSid
 	"Quoted from Linux man pages:
 	setsid() creates a new session if the calling process is not a process group leader.
@@ -1438,7 +3097,7 @@ primSetSid
 	<primitive: 'primitiveSetSid' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 9/10/2000 11:59'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 10/Sep/2000, 3:59:00 pm (UTC)'!
 putPath: aString
 	"Convenience method. Set the environment PATH variable to aString."
 
@@ -1451,7 +3110,7 @@ putPath: aString
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 12/18/2022 12:16'!
+!UnixOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 18/Dec/2022, 4:16:00 pm (UTC)'!
 realpath: pathString
 	"Get the real path for pathString from the external OS process."
 
@@ -1462,7 +3121,7 @@ realpath: pathString
 	^ self primRealpath: pathString asByteArray
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal print stack trace' stamp: 'dtl 7/20/2010 00:06'!
+!UnixOSProcessAccessor methodsFor: 'signal print stack trace' stamp: 'dtl 20/Jul/2010, 4:06:00 am (UTC)'!
 clearPrintAllStacksOnSigUsr1
 	"Clear any signal handler in the VM that was set to print all call stacks on
 	console output when a SIGUSR1 is received. Restores default SIGUSR1
@@ -1473,7 +3132,7 @@ clearPrintAllStacksOnSigUsr1
 	^self primForwardSignal: self primSigUsr1Number toSemaphore: nil	
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal print stack trace' stamp: 'dtl 7/20/2010 00:07'!
+!UnixOSProcessAccessor methodsFor: 'signal print stack trace' stamp: 'dtl 20/Jul/2010, 4:07:00 am (UTC)'!
 setPrintAllStacksOnSigUsr1
 	"Set a signal handler in the VM that will print all call stacks on console output
 	whenever a SIGUSR1 is received. Answer an identifier for the previously
@@ -1485,7 +3144,7 @@ setPrintAllStacksOnSigUsr1
 	^self primPrintAllStacksOnSignal: self primSigUsr1Number	
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 3/2/2009 22:42'!
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 3/Mar/2009, 2:42:00 am (UTC)'!
 closeUnixFileNumber: unixFileDescriptor
 	"Close the file associated with unixFileDescriptor, a small integer value."
 
@@ -1493,7 +3152,7 @@ closeUnixFileNumber: unixFileDescriptor
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:11'!
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 19/Aug/2022, 11:11:00 pm (UTC)'!
 flushExternalStream: ioHandle
 	"Convert ioHandle to an SQFile data structure and call primitive to flush the
 	external I/O stream."
@@ -1501,33 +3160,33 @@ flushExternalStream: ioHandle
 	^ self primSQFileFlush: ioHandle
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:07'!
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 19/Aug/2022, 11:07:00 pm (UTC)'!
 setBlocking: ioHandle
 	"Convert ioHandle to an SQFile data structure and call primitive to set for blocking I/O."
 
 	^ self primSQFileSetBlocking: ioHandle
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:07'!
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 19/Aug/2022, 11:07:00 pm (UTC)'!
 setNonBlocking: ioHandle
 	"Convert ioHandle to an SQFile data structure and call primitive to set it non-blocking."
 
 	^ self primSQFileSetNonBlocking: ioHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:04'!
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 19/Aug/2022, 11:04:00 pm (UTC)'!
 setUnbuffered: ioHandle
 	"Convert ioHandle to an SQFile data structure and call primitive to set unbuffered I/O."
 
 	^ self primSQFileSetUnbuffered: ioHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 8/19/2022 19:04'!
+!UnixOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 19/Aug/2022, 11:04:00 pm (UTC)'!
 unixFileNumber: ioHandle
 	"Answer the integer Unix file number corresponding to ioHandle."
 
 	^ ioHandle ifNotNil: [self primUnixFileNumber: ioHandle]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 11/19/2006 09:02'!
+!UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 19/Nov/2006, 1:02:00 pm (UTC)'!
 currentSigHandlerAddress: signalNumber
 	"Answer the current machine address of the signal handler for signalNumber,
 	expressed as a ByteArray.
@@ -1548,7 +3207,7 @@ currentSigHandlerAddress: signalNumber
 	self restoreSignal: signalNumber.
 	^ previousHandlerAddress! !
 
-!UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 11/19/2006 09:05'!
+!UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 19/Nov/2006, 1:05:00 pm (UTC)'!
 listSigHandlerAddressesOnConsole
 
 	"OSProcess accessor listSigHandlerAddressesOnConsole"
@@ -1560,7 +3219,7 @@ listSigHandlerAddressesOnConsole
 			do: [:ex | OSProcess debugMessage: ex printString]]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 11/19/2006 09:07'!
+!UnixOSProcessAccessor methodsFor: 'debugging' stamp: 'dtl 19/Nov/2006, 1:07:00 pm (UTC)'!
 listSigHandlerAddressesOnTranscript
 
 	"OSProcess accessor listSigHandlerAddressesOnTranscript"
@@ -1573,7 +3232,7 @@ listSigHandlerAddressesOnTranscript
 			do: [:ex | Transcript show: ex printString; cr]]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 9/10/2000 09:48'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/Sep/2000, 1:48:00 pm (UTC)'!
 environmentPut: aString
 	"Add or update an environment variable in the external OS process using a 'KEY=value'
 	string. Create a null terminated string for use by the external putenv() call in a pluggable
@@ -1586,7 +3245,7 @@ environmentPut: aString
 	^ self primPutEnv: cString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 10:37'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 2:37:00 pm (UTC)'!
 primAioPluginModuleName
 	"Answer a string containing the module name string for the AIO plugin."
 
@@ -1596,7 +3255,7 @@ primAioPluginModuleName
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 10:38'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 2:38:00 pm (UTC)'!
 primAioPluginVersionString
 	"Answer a string containing the version string for the AIO plugin."
 
@@ -1606,14 +3265,14 @@ primAioPluginVersionString
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 3/31/2001 11:18'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 31/Mar/2001, 3:18:00 pm (UTC)'!
 primChdir: pathString
 	"Change current working directory. Does not update the $PWD environment variable."
 
 	<primitive: 'primitiveChdir' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 16:56'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 17/Oct/2020, 8:56:00 pm (UTC)'!
 primConfstr: optionIndex
 	"Answer the result of confstr() for the supplied option index, and integer
 	value typically defined in unistd.h or limits.h"
@@ -1622,7 +3281,7 @@ primConfstr: optionIndex
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/28/2010 12:31'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 28/Nov/2010, 4:31:00 pm (UTC)'!
 primCreatePipe
 	"Create a pipe, and answer an array of two file handles (SQFile data structures in interp.c)
 	for the pipe reader and writer."
@@ -1630,7 +3289,7 @@ primCreatePipe
 	<primitive: 'primitiveCreatePipe' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/28/2010 12:32'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 28/Nov/2010, 4:32:00 pm (UTC)'!
 primCreatePipeWithSessionIdentifier: aByteArray
 	"Create a pipe, and answer an array of two file handles (SQFile data structures in interp.c)
 	for the pipe reader and writer."
@@ -1638,7 +3297,7 @@ primCreatePipeWithSessionIdentifier: aByteArray
 	<primitive: 'primitiveCreatePipeWithSessionIdentifier' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 9/10/2011 23:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/Sep/2011, 3:28:00 am (UTC)'!
 primDup: fileDescriptor
 	"Call dup2 to duplicate a file descriptor to the next available descriptor. Answer
 	the new file descriptor or -1 on failure."
@@ -1647,7 +3306,7 @@ primDup: fileDescriptor
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 5/17/2009 21:57'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 18/May/2009, 1:57:00 am (UTC)'!
 primDup: oldFileDescriptor to: newFileDescriptor
 	"Call dup2() to duplicate a file descriptor. Answer the duplicated file descriptor
 	or -1 on failure."
@@ -1656,7 +3315,7 @@ primDup: oldFileDescriptor to: newFileDescriptor
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/20/2019 12:25'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 20/Jan/2019, 4:25:00 pm (UTC)'!
 primEnvironmentAsBytesAtSymbol: aSymbol
 	"Answer a ByteArray with the value of an environment variable in
 	the external OS process."
@@ -1664,14 +3323,14 @@ primEnvironmentAsBytesAtSymbol: aSymbol
 	<primitive: 'primitiveEnvironmentAtSymbolAsBytes' module: 'UnixOSProcessPlugin'>
 	self primitiveFailed! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:28:00 pm (UTC)'!
 primEnvironmentAtSymbol: aSymbol
 	"Answer the value of an environment variable in the external OS process."
 
 	<primitive: 'primitiveEnvironmentAtSymbol' module: 'UnixOSProcessPlugin'>
 	^ nil ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/30/2001 05:49'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 30/Apr/2001, 9:49:00 am (UTC)'!
 primFileProtectionMask: aPathString
 	"Call stat(2) to obtain the file protection mask for a file. Answer an Array of
 	four integers representing the protection mask, or answer errno on failure. The
@@ -1686,7 +3345,7 @@ primFileProtectionMask: aPathString
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/30/2001 20:56'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/May/2001, 12:56:00 am (UTC)'!
 primFileStat: aPathString
 	"Call stat(2) to obtain the file protection mask for a file. Answer errno on failure,
 	or on success answer an array with: UID with: GID with: protectionMask. The	
@@ -1703,7 +3362,7 @@ primFileStat: aPathString
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 23:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 18/Oct/2020, 3:28:00 am (UTC)'!
 primFpathconf: fileID index: optionIndex
 	"Answer the result of pathconf() for fileID, the fileID of a FileStream,
 	and the supplied option index, an integer value defined in unistd.h.
@@ -1714,7 +3373,7 @@ primFpathconf: fileID index: optionIndex
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:28:00 pm (UTC)'!
 primGetStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
@@ -1722,7 +3381,7 @@ primGetStdErrHandle
 	<primitive: 'primitiveGetStdErrHandle' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:28:00 pm (UTC)'!
 primGetStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for
 	the OS process in which I am currently executing."
@@ -1730,7 +3389,7 @@ primGetStdInHandle
 	<primitive: 'primitiveGetStdInHandle' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:28:00 pm (UTC)'!
 primGetStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
@@ -1738,7 +3397,7 @@ primGetStdOutHandle
 	<primitive: 'primitiveGetStdOutHandle' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 3/18/2007 10:35'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 18/Mar/2007, 2:35:00 pm (UTC)'!
 primKill: listOfPids withSignal: signumOrNil
 	"Set a list of pids to kill with signum when VM exits. If the signum
 	parameter is nil, the default value of SIGTERM will be used."
@@ -1746,7 +3405,7 @@ primKill: listOfPids withSignal: signumOrNil
 	<primitive: 'primitiveKillOnExit' module: 'UnixOSProcessPlugin'>
 	^ self primitiveFailed! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/3/2004 19:59'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 3/Jan/2004, 11:59:00 pm (UTC)'!
 primLockFileRegion: aSQFileStruct offset: begin length: len exclusive: flag
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
 	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
@@ -1758,7 +3417,7 @@ primLockFileRegion: aSQFileStruct offset: begin length: len exclusive: flag
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 6/1/2013 17:14'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Jun/2013, 9:14:00 pm (UTC)'!
 primMkdtemp: templateString
 	"Call mkdtemp() to generate a uniquely named temporary directory from a template
 	string. The last six characters of template must be XXXXXX and these are replaced
@@ -1769,7 +3428,7 @@ primMkdtemp: templateString
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 6/3/2013 22:33'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/Jun/2013, 2:33:00 am (UTC)'!
 primMkstemp: templateString
 	"Call mkstemp() to generate a unique temporary file from a template string.
 	The last six characters of template must be XXXXXX and these are replaced with
@@ -1786,7 +3445,7 @@ primMkstemp: templateString
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 6/1/2013 17:14'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Jun/2013, 9:14:00 pm (UTC)'!
 primMktemp: templateString
 	"Call mktemp() to generate a unique temporary filename from a template string.
 	The last six characters of template must be XXXXXX and these are replaced with
@@ -1799,7 +3458,7 @@ primMktemp: templateString
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 11:48'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 3:48:00 pm (UTC)'!
 primOSProcessPluginModuleName
 	"Answer a string containing the module name string for the OSPP plugin."
 
@@ -1809,7 +3468,7 @@ primOSProcessPluginModuleName
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 11:48'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 3:48:00 pm (UTC)'!
 primOSProcessPluginModuleVersionString
 	"Answer a string containing the version string for the OSPP plugin."
 
@@ -1819,7 +3478,7 @@ primOSProcessPluginModuleVersionString
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 17:12'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 17/Oct/2020, 9:12:00 pm (UTC)'!
 primPathconf: path index: optionIndex
 	"Answer the result of pathconf() for file path string and the
 	supplied option index, an integer value defined in unistd.h. On
@@ -1830,7 +3489,7 @@ primPathconf: path index: optionIndex
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:28:00 pm (UTC)'!
 primPutEnv: aString
 	"Add or update an environment variable in the external OS process using a 'KEY=value'
 	string."
@@ -1838,21 +3497,21 @@ primPutEnv: aString
 	<primitive: 'primitivePutEnv' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 3/31/2001 15:44'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 31/Mar/2001, 7:44:00 pm (UTC)'!
 primRealpath: pathString
 	"Resolve pathString into a real path if possible, or answer nil."
 
 	<primitive: 'primitiveRealpath' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/20/2019 12:32'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 20/Jan/2019, 4:32:00 pm (UTC)'!
 primRealpathAsBytes: pathString
 	"Resolve pathString into a real path if possible, or answer nil."
 
 	<primitive: 'primitiveRealpathAsBytes' module: 'UnixOSProcessPlugin'>
 	self primitiveFailed! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:28:00 pm (UTC)'!
 primSQFileFlush: aSQFileStruct
 	"Pass a struct SQFile on the stack, flush the external file stream."
 
@@ -1860,7 +3519,7 @@ primSQFileFlush: aSQFileStruct
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:29'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:29:00 pm (UTC)'!
 primSQFileSetBlocking: aSQFileStruct
 	"Pass a struct SQFile on the stack, and call fcntl() to set the file non-blocking."
 
@@ -1868,7 +3527,7 @@ primSQFileSetBlocking: aSQFileStruct
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:29'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:29:00 pm (UTC)'!
 primSQFileSetNonBlocking: aSQFileStruct
 	"Pass a struct SQFile on the stack, and call fcntl() to set the file non-blocking."
 
@@ -1876,7 +3535,7 @@ primSQFileSetNonBlocking: aSQFileStruct
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/22/2000 17:29'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 22/Jul/2000, 9:29:00 pm (UTC)'!
 primSQFileSetUnbuffered: aSQFileStruct
 	"Pass a struct SQFile on the stack, set the file non-blocking."
 
@@ -1884,7 +3543,7 @@ primSQFileSetUnbuffered: aSQFileStruct
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 8/7/2005 12:33'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/Aug/2005, 4:33:00 pm (UTC)'!
 primSizeOfInt
 	"Size of an integer for this C compiler on this machine."
 
@@ -1892,7 +3551,7 @@ primSizeOfInt
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 8/7/2005 12:33'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/Aug/2005, 4:33:00 pm (UTC)'!
 primSizeOfPointer
 	"Size of a void pointer for this C compiler on this machine."
 
@@ -1900,13 +3559,13 @@ primSizeOfPointer
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/31/2020 00:15'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 31/Jan/2020, 4:15:00 am (UTC)'!
 primSpaceFor: byteSize InDirectoryPath: dirPath
 
 	<primitive: 'primitiveSpaceForByteSizeInDirectoryPath' module: 'UnixOSProcessPlugin'>
 	^ self primitiveFailed! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/17/2020 16:57'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 17/Oct/2020, 8:57:00 pm (UTC)'!
 primSysconf: optionIndex
 	"Answer the result of sysconf() for the supplied option index, and integer
 	value typically defined in unistd.h or limits.h"
@@ -1915,7 +3574,7 @@ primSysconf: optionIndex
 	^ self primitiveFailed
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/28/2010 14:06'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 28/Nov/2010, 6:06:00 pm (UTC)'!
 primTestEndOfFileFlag: aSqFileStruct
 	"Answer whether the file represented by aSqFileStruct is at end of file, as determined
 	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
@@ -1927,7 +3586,7 @@ primTestEndOfFileFlag: aSqFileStruct
 	<primitive: 'primitiveTestEndOfFileFlag' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/4/2004 15:29'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/Jan/2004, 7:29:00 pm (UTC)'!
 primTestLockableFileRegion: aSQFileStruct offset: begin length: len exclusive: flag
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
 	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
@@ -1951,7 +3610,7 @@ primTestLockableFileRegion: aSQFileStruct offset: begin length: len exclusive: f
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 5/17/2009 21:07'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 18/May/2009, 1:07:00 am (UTC)'!
 primUnixFileClose: integerFileNumber
 	"Close a file handle at the close(2) level, using a handle returned by
 	#primUnixFileNumber."
@@ -1960,7 +3619,7 @@ primUnixFileClose: integerFileNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 2/11/2001 16:23'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 11/Feb/2001, 8:23:00 pm (UTC)'!
 primUnixFileNumber: aSQFileStruct
 	"Pass a struct SQFile on the stack, and answer the corresponding Unix file number."
 
@@ -1968,7 +3627,7 @@ primUnixFileNumber: aSQFileStruct
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/3/2004 23:08'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/Jan/2004, 3:08:00 am (UTC)'!
 primUnlockFileRegion: aSQFileStruct offset: begin length: len
 	"Pass a struct SQFile on tthe stack, and unlock the specified region.
 	Answer the result of the call to fcntl(). If the region is in the file lock cache,
@@ -1981,20 +3640,20 @@ primUnlockFileRegion: aSQFileStruct offset: begin length: len
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 12/18/2022 13:45'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 18/Dec/2022, 5:45:00 pm (UTC)'!
 primUnsetEnv: aKeyString
 	"Remove an environment variable from the external OS process environment."
 
 	^ self primUnsetEnvPrivate: (aKeyString, (Character null) asString) asByteArray! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 12/9/2022 19:32:28'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 9/Dec/2022, 11:32:28 pm (UTC)'!
 primUnsetEnvPrivate: aByteString
 	"Dangerous, primitive may not check class type properly, VM crash possible"
 
 	<primitive: 'primitiveUnsetEnv' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 8/30/2003 18:29'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 30/Aug/2003, 10:29:00 pm (UTC)'!
 primXDisplayControlPluginModuleName
 	"Answer a string containing the module name string for the display control plugin."
 
@@ -2004,7 +3663,7 @@ primXDisplayControlPluginModuleName
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 8/30/2003 18:32'!
+!UnixOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 30/Aug/2003, 10:32:00 pm (UTC)'!
 primXDisplayControlPluginModuleVersionString
 	"Answer a string containing the version string for the display control plugin."
 
@@ -2014,7 +3673,7 @@ primXDisplayControlPluginModuleVersionString
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 12/18/2022 11:32'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 18/Dec/2022, 3:32:00 pm (UTC)'!
 fileProtectionMask: aPathString
 	"Call stat(2) to obtain the file protection mask for a file."
 
@@ -2032,7 +3691,7 @@ fileProtectionMask: aPathString
 	^ mask
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 12/18/2022 11:33'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 18/Dec/2022, 3:33:00 pm (UTC)'!
 fileStat: aPathString
 	"Call stat(2) to obtain the UID, GID, and file protection mask for a file."
 
@@ -2050,7 +3709,7 @@ fileStat: aPathString
 	^ mask
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 10/6/2001 12:08'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 6/Oct/2001, 4:08:00 pm (UTC)'!
 isExecutable: aPathName
 	"Answer true if file at aPathName has execute permission for this process."
 
@@ -2061,7 +3720,7 @@ isExecutable: aPathName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 22:53'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 2/May/2001, 2:53:00 am (UTC)'!
 isExecutable: aPathName forUser: uid inGroup: gid
 	"Answer true if file at aPathName has execute permission for a user
 	identified by user uid and group gid."
@@ -2094,7 +3753,7 @@ isExecutable: aPathName forUser: uid inGroup: gid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 23:09'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 2/May/2001, 3:09:00 am (UTC)'!
 isReadable: aPathName
 	"Answer true if file at aPathName has read permission for this process."
 
@@ -2104,7 +3763,7 @@ isReadable: aPathName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 23:00'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 2/May/2001, 3:00:00 am (UTC)'!
 isReadable: aPathName forUser: uid inGroup: gid
 	"Answer true if file at aPathName has read permission for a user
 	identified by user uid and group gid."
@@ -2131,7 +3790,7 @@ isReadable: aPathName forUser: uid inGroup: gid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 23:09'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 2/May/2001, 3:09:00 am (UTC)'!
 isWritable: aPathName
 	"Answer true if file at aPathName has write permission for this process."
 
@@ -2141,7 +3800,7 @@ isWritable: aPathName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 5/1/2001 23:08'!
+!UnixOSProcessAccessor methodsFor: 'file testing' stamp: 'dtl 2/May/2001, 3:08:00 am (UTC)'!
 isWritable: aPathName forUser: uid inGroup: gid
 	"Answer true if file at aPathName has read permission for a user
 	identified by user uid and group gid."
@@ -2168,7 +3827,7 @@ isWritable: aPathName forUser: uid inGroup: gid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 7/6/2010 21:22'!
+!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 7/Jul/2010, 1:22:00 am (UTC)'!
 finalize
 	"Clean up grimReaper and associated semaphore."
 
@@ -2180,7 +3839,7 @@ finalize
 			self sigChldSemaphore: nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'eem 11/19/2021 12:34'!
+!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'eem 8/Aug/2025, 6:23:00 pm (UTC)'!
 grimReaperProcess
 	"This is a process which waits for the death of a child OSProcess, and 
 	informs any dependents of the change. Use SIGCHLD events if possible,
@@ -2193,22 +3852,25 @@ grimReaperProcess
 				ifTrue: [ self sigChldSemaphore	"semaphore signaled by SIGCHLD" ]
 				ifFalse: [ Delay forMilliseconds: 200	"simple polling loop" ].
 			processSynchronizationDelay _ Delay forMilliseconds: 20.
-			grimReaper
-				ifNil: [ grimReaper _ [ [ (eventWaiter respondsTo: #waitTimeoutMSecs:)
-						ifTrue: [ eventWaiter waitTimeoutMSecs: 1000	"semaphore with timeout" ]
-						ifFalse: [ eventWaiter wait ].
-					processSynchronizationDelay wait.	"Avoids lost signals in heavy process switching"
-					self changed: #childProcessStatus ] repeat ] newProcess.
-					grimReaper priority: Processor userSchedulingPriority.
-					grimReaper resume.
-					"name selected to look reasonable in the process browser"
-					grimReaper
-						name:
+			grimReaper ifNil:
+				[ grimReaper _ ((eventWaiter respondsTo: #waitTimeoutMSecs:)
+									ifTrue:
+										[ [ [ eventWaiter waitTimeoutMSecs: 1000	"semaphore with timeout".
+											processSynchronizationDelay wait.	"Avoids lost signals in heavy process switching"
+											self changed: #childProcessStatus ] repeat ] ]
+									ifFalse:
+										[ [ [ eventWaiter wait.
+											processSynchronizationDelay wait.	"Avoids lost signals in heavy process switching"
+											self changed: #childProcessStatus ] repeat ] ]) newProcess.
+				  grimReaper priority: Processor userSchedulingPriority.
+				  grimReaper resume.
+				  "name selected to look reasonable in the process browser"
+				  grimReaper name:
 							((ReadStream on: grimReaper hash asString) next: 5)
 								, ': the child OSProcess watcher' ] ]
 		ifFalse: [ grimReaper ifNotNil: [grimReaper priority: Processor userSchedulingPriority ]]! !
 
-!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 7/7/2010 07:46'!
+!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 7/Jul/2010, 11:46:00 am (UTC)'!
 initialize
 	"Call this method when an instance is first created, or to refresh after an image
 	restart to clean up from the previous session. Notify dependents of my singleton
@@ -2227,7 +3889,7 @@ initialize
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 8/15/2010 15:30'!
+!UnixOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 15/Aug/2010, 7:30:00 pm (UTC)'!
 restartChildWatcherProcess
 	"OSProcess accessor restartChildWatcherProcess"
 
@@ -2235,7 +3897,7 @@ restartChildWatcherProcess
 	^ self grimReaperProcess
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 1/25/2004 21:43'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 26/Jan/2004, 1:43:00 am (UTC)'!
 forkAndExec: executableFile
 	stdIn: inputFileHandle
 	stdOut: outputFileHandle
@@ -2272,10 +3934,9 @@ forkAndExec: executableFile
 			argOffsets: argOffsets
 			envBuf: envVec
 			envOffsets: envOffsets
-			workingDir: pathString
-! !
+			workingDir: pathString! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 4/27/2011 21:01'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 28/Apr/2011, 1:01:00 am (UTC)'!
 forkSqueak
 	"Clone this Squeak Smalltalk image in a child OSProcess. The child is the same as the
 	parent, except for its new X session connection, and the return value of this method,
@@ -2292,7 +3953,7 @@ forkSqueak
 		ensure: [^nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 10/8/2005 09:55'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 8/Oct/2005, 1:55:00 pm (UTC)'!
 nice: inc
 	"Change the scheduling priority of this OS process by the given nice increment.
 	A positive increment decreases the priority. Only the superuser can specify
@@ -2306,7 +3967,7 @@ nice: inc
 	^ self primNice: inc
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 11/28/2010 12:35'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 28/Nov/2010, 4:35:00 pm (UTC)'!
 primForkExec: executableFile
 	stdIn: inputFileHandle
 	stdOut: outputFileHandle
@@ -2339,7 +4000,7 @@ primForkExec: executableFile
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 11/28/2010 12:37'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 28/Nov/2010, 4:37:00 pm (UTC)'!
 primForkSqueak
 	"Clone this Squeak Smalltalk image in a child OSProcess. The child is the same as the
 	parent, except for its new X session connection, and the return value of this method,
@@ -2353,14 +4014,14 @@ primForkSqueak
 	<primitive: 'primitiveForkSqueakWithoutSigHandler' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 10/14/2001 11:15'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 14/Oct/2001, 3:15:00 pm (UTC)'!
 primGetChildExitStatus: childPid
 	"Clean up after the death of a child process, and answer the exit status of the child process."
 
 	<primitive: 'primitiveReapChildProcess' module: 'UnixOSProcessPlugin'>
 	^ Array with: childPid with: nil! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 10/8/2005 09:55'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 8/Oct/2005, 1:55:00 pm (UTC)'!
 primNice: inc
 	"Change the scheduling priority of this OS process by the given nice increment."
 
@@ -2368,7 +4029,7 @@ primNice: inc
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 8/18/2014 20:16'!
+!UnixOSProcessAccessor methodsFor: 'fork and exec' stamp: 'dtl 19/Aug/2014, 12:16:00 am (UTC)'!
 safeToForkSqueak
 	"The forkSqueak method is currently supported only for X11 displays with
 	XDisplayControlPlugin available. If the plugin is not available, the child Squeak
@@ -2378,7 +4039,7 @@ safeToForkSqueak
 	^self canControlXDisplay
 		or: [ ThisOSProcess isHeadless ]! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:51'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:51:00 am (UTC)'!
 forwardSigChld
 	"Set a signal handler for SIGCHLD. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2388,7 +4049,7 @@ forwardSigChld
 	^ self forwardSignal: self primSigChldNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:51'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:51:00 am (UTC)'!
 forwardSigHup
 	"Set a signal handler for SIGHUP. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2398,7 +4059,7 @@ forwardSigHup
 	^ self forwardSignal: self primSigHupNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:51'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:51:00 am (UTC)'!
 forwardSigInt
 	"Set a signal handler for SIGINT. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2408,7 +4069,7 @@ forwardSigInt
 	^ self forwardSignal: self primSigIntNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:51'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:51:00 am (UTC)'!
 forwardSigKill
 	"Set a signal handler for SIGKILL. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2419,7 +4080,7 @@ forwardSigKill
 	^ self forwardSignal: self primSigKillNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:52'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:52:00 am (UTC)'!
 forwardSigPipe
 	"Set a signal handler for SIGPIPE. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2429,7 +4090,7 @@ forwardSigPipe
 	^ self forwardSignal: self primSigPipeNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:52'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:52:00 am (UTC)'!
 forwardSigQuit
 	"Set a signal handler for SIGQUIT. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2439,7 +4100,7 @@ forwardSigQuit
 	^ self forwardSignal: self primSigQuitNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:52'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:52:00 am (UTC)'!
 forwardSigTerm
 	"Set a signal handler for SIGTERM. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2449,7 +4110,7 @@ forwardSigTerm
 	^ self forwardSignal: self primSigTermNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:52'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:52:00 am (UTC)'!
 forwardSigUsr1
 	"Set a signal handler for SIGUSR1. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2459,7 +4120,7 @@ forwardSigUsr1
 	^ self forwardSignal: self primSigUsr1Number
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:52'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:52:00 am (UTC)'!
 forwardSigUsr2
 	"Set a signal handler for SIGUSR2. Answer a new Semaphore, or nil if unable
 	to set the handler (possibly because it has already been set)."
@@ -2469,7 +4130,7 @@ forwardSigUsr2
 	^ self forwardSignal: self primSigUsr2Number
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 12/6/2002 18:28'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 6/Dec/2002, 10:28:00 pm (UTC)'!
 forwardSignal: signalNumber 
 	"Set a signal handler in the VM which will signal a Smalltalk semaphore 
 	at semaphoreIndex whenever an external signal sigNum is received.
@@ -2489,7 +4150,7 @@ forwardSignal: signalNumber
 			^ nil].
 	^ sema! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:45'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:45:00 am (UTC)'!
 restoreSigChld
 	"Unset a SIGCHLD signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2500,7 +4161,7 @@ restoreSigChld
 	^ self restoreSignal: self primSigChldNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:47'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:47:00 am (UTC)'!
 restoreSigHup
 	"Unset a SIGHUP signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2511,7 +4172,7 @@ restoreSigHup
 	^ self restoreSignal: self primSigHupNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:46'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:46:00 am (UTC)'!
 restoreSigInt
 	"Unset a SIGINT signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2522,7 +4183,7 @@ restoreSigInt
 	^ self restoreSignal: self primSigIntNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:48'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:48:00 am (UTC)'!
 restoreSigKill
 	"Unset a SIGKILL signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2534,7 +4195,7 @@ restoreSigKill
 	^ self restoreSignal: self primSigIntNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:48'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:48:00 am (UTC)'!
 restoreSigPipe
 	"Unset a SIGPIPE signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2545,7 +4206,7 @@ restoreSigPipe
 	^ self restoreSignal: self primSigPipeNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:49'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:49:00 am (UTC)'!
 restoreSigQuit
 	"Unset a SIGQUIT signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2556,7 +4217,7 @@ restoreSigQuit
 	^ self restoreSignal: self primSigQuitNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:49'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:49:00 am (UTC)'!
 restoreSigTerm
 	"Unset a SIGTERM signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2567,7 +4228,7 @@ restoreSigTerm
 	^ self restoreSignal: self primSigTermNumber
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:49'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:49:00 am (UTC)'!
 restoreSigUsr1
 	"Unset a SIGUSR1 signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2578,7 +4239,7 @@ restoreSigUsr1
 	^ self restoreSignal: self primSigUsr1Number
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 11/4/2005 06:50'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 4/Nov/2005, 10:50:00 am (UTC)'!
 restoreSigUsr2
 	"Unset a SIGUSR2 signal handler and unregister the Smalltalk semaphore.
 	Answer the unregistered Semaphore, or nil if unable to restore the signal
@@ -2589,7 +4250,7 @@ restoreSigUsr2
 	^ self restoreSignal: self primSigUsr2Number
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 12/28/2002 15:33'!
+!UnixOSProcessAccessor methodsFor: 'signal forwarding' stamp: 'dtl 28/Dec/2002, 7:33:00 pm (UTC)'!
 restoreSignal: signalNumber 
 	"Unset a signal handler and unregister the Smalltalk semaphore. Answer
 	the unregistered Semaphore, or nil if unable to restore the signal (possibly
@@ -2607,28 +4268,28 @@ restoreSignal: signalNumber
 	^ sema
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:38'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:38:00 pm (UTC)'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
 
 	^ self primGetStdErrHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:39'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:39:00 pm (UTC)'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
 
 	^ self primGetStdInHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:39'!
+!UnixOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:39:00 pm (UTC)'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
 
 	^ self primGetStdOutHandle! !
 
-!UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 3/17/2007 23:14'!
+!UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 18/Mar/2007, 3:14:00 am (UTC)'!
 getThreadID
 	"Answer the ID of the pthread that is currently executing (the interpreter thread).
 	A thread ID may be a 64 bit value on some platforms, so answer a byte array
@@ -2645,7 +4306,7 @@ getThreadID
 		ifFalse: [^ nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 3/5/2006 10:51'!
+!UnixOSProcessAccessor methodsFor: 'pthreads' stamp: 'dtl 5/Mar/2006, 2:51:00 pm (UTC)'!
 primGetThreadID
 	"Answer the ID of the pthread that is currently executing (the interpreter thread).
 	A thread ID may be a 64 bit value on some platforms, so answer a byte array
@@ -2656,7 +4317,7 @@ primGetThreadID
 	<primitive: 'primitiveGetThreadID' module: 'UnixOSProcessPlugin'>
 	^ nil! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/14/2004 15:10'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 14/Feb/2004, 7:10:00 pm (UTC)'!
 isLockableFile: aFileStream
 	"Check for ability to place an exclusive lock on the entire file represented by
 	aFileStream. An exclusive lock (write lock) permits only one OS process to hold
@@ -2665,7 +4326,7 @@ isLockableFile: aFileStream
 	^ self isLockableFile: aFileStream exclusive: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 2/22/2004 17:30'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 22/Feb/2004, 9:30:00 pm (UTC)'!
 isLockableFile: aFileStream exclusive: flag
 	"Check for ability to place an exclusive lock on the entire file represented by
 	aFileStream. An exclusive lock (write lock) permits only one OS process to hold
@@ -2677,7 +4338,7 @@ isLockableFile: aFileStream exclusive: flag
 	^ self isLockableFileRegion: fileLock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/14/2004 15:09'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 14/Feb/2004, 7:09:00 pm (UTC)'!
 isLockableFile: aFileStream from: start to: end
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
 	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
@@ -2693,7 +4354,7 @@ isLockableFile: aFileStream from: start to: end
 	^ self isLockableFile: aFileStream from: start to: end exclusive: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:10'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 22/Feb/2004, 7:10:00 pm (UTC)'!
 isLockableFile: aFileStream from: start to: end exclusive: flag
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
 	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
@@ -2712,7 +4373,7 @@ isLockableFile: aFileStream from: start to: end exclusive: flag
 	^ self isLockableFileRegion: fileRegion
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 2/22/2004 18:42'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 22/Feb/2004, 10:42:00 pm (UTC)'!
 isLockableFileRegion: aFileLock
 	"Pass a struct SQFile on the stack, and check for ability to lock the specified region.
 	If the exclusive flag is true, then specify an exclusive (F_WRLCK) lock on the
@@ -2731,7 +4392,7 @@ isLockableFileRegion: aFileLock
 	^ aFileLock test
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/14/2004 15:01'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 14/Feb/2004, 7:01:00 pm (UTC)'!
 lockFile: aFileStream
 	"Request an exclusive lock on the entire file represented by aFileStream. The
 	exclusive lock (write lock) permits only one OS process to hold the lock. Answer
@@ -2746,7 +4407,7 @@ lockFile: aFileStream
 	^ self lockFile: aFileStream exclusive: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/11/2006 23:40'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 12/May/2006, 3:40:00 am (UTC)'!
 lockFile: aFileStream exclusive: flag
 	"Request an exclusive lock on the entire file represented by aFileStream. The
 	exclusive lock (write lock) permits only one OS process to hold the lock. Answer
@@ -2761,7 +4422,7 @@ lockFile: aFileStream exclusive: flag
 	^ self lockFile: aFileStream exclusive: flag ifFail: nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/11/2006 23:39'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 12/May/2006, 3:39:00 am (UTC)'!
 lockFile: aFileStream exclusive: flag ifFail: failBlock
 	"Request an exclusive lock on the entire file represented by aFileStream. The
 	exclusive lock (write lock) permits only one OS process to hold the lock. Answer
@@ -2779,7 +4440,7 @@ lockFile: aFileStream exclusive: flag ifFail: failBlock
 	^ self lockFileRegion: fileLock ifFail: failBlock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/14/2004 15:01'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 14/Feb/2004, 7:01:00 pm (UTC)'!
 lockFile: aFileStream from: start to: end
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
 	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
@@ -2799,7 +4460,7 @@ lockFile: aFileStream from: start to: end
 	^ self lockFile: aFileStream from: start to: end exclusive: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:10'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 22/Feb/2004, 7:10:00 pm (UTC)'!
 lockFile: aFileStream from: start to: end exclusive: flag
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
 	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
@@ -2822,20 +4483,20 @@ lockFile: aFileStream from: start to: end exclusive: flag
 	^ self lockFileRegion: fileRegion
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/30/2009 14:51'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 30/Aug/2009, 6:51:00 pm (UTC)'!
 lockFile: fileStream from: start to: end exclusive: writeLockFlag ifFail: failBlock
 
 	| lock |
 	lock _ OSFileRegionLock onFile: fileStream from: start to: end exclusive: writeLockFlag.
 	^ self lockFileRegion: lock ifFail: [failBlock value]! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 11/28/2010 19:07'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 28/Nov/2010, 11:07:00 pm (UTC)'!
 lockFile: fileStream from: start to: end ifFail: failBlock
 
 	^ self lockFile: fileStream from: start to: end exclusive: true ifFail: failBlock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/11/2006 23:41'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 12/May/2006, 3:41:00 am (UTC)'!
 lockFile: aFileStream ifFail: failBlock
 	"Request an exclusive lock on the entire file represented by aFileStream. The
 	exclusive lock (write lock) permits only one OS process to hold the lock. Answer
@@ -2850,7 +4511,7 @@ lockFile: aFileStream ifFail: failBlock
 	^ self lockFile: aFileStream exclusive: true ifFail: failBlock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/8/2006 07:04'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/May/2006, 11:04:00 am (UTC)'!
 lockFileRegion: aFileLock
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
 	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
@@ -2870,7 +4531,7 @@ lockFileRegion: aFileLock
 	^ self lockFileRegion: aFileLock ifFail: [nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/8/2006 07:03'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/May/2006, 11:03:00 am (UTC)'!
 lockFileRegion: aFileLock ifFail: failBlock
 	"Pass a struct SQFile on the stack, and request a lock on the specified region.
 	If the exclusive flag is true, then request an exclusive (F_WRLCK) lock on the
@@ -2898,7 +4559,7 @@ lockFileRegion: aFileLock ifFail: failBlock
 			^ aFileLock]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 4/10/2005 15:17'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 10/Apr/2005, 7:17:00 pm (UTC)'!
 unlockAllForFile: aFileStream
 	"Unlock and uncache all locks associated with aFileStream.  This could be called
 	before closing a stream, for example."
@@ -2906,7 +4567,7 @@ unlockAllForFile: aFileStream
 	(self registeredLocksForFile: aFileStream) do: [:ea | self unlockFileRegion: ea]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:02'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 22/Feb/2004, 7:02:00 pm (UTC)'!
 unlockFile: aFileStream
 	"Unlock the file represented by aFileStream.  Answer a descriptor for the unlocked
 	file region, an Array of file handle and region interval; or answer nil on error
@@ -2920,7 +4581,7 @@ unlockFile: aFileStream
 	^ self unlockFile: aFileStream exclusive: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 2/22/2004 17:30'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'jf 22/Feb/2004, 9:30:00 pm (UTC)'!
 unlockFile: aFileStream exclusive: flag
 	"Unlock the file represented by aFileStream.  Answer a descriptor for the unlocked
 	file region, an Array of file handle and region interval; or answer nil on error
@@ -2937,7 +4598,7 @@ unlockFile: aFileStream exclusive: flag
 	^ self unlockFileRegion: fileLock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/12/2006 07:05'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 12/May/2006, 11:05:00 am (UTC)'!
 unlockFile: aFileStream exclusive: flag ifFail: failBlock
 	"Unlock the file represented by aFileStream.  Answer a descriptor for the unlocked
 	file region, an Array of file handle and region interval; or answer nil on error
@@ -2955,7 +4616,7 @@ unlockFile: aFileStream exclusive: flag ifFail: failBlock
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:01'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 22/Feb/2004, 7:01:00 pm (UTC)'!
 unlockFile: aFileStream from: start to: end
 	"Pass a struct SQFile on the stack, and unlock the specified region.
 	Answer the result of the call to fcntl(). If the region is in the file lock cache,
@@ -2974,7 +4635,7 @@ unlockFile: aFileStream from: start to: end
 	^ self unlockFile: aFileStream from: start to: end exclusive: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 2/22/2004 15:09'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 22/Feb/2004, 7:09:00 pm (UTC)'!
 unlockFile: aFileStream from: start to: end exclusive: flag
 	"Pass a struct SQFile on the stack, and unlock the specified region.
 	Answer the result of the call to fcntl(). If the region is in the file lock cache,
@@ -2996,20 +4657,20 @@ unlockFile: aFileStream from: start to: end exclusive: flag
 	^ self unlockFileRegion: fileRegion
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/30/2009 14:54'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 30/Aug/2009, 6:54:00 pm (UTC)'!
 unlockFile: fileStream from: start to: end exclusive: writeLockFlag ifFail: failBlock
 
 	| lock |
 	lock _ OSFileRegionLock onFile: fileStream from: start to: end exclusive: writeLockFlag.
 	^ self unlockFileRegion: lock ifFail: [failBlock value]! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/30/2009 16:25'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 30/Aug/2009, 8:25:00 pm (UTC)'!
 unlockFile: fileStream from: start to: end ifFail: failBlock
 
 	^ self unlockFile: fileStream from: start to: end exclusive: true ifFail: failBlock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/12/2006 07:06'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 12/May/2006, 11:06:00 am (UTC)'!
 unlockFile: aFileStream ifFail: failBlock
 	"Unlock the file represented by aFileStream.  Answer a descriptor for the unlocked
 	file region, an Array of file handle and region interval; or answer nil on error
@@ -3023,7 +4684,7 @@ unlockFile: aFileStream ifFail: failBlock
 	^ self unlockFile: aFileStream exclusive: true ifFail: failBlock
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/8/2006 07:12'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 8/May/2006, 11:12:00 am (UTC)'!
 unlockFileRegion: aFileLock
 	"Pass a struct SQFile on the stack, and unlock the specified region.
 	Answer the result of the call to fcntl(). If the region is in the file lock cache,
@@ -3042,7 +4703,7 @@ unlockFileRegion: aFileLock
 	^ self unlockFileRegion: aFileLock ifFail: [nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 5/20/2006 12:46'!
+!UnixOSProcessAccessor methodsFor: 'file locking' stamp: 'dtl 20/May/2006, 4:46:00 pm (UTC)'!
 unlockFileRegion: aFileLock ifFail: failBlock
 	"Pass a struct SQFile on the stack, and unlock the specified region.
 	Answer the result of the call to fcntl(). If the region is in the file lock cache,
@@ -3072,7 +4733,7 @@ unlockFileRegion: aFileLock ifFail: failBlock
 					ifFalse: [^ failBlock value]]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'VM atexit' stamp: 'dtl 3/17/2007 18:39'!
+!UnixOSProcessAccessor methodsFor: 'VM atexit' stamp: 'dtl 17/Mar/2007, 10:39:00 pm (UTC)'!
 kill: listOfPids withSignal: signumOrNil
 	"On exit of the VM process, send signal to the external processes
 	identified by listOfPids. If signumOrNil is nil, the default SIGTERM
@@ -3081,7 +4742,7 @@ kill: listOfPids withSignal: signumOrNil
 	^ self primKill: listOfPids withSignal: signumOrNil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'VM atexit' stamp: 'dtl 3/18/2007 10:39'!
+!UnixOSProcessAccessor methodsFor: 'VM atexit' stamp: 'dtl 18/Mar/2007, 2:39:00 pm (UTC)'!
 killOnVmExit: proxies withSignal: signumOrNil
 	"When Squeak uses OSProcess to start a long running external process, it
 	may be useful to guarantee that one or more child processes is killed when
@@ -3098,7 +4759,7 @@ killOnVmExit: proxies withSignal: signumOrNil
 	^ self kill: pids withSignal: signumOrNil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 8/19/2022 19:34'!
+!UnixOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 19/Aug/2022, 11:34:00 pm (UTC)'!
 makePipeHandles
 	"Create a pipe, and answer an array of two IO accessors for the pipe 
 	reader and writer. Set a signal handler to cause SIGPIPE signals to be
@@ -3113,7 +4774,7 @@ makePipeHandles
 	^ self primCreatePipe
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 6/3/2013 22:05'!
+!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 4/Jun/2013, 2:05:00 am (UTC)'!
 mkdtemp: templateString
 	"Call mkdtemp() to generate a uniquely named temporary directory from a template
 	string. The last six or more characters of template must be XXXXXX and these are
@@ -3125,7 +4786,7 @@ mkdtemp: templateString
 	^self primMkdtemp: templateString
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 6/3/2013 22:36'!
+!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 4/Jun/2013, 2:36:00 am (UTC)'!
 mkstemp: templateString
 
 	"Call mkstemp() to generate a unique temporary file from a template string.
@@ -3147,7 +4808,7 @@ mkstemp: templateString
 		writable: true
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 2/8/2020 15:18'!
+!UnixOSProcessAccessor methodsFor: 'temp files and directories' stamp: 'dtl 8/Feb/2020, 7:18:00 pm (UTC)'!
 mktemp: templateString
 	"Call mktemp() to generate a unique temporary filename from a template string.
 	No longer supported in OSProcess because mktemp() is considered a security risk.
@@ -3159,7 +4820,7 @@ mktemp: templateString
 	^ self error: 'mktemp: support has been removed for security reasons, use mkstemp or mkdtemp: instead'
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:34'!
+!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 4/Aug/2003, 12:34:00 am (UTC)'!
 oldPrimCanConnectToXDisplay: xDisplayName
 
 	"Deprecated - install the XDisplayControlPlugin to eliminate the need to call this method"
@@ -3176,7 +4837,7 @@ oldPrimCanConnectToXDisplay: xDisplayName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:34'!
+!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 4/Aug/2003, 12:34:00 am (UTC)'!
 oldPrimGetXDisplayName
 
 	"Deprecated - install the XDisplayControlPlugin to eliminate the need to call this method"
@@ -3192,7 +4853,7 @@ oldPrimGetXDisplayName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:35'!
+!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 4/Aug/2003, 12:35:00 am (UTC)'!
 oldPrimIsConnectedToXServer
 
 	"Deprecated - install the XDisplayControlPlugin to eliminate the need to call this method"
@@ -3211,7 +4872,7 @@ oldPrimIsConnectedToXServer
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:35'!
+!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 4/Aug/2003, 12:35:00 am (UTC)'!
 oldPrimKillDisplay
 
 	"Deprecated - install the XDisplayControlPlugin to eliminate the need to call this method"
@@ -3225,7 +4886,7 @@ oldPrimKillDisplay
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:35'!
+!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 4/Aug/2003, 12:35:00 am (UTC)'!
 oldPrimOpenXDisplay
 
 	"Deprecated - install the XDisplayControlPlugin to eliminate the need to call this method"
@@ -3241,7 +4902,7 @@ oldPrimOpenXDisplay
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 8/3/2003 20:35'!
+!UnixOSProcessAccessor methodsFor: 'display handling - old plugin compatibility' stamp: 'dtl 4/Aug/2003, 12:35:00 am (UTC)'!
 oldPrimSetXDisplayName: aStringOrNil
 
 	"Deprecated - install the XDisplayControlPlugin to eliminate the need to call this method"
@@ -3258,7 +4919,7 @@ oldPrimSetXDisplayName: aStringOrNil
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/3/2003 18:26'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 3/Aug/2003, 10:26:00 pm (UTC)'!
 primCanConnectToXDisplay: xDisplayName
 	"Open and close a connection to displayName. It the connection was successfully
 	opened, answer true; otherwise false. This is intended to check for the ability
@@ -3272,7 +4933,7 @@ primCanConnectToXDisplay: xDisplayName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/6/2003 06:24'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 6/Aug/2003, 10:24:00 am (UTC)'!
 primDisconnectDisplay
 	"Disconnect the X display session. The actual Squeak window on the X server is not
 	effected, but this instance of Squeak will not have any further interaction with it."
@@ -3284,7 +4945,7 @@ primDisconnectDisplay
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/24/2003 10:13'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 24/Aug/2003, 2:13:00 pm (UTC)'!
 primFlushXDisplay
 	"Call an internal function to synchronize output to the X display."
 
@@ -3295,7 +4956,7 @@ primFlushXDisplay
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/3/2003 18:27'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 3/Aug/2003, 10:27:00 pm (UTC)'!
 primGetXDisplayName
 	"Answer a string containing the name for the X display, or nil if the display was opened
 	using the $DISPLAY environment variable. This answers the name of the X display as of
@@ -3308,7 +4969,7 @@ primGetXDisplayName
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/3/2003 18:29'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 3/Aug/2003, 10:29:00 pm (UTC)'!
 primIsConnectedToXServer
 	"Answer true if VM is currently connected to an X server."
 
@@ -3324,7 +4985,7 @@ primIsConnectedToXServer
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/6/2003 06:22'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 6/Aug/2003, 10:22:00 am (UTC)'!
 primKillDisplay
 	"Disconnect the X display session and destroy the Squeak window on the X display."
 
@@ -3335,7 +4996,7 @@ primKillDisplay
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/3/2003 18:31'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 3/Aug/2003, 10:31:00 pm (UTC)'!
 primOpenXDisplay
 	"Call an internal function which will open the X display session."
 
@@ -3348,7 +5009,7 @@ primOpenXDisplay
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 8/3/2003 18:32'!
+!UnixOSProcessAccessor methodsFor: 'display handling' stamp: 'dtl 3/Aug/2003, 10:32:00 pm (UTC)'!
 primSetXDisplayName: aStringOrNil
 	"Set the name for the X display for use in the next call to primitiveOpenXDisplay.
 	aStringOrNil must be either a String (such as 'myhost:0') or nil, indicating that
@@ -3362,7 +5023,7 @@ primSetXDisplayName: aStringOrNil
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 2/24/2001 14:28'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 24/Feb/2001, 6:28:00 pm (UTC)'!
 primCanReceiveSignals: anIntegerPid
 	"Answer true if an external OS process can receive signals. In most
 	cases, if the process identified by anIntegerPid cannot receive signals, it is
@@ -3375,7 +5036,7 @@ primCanReceiveSignals: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:24'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:24:00 pm (UTC)'!
 primSendSigabrtTo: anIntegerPid
 	"Send SIGABRT (abort) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3385,7 +5046,7 @@ primSendSigabrtTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:24'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:24:00 pm (UTC)'!
 primSendSigalrmTo: anIntegerPid
 	"Send SIGALRM (alarm) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3395,7 +5056,7 @@ primSendSigalrmTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:24'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:24:00 pm (UTC)'!
 primSendSigchldTo: anIntegerPid
 	"Send SIGCHLD (child status has changed, usually death of child) to the OS process
 	identified by anIntegerPid.
@@ -3406,7 +5067,7 @@ primSendSigchldTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSigcontTo: anIntegerPid
 	"Send SIGCONT (continue) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3416,7 +5077,7 @@ primSendSigcontTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSighupTo: anIntegerPid
 	"Send SIGHUP (hangup) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3426,7 +5087,7 @@ primSendSighupTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSigintTo: anIntegerPid
 	"Send SIGINT (interrupt) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3436,7 +5097,7 @@ primSendSigintTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSigkillTo: anIntegerPid
 	"Send SIGKILL (kill, unblockable) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3446,7 +5107,7 @@ primSendSigkillTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSigpipeTo: anIntegerPid
 	"Send SIGPIPE (broken pipe) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3456,7 +5117,7 @@ primSendSigpipeTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSigquitTo: anIntegerPid
 	"Send SIGQUIT (quit) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3466,7 +5127,7 @@ primSendSigquitTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:25'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:25:00 pm (UTC)'!
 primSendSigstopTo: anIntegerPid
 	"Send SIGSTOP (stop, unblockable) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3476,7 +5137,7 @@ primSendSigstopTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:26'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:26:00 pm (UTC)'!
 primSendSigtermTo: anIntegerPid
 	"Send SIGTERM (termination) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3486,7 +5147,7 @@ primSendSigtermTo: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:26'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:26:00 pm (UTC)'!
 primSendSigusr1To: anIntegerPid
 	"Send SIGUSR1 (User-defined signal 1) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3496,7 +5157,7 @@ primSendSigusr1To: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 7/22/2000 17:26'!
+!UnixOSProcessAccessor methodsFor: 'OS signal sending' stamp: 'dtl 22/Jul/2000, 9:26:00 pm (UTC)'!
 primSendSigusr2To: anIntegerPid
 	"Send SIGUSR2 (User-defined signal 2) to the OS process identified by anIntegerPid.
 	Answer 0 on success, -1 on failure, and nil if the pluggable primitive is not present."
@@ -3506,7 +5167,7 @@ primSendSigusr2To: anIntegerPid
 
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 8/3/2002 20:29'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Aug/2002, 12:29:00 am (UTC)'!
 primForwardSignal: signalNumber toSemaphore: semaphoreIndex
 	"Set a signal handler in the VM which will signal a Smalltalk semaphore at
 	semaphoreIndex whenever an external signal sigNum is received. Answer the
@@ -3522,7 +5183,7 @@ primForwardSignal: signalNumber toSemaphore: semaphoreIndex
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 7/19/2010 23:38'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 20/Jul/2010, 3:38:00 am (UTC)'!
 primPrintAllStacksOnSignal: signalNumber
 	"Set a signal handler in the VM which will print all call stacks on the console
 	output whenever an external signal sigNum is received. Answer the
@@ -3536,7 +5197,7 @@ primPrintAllStacksOnSignal: signalNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 8/4/2002 01:13'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Aug/2002, 5:13:00 am (UTC)'!
 primSemaIndexFor: sigNum
 	"Answer the registration index of the semaphore currently associated with the
 	signal handler for sigNum."
@@ -3545,7 +5206,7 @@ primSemaIndexFor: sigNum
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 8/3/2002 20:36'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Aug/2002, 12:36:00 am (UTC)'!
 primSigChldNumber
 	"Integer value corresponding to SIGCHLD"
 
@@ -3553,7 +5214,7 @@ primSigChldNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 12/6/2002 18:04'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 6/Dec/2002, 10:04:00 pm (UTC)'!
 primSigHupNumber
 	"Integer value corresponding to SIGHUP"
 
@@ -3561,7 +5222,7 @@ primSigHupNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 8/4/2002 00:19'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Aug/2002, 4:19:00 am (UTC)'!
 primSigIntNumber
 	"Integer value corresponding to SIGINT"
 
@@ -3571,7 +5232,7 @@ primSigIntNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 12/6/2002 18:05'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 6/Dec/2002, 10:05:00 pm (UTC)'!
 primSigKillNumber
 	"Integer value corresponding to SIGKILL"
 
@@ -3581,7 +5242,7 @@ primSigKillNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 8/3/2002 20:35'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Aug/2002, 12:35:00 am (UTC)'!
 primSigPipeNumber
 	"Integer value corresponding to SIGPIPE"
 
@@ -3589,7 +5250,7 @@ primSigPipeNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 12/6/2002 18:06'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 6/Dec/2002, 10:06:00 pm (UTC)'!
 primSigQuitNumber
 	"Integer value corresponding to SIGQUIT"
 
@@ -3597,7 +5258,7 @@ primSigQuitNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 12/6/2002 18:06'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 6/Dec/2002, 10:06:00 pm (UTC)'!
 primSigTermNumber
 	"Integer value corresponding to SIGTERM"
 
@@ -3605,7 +5266,7 @@ primSigTermNumber
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 11/4/2005 06:41'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Nov/2005, 10:41:00 am (UTC)'!
 primSigUsr1Number
 	"Integer value corresponding to SIGUSR1"
 
@@ -3613,7 +5274,7 @@ primSigUsr1Number
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 11/4/2005 06:42'!
+!UnixOSProcessAccessor methodsFor: 'private - signal forwarding' stamp: 'dtl 4/Nov/2005, 10:42:00 am (UTC)'!
 primSigUsr2Number
 	"Integer value corresponding to SIGUSR2"
 
@@ -3621,7 +5282,7 @@ primSigUsr2Number
 	^ nil
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:10'!
+!UnixOSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 5/Mar/2005, 5:10:00 pm (UTC)'!
 register: fileRegionLock
 	"If an object equal to fileRegionLock exists in the registry, answer it. Otherwise, add
 	fileRegionLock to the registry and answer fileRegionLock. Caching is enabled when
@@ -3632,7 +5293,7 @@ register: fileRegionLock
 		ifFalse: [fileRegionLock]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 3/5/2005 13:10'!
+!UnixOSProcessAccessor methodsFor: 'file lock registry' stamp: 'dtl 5/Mar/2005, 5:10:00 pm (UTC)'!
 unregister: fileRegionLock
 	"If an object equal to fileRegionLock exists in the registry, remove it and
 	answer the object. Otherwise answer nil. Caching is enabled when
@@ -3643,20 +5304,20 @@ unregister: fileRegionLock
 		ifFalse: [nil]
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 1/25/2004 21:31'!
+!UnixOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 26/Jan/2004, 1:31:00 am (UTC)'!
 sigChldSemaphore
 	"Answer the value of sigChldSemaphore"
 
 	^ sigChldSemaphore ifNil: [sigChldSemaphore _ self forwardSigChld].
 ! !
 
-!UnixOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 1/25/2004 21:29'!
+!UnixOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 26/Jan/2004, 1:29:00 am (UTC)'!
 sigChldSemaphore: anObject
 	"Set the value of sigChldSemaphore"
 
 	sigChldSemaphore _ anObject! !
 
-!UnixOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:49'!
+!UnixOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:49:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for the
 	Squeak VM running on the current platform."
@@ -3664,14 +5325,14 @@ isResponsibleForThisPlatform
 	^ OSProcess isUnix
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 2/26/2002 16:11'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 26/Feb/2002, 8:11:00 pm (UTC)'!
 activeHandles
 	"Answer an Array of handles for all children that are believed to be running."
 
 	^ OSProcess thisOSProcess activeHandles
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 9/3/2010 13:13'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 3/Sep/2010, 5:13:00 pm (UTC)'!
 grimReaperProcess
 	"This is a process which waits for the death of a child OSProcess, and 
 	informs any dependents of the change."
@@ -3685,7 +5346,7 @@ grimReaperProcess
 						, ': the child OSProcess watcher'].
 	^ grimReaper! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 9/10/2002 09:19'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 10/Sep/2002, 1:19:00 pm (UTC)'!
 primCanAccessChildProcess: handleObject
 	"Answer true if the OS process represented by a HANDLE can be accessed by this OS process."
 
@@ -3693,7 +5354,7 @@ primCanAccessChildProcess: handleObject
 
 	^ false! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 2/25/2002 08:23'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 25/Feb/2002, 12:23:00 pm (UTC)'!
 primGetExitStatusForHandle: handleObject
 	"Answer the exit status for the process represented by a HANDLE. Fail if
 	the process is still active, or if the GetExitCodeProcess call fails."
@@ -3707,7 +5368,7 @@ primGetExitStatusForHandle: handleObject
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 2/26/2002 16:14'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 26/Feb/2002, 8:14:00 pm (UTC)'!
 primSetWaitForAnyProcessExit: arrayOfProcessHandleObjects thenSignalSemaphoreWithIndex: index
 	"Set up a thread to wait for a process HANDLE to exit, then signal the Semaphore
 	at index. This provides asychronous notification of an external process exit."
@@ -3716,7 +5377,7 @@ primSetWaitForAnyProcessExit: arrayOfProcessHandleObjects thenSignalSemaphoreWit
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 2/27/2002 11:34'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 27/Feb/2002, 3:34:00 pm (UTC)'!
 primTerminateThread: aThreadHandle
 	"Kill the thread. No cleanup is performed, so use with caution for a thread which
 	is (for example) manipulating a mutex. Answer true for success, else false."
@@ -3725,14 +5386,14 @@ primTerminateThread: aThreadHandle
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'ThierryGoubier 7/27/2017 22:39'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'ThierryGoubier 28/Jul/2017, 2:39:00 am (UTC)'!
 restartChildWatcherProcess
 	grimReaper notNil
 		ifTrue: [ grimReaper terminate.
 			grimReaper _ nil ].
 	self grimReaperProcess! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 1/13/2007 09:48'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 13/Jan/2007, 1:48:00 pm (UTC)'!
 restartChildWatcherThread: arrayOfProcessHandleObjects
 	"Start a new child watcher thread. If a thread is alread active, terminate
 	it before starting a new one."
@@ -3742,7 +5403,7 @@ restartChildWatcherThread: arrayOfProcessHandleObjects
 	^ childWatcherThread
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 2/26/2002 19:08'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 26/Feb/2002, 11:08:00 pm (UTC)'!
 setWaitForAnyProcessExit: arrayOfProcessHandleObjects
 	"Set up a thread to wait for a process HANDLE to exit, then signal the Semaphore
 	at index. This provides asychronous notification of an external process exit. The
@@ -3763,7 +5424,7 @@ setWaitForAnyProcessExit: arrayOfProcessHandleObjects
 
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 2/25/2002 21:12'!
+!WindowsOSProcessAccessor methodsFor: 'child process management' stamp: 'dtl 26/Feb/2002, 1:12:00 am (UTC)'!
 sigChldSemaphoreSet
 
 	sigChldSemaphore ifNil:
@@ -3771,7 +5432,7 @@ sigChldSemaphoreSet
 		semaIndex _ Smalltalk registerExternalObject: sigChldSemaphore].
 	^ sigChldSemaphore! !
 
-!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 9/10/2002 09:24'!
+!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 10/Sep/2002, 1:24:00 pm (UTC)'!
 canAccessChildProcess: anExternalProcess
 	"Is the child process still there? Maybe not if we have restarted the image
 	and anExternalProcess refers to a process which died while we were not
@@ -3783,7 +5444,7 @@ canAccessChildProcess: anExternalProcess
 		ifFalse: [false]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 2/22/2002 22:17'!
+!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 23/Feb/2002, 2:17:00 am (UTC)'!
 canAccessSystem
 	"Answer true if it is possible to access the external process, else false. Failure
 	to access the external process is probably due to lack of a UnixOSProcessPlugin
@@ -3792,7 +5453,7 @@ canAccessSystem
 	^ self primGetPid notNil
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 9/26/2005 07:45'!
+!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 26/Sep/2005, 11:45:00 am (UTC)'!
 isExecutable: aPathName
 	"Answer true if file at aPathName has execute permission for this process."
 
@@ -3802,7 +5463,7 @@ isExecutable: aPathName
 
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 10/10/2012 08:05'!
+!WindowsOSProcessAccessor methodsFor: 'testing' stamp: 'dtl 10/Oct/2012, 12:05:00 pm (UTC)'!
 primOneShot
 	"Answer true the first time this is called in a Squeak session, and false thereafter."
 
@@ -3812,27 +5473,27 @@ primOneShot
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/27/2002 11:56'!
+!WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 27/Feb/2002, 3:56:00 pm (UTC)'!
 childWatcherThread
 	"A thread which signals my sigChldSemaphore when any child process exits."
 
 	^ childWatcherThread! !
 
-!WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/27/2002 11:44'!
+!WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 27/Feb/2002, 3:44:00 pm (UTC)'!
 childWatcherThread: aThreadObject
 	"A thread which signals my sigChldSemaphore when any child process exits."
 
 	childWatcherThread _ aThreadObject
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 2/25/2002 21:17'!
+!WindowsOSProcessAccessor methodsFor: 'accessing' stamp: 'dtl 26/Feb/2002, 1:17:00 am (UTC)'!
 semaIndex
 	"Index of the registered Semaphore"
 
 	semaIndex ifNil: [self initialize].
 	^ semaIndex! !
 
-!WindowsOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 2/26/2002 08:43'!
+!WindowsOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 26/Feb/2002, 12:43:00 pm (UTC)'!
 finalize
 	"Clean up grimReaper and associated semaphore."
 
@@ -3845,7 +5506,7 @@ finalize
 	semaIndex _ nil
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 3/2/2002 08:33'!
+!WindowsOSProcessAccessor methodsFor: 'initialize - release' stamp: 'dtl 2/Mar/2002, 12:33:00 pm (UTC)'!
 initialize
 	"Create and register a semaphore to be used for signaling external process exits"
 
@@ -3854,7 +5515,7 @@ initialize
 	self grimReaperProcess
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/27/2002 13:22'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 27/Feb/2002, 5:22:00 pm (UTC)'!
 getMainThread
 	"Answer the main thread of this OS process. The handle for this thread is a
 	pseudo-handle, and cannot be used to terminate the thread."
@@ -3864,7 +5525,7 @@ getMainThread
 	^ WindowsThread threadID: self primGetPid handle: self primGetPidHandle running: true
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 9/6/2002 14:58'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 6/Sep/2002, 6:58:00 pm (UTC)'!
 primGetCurrentWorkingDirectory
 	"Call getcwd() to get the current working directory."
 
@@ -3874,7 +5535,7 @@ primGetCurrentWorkingDirectory
 	^ nil
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 13:39'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 20/Jan/2019, 5:39:00 pm (UTC)'!
 primGetCurrentWorkingDirectoryAsBytes
 	"Call getcwd() to get the current working directory."
 
@@ -3884,7 +5545,7 @@ primGetCurrentWorkingDirectoryAsBytes
 	self primitiveFailed
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/22/2002 18:23'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Feb/2002, 10:23:00 pm (UTC)'!
 primGetEnvironmentStrings
 	"Answer the environment block in the form of an Array of Strings. The
 	caller is expected to parse the strings into a dictionary of keys and values."
@@ -3893,7 +5554,7 @@ primGetEnvironmentStrings
 	^ nil
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 1/20/2019 13:49'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 20/Jan/2019, 5:49:00 pm (UTC)'!
 primGetEnvironmentStringsAsBytes
 	"Answer the environment block in the form of an Array of Strings. The
 	caller is expected to parse the strings into a dictionary of keys and values."
@@ -3902,7 +5563,7 @@ primGetEnvironmentStringsAsBytes
 	self primitiveFailed
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/27/2002 13:20'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 27/Feb/2002, 5:20:00 pm (UTC)'!
 primGetMainThreadHandle
 	"Answer a pseudo-handle for my main thread."
 
@@ -3911,7 +5572,7 @@ primGetMainThreadHandle
 	<primitive: 'primitiveGetMainThreadHandle' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 3/4/2006 17:57'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 4/Mar/2006, 9:57:00 pm (UTC)'!
 primGetMainThreadID
 	"Answer the ID of my main thread."
 
@@ -3920,14 +5581,14 @@ primGetMainThreadID
 	<primitive: 'primitiveGetMainThreadID' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/22/2002 16:06'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 22/Feb/2002, 8:06:00 pm (UTC)'!
 primGetPid
 	"Answer the OS process ID for the OS process in which I am currently executing."
 
 	<primitive: 'primitiveGetPid' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 2/27/2002 13:21'!
+!WindowsOSProcessAccessor methodsFor: 'external process access' stamp: 'dtl 27/Feb/2002, 5:21:00 pm (UTC)'!
 primGetPidHandle
 	"Answer the pseudo-handle for my OS process"
 
@@ -3936,7 +5597,7 @@ primGetPidHandle
 	<primitive: 'primitiveGetPidHandle' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:41'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:41:00 pm (UTC)'!
 getStdErr
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	error for the OS process in which I am currently executing, or nil if the IO handle
@@ -3951,7 +5612,7 @@ getStdErr
 		ifFalse: [nil]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:51'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 3:51:00 am (UTC)'!
 getStdErrHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard error for the
 	OS process in which I am currently executing."
@@ -3959,7 +5620,7 @@ getStdErrHandle
 	^ self getStdErr
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:45'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:45:00 pm (UTC)'!
 getStdIn
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	input for the OS process in which I am currently executing, or nil if the IO handle
@@ -3974,7 +5635,7 @@ getStdIn
 		ifFalse: [nil]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:51'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 3:51:00 am (UTC)'!
 getStdInHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard input for the
 	OS process in which I am currently executing."
@@ -3982,7 +5643,7 @@ getStdInHandle
 	^ self getStdIn
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:45'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:45:00 pm (UTC)'!
 getStdOut
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	output for the OS process in which I am currently executing, or nil if the IO handle
@@ -3997,7 +5658,7 @@ getStdOut
 		ifFalse: [nil]
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:51'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 3:51:00 am (UTC)'!
 getStdOutHandle
 	"Answer the handle (a SQFile data structure in interp.c) for the standard output for the
 	OS process in which I am currently executing."
@@ -4005,7 +5666,7 @@ getStdOutHandle
 	^ self getStdOut
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:41'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 3:41:00 am (UTC)'!
 openStdErr
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	error for the OS process in which I am currently executing. Open a console if necessary
@@ -4023,7 +5684,7 @@ openStdErr
 	^ error first
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 23:45'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 3:45:00 am (UTC)'!
 openStdIn
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	input for the OS process in which I am currently executing. Open a console if necessary
@@ -4041,7 +5702,7 @@ openStdIn
 	^ input first
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/19/2022 19:46'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 19/Aug/2022, 11:46:00 pm (UTC)'!
 openStdOut
 	"Answer an IO handle (representing a SQFile data structure in interp.c) for the standard
 	output for the OS process in which I am currently executing. Open a console if necessary
@@ -4059,7 +5720,7 @@ openStdOut
 	^ output first
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/20/2022 00:50'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 4:50:00 am (UTC)'!
 setStdErr: aFileStream
 	"Set the standard error handle for this OSProcess to be that of aFileStream"
 
@@ -4071,7 +5732,7 @@ setStdErr: aFileStream
 	^ self primSetStdErr: aFileStream fileID
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/20/2022 00:51'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 4:51:00 am (UTC)'!
 setStdIn: aFileStream
 	"Set the standard input handle for this OSProcess to be that of aFileStream"
 
@@ -4085,7 +5746,7 @@ setStdIn: aFileStream
 	^ self primSetStdIn: aFileStream fileID
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 8/20/2022 00:51'!
+!WindowsOSProcessAccessor methodsFor: 'standard IO handles' stamp: 'dtl 20/Aug/2022, 4:51:00 am (UTC)'!
 setStdOut: aFileStream
 	"Set the standard output handle for this OSProcess to be that of aFileStream"
 
@@ -4097,7 +5758,7 @@ setStdOut: aFileStream
 	^ self primSetStdOut: aFileStream fileID
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 10/1/2005 09:26'!
+!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 1/Oct/2005, 1:26:00 pm (UTC)'!
 lastReadFor: aSemaphoreIndex
 	"A character has been read into an external buffer corresponding to aSemaphoreIndex,
 	and is now available. Answer integer value of the character, or nil if no character
@@ -4110,7 +5771,7 @@ lastReadFor: aSemaphoreIndex
 	^ c
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 10/1/2005 09:26'!
+!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 1/Oct/2005, 1:26:00 pm (UTC)'!
 lastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 	"A character has been read into an external buffer corresponding to aSemaphoreIndex,
 	and is now available. Answer integer value of the character, or nil if no character
@@ -4120,7 +5781,7 @@ lastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 	^ self primLastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 8/20/2022 00:50'!
+!WindowsOSProcessAccessor methodsFor: 'nonblocking read' stamp: 'dtl 20/Aug/2022, 4:50:00 am (UTC)'!
 nextFrom: aFileStream signaling: aSemaphoreIndex
 	"Read the next character from aFileStream into a buffer in the VM. When the read completes,
 	signal the specified Semaphore to notify that the character is available."
@@ -4128,7 +5789,7 @@ nextFrom: aFileStream signaling: aSemaphoreIndex
 	^ self primNextFrom: aFileStream fileID signaling: aSemaphoreIndex
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 11:46'!
+!WindowsOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 3:46:00 pm (UTC)'!
 osppModuleName
 	"Answer a string containing the module name string for the OSPP plugin."
 
@@ -4137,7 +5798,7 @@ osppModuleName
 	^ self primOSProcessPluginModuleName
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 10/1/2005 11:46'!
+!WindowsOSProcessAccessor methodsFor: 'plugin identification' stamp: 'dtl 1/Oct/2005, 3:46:00 pm (UTC)'!
 osppModuleVersionString
 	"Answer a string containing the version string for the OSPP plugin."
 
@@ -4146,7 +5807,7 @@ osppModuleVersionString
 	^ self primOSProcessPluginModuleVersionString
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'console' stamp: 'dtl 3/25/2002 06:28'!
+!WindowsOSProcessAccessor methodsFor: 'console' stamp: 'dtl 25/Mar/2002, 10:28:00 am (UTC)'!
 primAllocConsole
 	"Allocate a console if not already allocated."
 
@@ -4156,7 +5817,7 @@ primAllocConsole
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'console' stamp: 'dtl 3/25/2002 06:27'!
+!WindowsOSProcessAccessor methodsFor: 'console' stamp: 'dtl 25/Mar/2002, 10:27:00 am (UTC)'!
 primFreeConsole
 	"Deallocate the console if allocated."
 
@@ -4166,7 +5827,7 @@ primFreeConsole
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 8/17/2002 12:46'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 17/Aug/2002, 4:46:00 pm (UTC)'!
 primBufferValuesAt: aSemaphoreIndex
 	"For debugging only. Answer the current values of readCharBufferArray,
 	readCharCountArray, and readCharStatusArray at index, an integer corresponding
@@ -4178,7 +5839,7 @@ primBufferValuesAt: aSemaphoreIndex
 	<primitive: 'primitiveBufferValuesAt' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 9/7/2002 14:55'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/Sep/2002, 6:55:00 pm (UTC)'!
 primGetStdErrorForSession: sessionIdentifierByteArray
 	"Answer a two element array containing the sqFile data structure representing
 	standard error stream for my OS process, and a flag (true or false) to indicate
@@ -4191,7 +5852,7 @@ primGetStdErrorForSession: sessionIdentifierByteArray
 	<primitive: 'primitiveGetStdError' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 9/7/2002 14:55'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/Sep/2002, 6:55:00 pm (UTC)'!
 primGetStdInputForSession: sessionIdentifierByteArray
 	"Answer a two element array containing the sqFile data structure representing
 	standard input stream for my OS process, and a flag (true or false) to indicate
@@ -4204,7 +5865,7 @@ primGetStdInputForSession: sessionIdentifierByteArray
 	<primitive: 'primitiveGetStdInput' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 9/7/2002 14:55'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 7/Sep/2002, 6:55:00 pm (UTC)'!
 primGetStdOutputForSession: sessionIdentifierByteArray
 	"Answer a two element array containing the sqFile data structure representing
 	standard output stream for my OS process, and a flag (true or false) to indicate
@@ -4217,7 +5878,7 @@ primGetStdOutputForSession: sessionIdentifierByteArray
 	<primitive: 'primitiveGetStdOutput' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 09:26'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 1:26:00 pm (UTC)'!
 primLastReadFor: aSemaphoreIndex
 	"A character has been read into an external buffer corresponding to aSemaphoreIndex,
 	and is now available. Answer integer value of the character, or nil if no character
@@ -4226,7 +5887,7 @@ primLastReadFor: aSemaphoreIndex
 	<primitive: 'primitiveLastReadFor' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 09:27'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 1:27:00 pm (UTC)'!
 primLastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 	"A character has been read into an external buffer corresponding to aSemaphoreIndex,
 	and is now available. Answer integer value of the character, or nil if no character
@@ -4237,7 +5898,7 @@ primLastReadFor: aSemaphoreIndex storeIn: aThreeElementArray
 	<primitive: 'primitiveLastReadForStoreIn' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/1/2002 10:58'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Apr/2002, 2:58:00 pm (UTC)'!
 primNextFrom: anIOHandle signaling: aSemaphoreIndex
 	"Read the next character from anIOHandle (a SQFile struct) into a buffer in the VM. When
 	the read completes, signal the specified Semaphore to notify that the character is available."
@@ -4248,7 +5909,7 @@ primNextFrom: anIOHandle signaling: aSemaphoreIndex
 
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 11:50'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 3:50:00 pm (UTC)'!
 primOSProcessPluginModuleName
 	"Answer a string containing the module name string for the OSPP plugin."
 
@@ -4258,7 +5919,7 @@ primOSProcessPluginModuleName
 	^ nil
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 10/1/2005 11:51'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/Oct/2005, 3:51:00 pm (UTC)'!
 primOSProcessPluginModuleVersionString
 	"Answer a string containing the version string for the OSPP plugin."
 
@@ -4268,14 +5929,14 @@ primOSProcessPluginModuleVersionString
 	^ nil
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 1/31/2020 00:15'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 31/Jan/2020, 4:15:00 am (UTC)'!
 primSpaceFor: byteSize InDirectoryPath: dirPath
 
 	<primitive: 'primitiveSpaceForByteSizeInDirectoryPath' module: 'Win32OSProcessPlugin'>
 	self flag: 'FIXME'. "not yet implemented in OSPP for Windows"
 	^ self primitiveFailed! !
 
-!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 4/8/2007 10:54'!
+!WindowsOSProcessAccessor methodsFor: 'private - primitive access' stamp: 'dtl 8/Apr/2007, 2:54:00 pm (UTC)'!
 primTestEndOfFileFlag: aSqFileStruct
 	"Answer whether the file represented by aSqFileStruct is at end of file, as determined
 	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
@@ -4289,7 +5950,7 @@ primTestEndOfFileFlag: aSqFileStruct
 	^ self primitiveFailed
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 2/25/2002 07:37'!
+!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 25/Feb/2002, 11:37:00 am (UTC)'!
 primCloseHandle: handleObject
 	"Close the specified handle, which may refer to a process, a thread, or
 	some other Win32 object."
@@ -4302,7 +5963,7 @@ primCloseHandle: handleObject
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 3/29/2002 17:47'!
+!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 29/Mar/2002, 9:47:00 pm (UTC)'!
 primSetStdErr: anIOHandle
 	"Set the standard error handle to that of anIOHandle, where anIOHandle is a
 	ByteArray representation of a SQFile structure."
@@ -4311,7 +5972,7 @@ primSetStdErr: anIOHandle
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 3/29/2002 17:48'!
+!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 29/Mar/2002, 9:48:00 pm (UTC)'!
 primSetStdIn: anIOHandle
 	"Set the standard input handle to that of anIOHandle, where anIOHandle is a
 	ByteArray representation of a SQFile structure."
@@ -4320,7 +5981,7 @@ primSetStdIn: anIOHandle
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 3/29/2002 17:48'!
+!WindowsOSProcessAccessor methodsFor: 'handles' stamp: 'dtl 29/Mar/2002, 9:48:00 pm (UTC)'!
 primSetStdOut: anIOHandle
 	"Set the standard output handle to that of anIOHandle, where anIOHandle is a
 	ByteArray representation of a SQFile structure."
@@ -4329,7 +5990,7 @@ primSetStdOut: anIOHandle
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'deprecated' stamp: 'dtl 9/9/2002 09:24'!
+!WindowsOSProcessAccessor methodsFor: 'deprecated' stamp: 'dtl 9/Sep/2002, 1:24:00 pm (UTC)'!
 primCommand: commandString
 	"Run a command in a new external process. Answer a result array with
 	hProcess, hThread, dwProcessId, dwThreadId.
@@ -4345,7 +6006,7 @@ primCommand: commandString
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'process creation' stamp: 'dtl 9/9/2002 09:19'!
+!WindowsOSProcessAccessor methodsFor: 'process creation' stamp: 'dtl 9/Sep/2002, 1:19:00 pm (UTC)'!
 primCommand: commandString stdIn: inputFileIoHandle stdOut: outputFileIoHandle stdErr: errorFileIoHandle
 
 	"Run a command in a new external process. The standard input, output and error
@@ -4361,7 +6022,7 @@ primCommand: commandString stdIn: inputFileIoHandle stdOut: outputFileIoHandle s
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 11/28/2010 12:51'!
+!WindowsOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 28/Nov/2010, 4:51:00 pm (UTC)'!
 primCreatePipe
 	"Create a pipe, and answer an array of two file handles (SQFile data structures in interp.c)
 	for the pipe reader and writer."
@@ -4369,7 +6030,7 @@ primCreatePipe
 	<primitive: 'primitiveCreatePipe' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 11/28/2010 12:52'!
+!WindowsOSProcessAccessor methodsFor: 'pipe open' stamp: 'dtl 28/Nov/2010, 4:52:00 pm (UTC)'!
 primCreatePipeWithSessionIdentifier: aByteArray
 	"Create a pipe, and answer an array of two file handles (SQFile data structures in interp.c)
 	for the pipe reader and writer."
@@ -4377,7 +6038,7 @@ primCreatePipeWithSessionIdentifier: aByteArray
 	<primitive: 'primitiveCreatePipeWithSessionIdentifier' module: 'Win32OSProcessPlugin'>
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 3/2/2002 08:15'!
+!WindowsOSProcessAccessor methodsFor: 'session identification' stamp: 'dtl 2/Mar/2002, 12:15:00 pm (UTC)'!
 primGetSession
 	"Answer the unique identifier for this session of Smalltalk running in this OS Process."
 
@@ -4387,7 +6048,7 @@ primGetSession
 
 	^ nil! !
 
-!WindowsOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 9/26/2005 07:35'!
+!WindowsOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 26/Sep/2005, 11:35:00 am (UTC)'!
 setBlocking: anIOHandle
 	"Convert anIOHandle to an SQFile data structure and call primitive to set for blocking I/O."
 
@@ -4395,7 +6056,7 @@ setBlocking: anIOHandle
 	"self notify: 'there is no general mechanism to set blocking IO on Win32'"
 ! !
 
-!WindowsOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 9/26/2005 07:36'!
+!WindowsOSProcessAccessor methodsFor: 'file control' stamp: 'dtl 26/Sep/2005, 11:36:00 am (UTC)'!
 setNonBlocking: anIOHandle
 	"Convert anIOHandle to an SQFile data structure and call primitive to set it non-blocking."
 
@@ -4404,7 +6065,7 @@ setNonBlocking: anIOHandle
 
 ! !
 
-!WindowsOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:50'!
+!WindowsOSProcessAccessor class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:50:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for the
 	Squeak VM running on the current platform."
@@ -4412,5668 +6073,277 @@ isResponsibleForThisPlatform
 	^ OSProcess isWindows
 ! !
 
-!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 7/4/2003 19:10'!
-aioDisable: ioDescriptor
-	"Definitively disable asynchronous event notification for a descriptor. The ioDescriptor
-	parameter is an object representing a low level OS file or socket descriptor."
-
-	^ self primAioDisable: ioDescriptor
-! !
-
-!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 9/1/2003 16:58'!
-aioEnable: ioDescriptor forSemaphore: semaphoreIndex externalObject: trueOrFalse
-	"Enable asynchronous notification for a descriptor. Send this message one time
-	prior to beginning event handling for ioDescriptor. The ioDescriptor parameter is an
-	object representing a low level OS file or socket descriptor. The semaphoreIndex is
-	the index of a Semaphore to be notified, and the third parameter is a flag indicating
-	that ioDescriptor represents an external object which should not be closed on termination
-	of aio handling."
-
-	^ (self primAioEnable: ioDescriptor forSemaphore: semaphoreIndex externalObject: trueOrFalse)
-			ifNil: [self notify: 'aio event forwarding not supported']
-! !
-
-!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 7/4/2003 18:52'!
-aioHandle: ioDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
-	"Enable asynchronous notification for a descriptor. Send this message one time to
-	enable a single event notification. Send it again after each event has been received
-	and handled (in other words, the process which waits on the event semaphore is
-	responsible for re-enabling the handler by calling this method each time an event
-	is handled). The ioDescriptor parameter is an object representing a low level OS file or
-	socket descriptor. The remaining three parameters are Boolean flags representing the
-	types of events for which notification is being requested: handle exceptions, handle
-	for read, and handle for write. It is common to watch for read events and exception
-	events, or to watch for write events and exception events."
-
-	^ self primAioHandle: ioDescriptor
-		exceptionEvents: exceptionFlag
-		readEvents: readFlag
-		writeEvents: writeFlag
-! !
-
-!AioEventHandler methodsFor: 'aio event forwarding' stamp: 'dtl 7/4/2003 19:10'!
-aioSuspend: ioDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
-
-	"Temporarily suspend asynchronous event notification for a descriptor. The
-	ioDescriptor parameter is an object representing a low level OS file or socket
-	descriptor. The remaining three parameters are Boolean flags representing the
-	types of events for which notification is being requested: handle exceptions,
-	handle for read, and handle for write."
-
-	^ self primAioSuspend: ioDescriptor
-		exceptionEvents: exceptionFlag
-		readEvents: readFlag
-		writeEvents: writeFlag
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/20/2006 18:43'!
-close
-	"When the FileStream or Socket handled by this aio handler is closed,
-	it should send #close to this handler."
-
-	| p |
-	self breakDependents.
-	Smalltalk unregisterExternalObject: semaphore.
-	self aioDisable: self descriptor.
-	semaphore _ nil.
-	semaIndex _ nil.
-	p _ handlerProc.
-	handlerProc _ nil.
-	p ifNotNil: [p terminate] "p may be the active process, do this last"
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/5/2003 09:15'!
-for: aSocketOrFileStream
-	"Answer an event handler for any kind of IO stream that can be associated
-	with an OS handle for aio events. Currently, subclasses of FileStream and
-	Socket can have aio event handlers."
-
-	(aSocketOrFileStream isKindOf: Socket)
-		ifTrue: [^ self forSocket: aSocketOrFileStream].
-	(aSocketOrFileStream isKindOf: FileStream)
-		ifTrue: [^ self forFileStream: aSocketOrFileStream].
-	self error: 'expected a FileStream or Socket subclass'! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/5/2003 11:03'!
-for: aSocketOrFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-	"Answer an event handler for any kind of IO stream that can be associated
-	with an OS handle for aio events. Currently, subclasses of FileStream and
-	Socket can have aio event handlers."
-
-	(aSocketOrFileStream isKindOf: Socket)
-		ifTrue: [^ self forSocket: aSocketOrFileStream
-					exceptions: exceptionEventFlag
-					readEvents: readEventFlag
-					writeEvents: writeEventFlag].
-	(aSocketOrFileStream isKindOf: FileStream)
-		ifTrue: [^ self forFileStream: aSocketOrFileStream
-					exceptions: exceptionEventFlag
-					readEvents: readEventFlag
-					writeEvents: writeEventFlag].
-	self error: 'expected a FileStream or Socket subclass'! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:25'!
-forFileStream: aFileStream
-
-	self descriptor: (self descriptorForFile: aFileStream).
-	self setDefaultEventMask.
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:25'!
-forFileStream: aFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-
-	self descriptor: (self descriptorForFile: aFileStream).
-	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:27'!
-forSocket: aSocket
-	"Any existing event handling for aSocket will be disabled. Note that this
-	will make the socket useless for any applications that expect the prior
-	event handling behavior."
-
-	self descriptor: (self desriptorForSocket: aSocket).
-	self aioDisable: self descriptor.
-	self setDefaultEventMask.
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 23:27'!
-forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-	"Any existing event handling for aSocket will be disabled. Note that this
-	will make the socket useless for any applications that expect the prior
-	event handling behavior."
-
-	self descriptor: (self desriptorForSocket: aSocket).
-	self aioDisable: self descriptor.
-	self initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 1/23/2022 11:31'!
-initializeForExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-
-	semaphore _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: semaphore.
-	(AioPluginPresent = true) ifTrue: [
-		([self aioEnable: self descriptor forSemaphore: self semaIndex externalObject: true]
-			on: Warning
-			do: [:e |
-				self close. "unregister the semaphore"
-				OSProcess trace: e messageText asString. nil])
-			ifNotNil:
-				[handlerProc _ self
-					handleExceptions: exceptionEventFlag
-					readEvents: readEventFlag
-					writeEvents: writeEventFlag]]
-! !
-
-!AioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 7/9/2005 14:00'!
-setDefaultEventMask
-	"Default initialization for read events and exception events"
-
-	^ self initializeForExceptions: true readEvents: true writeEvents: false
-
-! !
-
-!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 7/5/2003 10:50'!
-defaultHandlerProcess
-	"Generate a #changed notification whenever an external aio event occurs"
-
-	^ self handleReadAndExceptionsEvents! !
-
-!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 11/12/2011 21:25'!
-handleExceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-	"Generate a #changed notification whenever the requested type of external aio event occurs."
-
-	| p sema handler |
-	sema _ Semaphore new.
-	handler _ [[self hasValidHandler] whileTrue:
-		[self aioHandle: self descriptor
-			exceptionEvents: exceptionEventFlag
-			readEvents: readEventFlag
-			writeEvents: writeEventFlag.
-		sema signal. "event handler is ready"
-		self semaphore wait.
-		self changed]].
-	p _ handler forkAt: Processor userBackgroundPriority.
-	sema wait. "until process has been started and events are being handled"
-	^p! !
-
-!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 7/5/2003 10:49'!
-handleReadAndExceptionsEvents
-	"Generate a #changed notification whenever data is available for reading or an exception
-	occurs on the external IO channel."
-
-	^ self handleExceptions: true readEvents: true writeEvents: false
-! !
-
-!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 7/5/2003 10:49'!
-handleReadEvents
-	"Generate a #changed notification whenever data is available for reading"
-
-	^ self handleExceptions: false readEvents: true writeEvents: false
-! !
-
-!AioEventHandler methodsFor: 'handler process' stamp: 'dtl 4/23/2012 06:45'!
-hasValidHandler
-	"True if the event handler is running, and if it refers to the correct external
-	object semaphore. For protection following an image restart."
-
-	^ semaIndex notNil
-		and: [Smalltalk externalObjects size >= semaIndex
-			and: [(Smalltalk externalObjects at: semaIndex) == semaphore]]! !
-
-!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:05'!
-descriptor
-
-	^ descriptor! !
-
-!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:05'!
-descriptor: aLowLevelIODescriptor
-
-	descriptor _ aLowLevelIODescriptor! !
-
-!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:04'!
-handlerProc
-
-	^ handlerProc! !
-
-!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:04'!
-semaIndex
-
-	^ semaIndex! !
-
-!AioEventHandler methodsFor: 'accessing' stamp: 'dtl 3/30/2003 19:04'!
-semaphore
-
-	^ semaphore! !
-
-!AioEventHandler methodsFor: 'finalization' stamp: 'dtl 9/4/2003 06:54'!
-finalize
-	"Note: An aio handler will not be garbage collected until the semaphore
-	is unregistered. When the FileStream or Socket handled by this aio
-	handler is closed, it should send #close to this handler."
-
-	self close
-! !
-
-!AioEventHandler methodsFor: 'private' stamp: 'dtl 8/19/2022 23:24'!
-descriptorForFile: aFileStream
-
-	"self new descriptorForFile: SourceFiles first"
-
-	^ self primOSFileHandle: aFileStream fileID
-! !
-
-!AioEventHandler methodsFor: 'private' stamp: 'dtl 8/19/2022 23:25'!
-desriptorForSocket: aSocket
-
-	"self new desriptorForSocket: Socket newTCP"
-
-	^ self primOSSocketHandle: aSocket socketHandle
-! !
-
-!AioEventHandler methodsFor: 'private' stamp: 'dtl 9/4/2003 06:40'!
-handleForFile: aFileStream
-
-	"self new handleForFile: SourceFiles first"
-
-	| ioHandle |
-	ioHandle _ self useIOHandle
-		ifTrue: [aFileStream ioHandle]
-		ifFalse: [aFileStream fileID].
-	^ self primOSFileHandle: ioHandle
-! !
-
-!AioEventHandler methodsFor: 'private' stamp: 'dtl 7/4/2003 15:16'!
-handleForSocket: aSocket
-
-	"self new handleForSocket: Socket newTCP"
-
-	| ioHandle |
-	ioHandle _ self useIOHandle
-		ifTrue: [aSocket ioHandle]
-		ifFalse: [aSocket socketHandle].
-	^ self primOSSocketHandle: ioHandle
-! !
-
-!AioEventHandler methodsFor: 'private' stamp: 'dtl 3/30/2003 19:26'!
-useIOHandle
-
-	^ Smalltalk hasClassNamed: #IOHandle! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:53'!
-primAioDisable: aDescriptor
-	"Definitively disable asynchronous event notification for a descriptor. The descriptor
-	parameter is an object representing a low level OS file or socket descriptor."
-
-	<primitive: 'primitiveAioDisable' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:53'!
-primAioEnable: aDescriptor forSemaphore: semaphoreIndex externalObject: trueOrFalse
-	"Enable asynchronous notification for a descriptor. The descriptor parameter is an
-	object representing a low level OS file or socket descriptor. The semaphoreIndex
-	is the index of a Semaphore to be notified, and the third parameter is a flag indicating
-	that descriptor represents an external object which should not be closed on termination
-	of aio handling."
-
-	<primitive: 'primitiveAioEnable' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:53'!
-primAioHandle: aDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
-	"Enable asynchronous notification for a descriptor. The descriptor parameter is an
-	object representing a low level OS file or socket descriptor. The second parameter is
-	the index of a Semaphore to be notified, the remaining three parameters are Boolean
-	flags representing the types of events for which notification is being requested:
-	handle exceptions, handle for read, and handle for write. It is common to watch for
-	read events and exception events, or to watch for write events and exception events."
-
-	<primitive: 'primitiveAioHandle' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:26'!
-primAioModuleName
-	"Module name of the installed plugin, if any."
-
-	"self new primAioModuleName"
-
-	<primitive: 'primitiveModuleName' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:28'!
-primAioModuleVersionString
-	"Module name of the installed plugin, if any."
-
-	"self new primAioModuleVersionString"
-
-	<primitive: 'primitiveVersionString' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:54'!
-primAioSuspend: aDescriptor exceptionEvents: exceptionFlag readEvents: readFlag writeEvents: writeFlag
-	"Temporarily suspend asynchronous event notification for a descriptor. The
-	descriptor parameter is an object representing a low level OS file or socket
-	descriptor. The remaining three parameters are Boolean flags representing the
-	types of events for which notification is being requested: handle exceptions,
-	handle for read, and handle for write."
-
-	<primitive: 'primitiveAioSuspend' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:54'!
-primOSFileHandle: sqFile
-	"Answer the low level file descriptor for a file IO handle."
-
-	<primitive: 'primitiveOSFileHandle' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler methodsFor: 'primitive access' stamp: 'dtl 9/1/2003 17:54'!
-primOSSocketHandle: sqFile
-	"Answer the low level socket descriptor for a socket IO handle."
-
-	<primitive: 'primitiveOSSocketHandle' module: 'AioPlugin'>
-	^ nil
-! !
-
-!AioEventHandler class methodsFor: 'system startup' stamp: 'dtl 11/25/2006 10:04'!
-startUp: resuming
-	"Clear the value of AioPluginPresent. The value will be set once when
-	#aioPluginPresent is first sent, and will remain set to that value for the
-	duration of this Squeak session.
-	This method is called by ThisOSProcess>>startUp. AioEventHandler does
-	not need to be registered in the system startup list."
-
-	resuming ifTrue: [AioPluginPresent _ nil]
-! !
-
-!AioEventHandler class methodsFor: 'testing' stamp: 'dtl 12/18/2016 18:06'!
-aioPluginPresent
-	"Answer true if an AIO plugin is available. The value of AioPluginPresent
-	is cleared at startup time, and is reestablished once for each Squeak session.
-	See initializeAioPluginPresent to initialize after an image startup if warning
-	dialog is not desired."
-
-	"AioEventHandler aioPluginPresent"
-
-	^ AioPluginPresent
-		ifNil: [AioPluginPresent _ self basicNew primAioModuleVersionString notNil.
-			AioPluginPresent ifFalse:
-				[OSProcess trace: ' AioPlugin not present, AioEventHandler will use polling input'].
-			^ AioPluginPresent]! !
-
-!AioEventHandler class methodsFor: 'testing' stamp: 'dtl 10/3/2012 20:24'!
-initializeAioPluginPresent
-	"Initialize the AioPluginPresent flag silently without invoking a warning
-	if the plugin is not present, and answer the value of the flag. Send this
-	to prevent a warning dialog from being presented after image startup,
-	as may be preferred if the image is to be run headless."
-
-	"AioEventHandler initializeAioPluginPresent"
-
-	^ AioPluginPresent
-		ifNil: [AioPluginPresent _ self basicNew primAioModuleVersionString notNil]! !
-
-!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/5/2003 09:16'!
-for: aSocketOrFileStream
-
-	"self for: SourceFiles first"
-	"self for: Socket new"
-	"self for: OSProcess thisOSProcess stdIn"
-
-	^ self new for: aSocketOrFileStream! !
-
-!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/5/2003 11:14'!
-for: aSocketOrFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-	"Flag parameters are true or false, indicating types of events to be handled."
-
-	^ self new for: aSocketOrFileStream
-			exceptions: exceptionEventFlag
-			readEvents: readEventFlag
-			writeEvents: writeEventFlag! !
-
-!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/4/2003 18:47'!
-forFileStream: aFileStream
-
-	"self forFileStream: SourceFiles first"
-
-	^ self new forFileStream: aFileStream
-
-! !
-
-!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/5/2003 11:14'!
-forFileStream: aFileStream exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-	"Flag parameters are true or false, indicating types of events to be handled."
-
-	"self forFileStream: SourceFiles first"
-
-	^ self new forFileStream: aFileStream
-			exceptions: exceptionEventFlag
-			readEvents: readEventFlag
-			writeEvents: writeEventFlag
-! !
-
-!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/4/2003 19:01'!
-forSocket: aSocket
-
-	"self forSocket: Socket new"
-
-	^ self new forSocket: aSocket
-
-! !
-
-!AioEventHandler class methodsFor: 'instance creation' stamp: 'dtl 7/5/2003 11:14'!
-forSocket: aSocket exceptions: exceptionEventFlag readEvents: readEventFlag writeEvents: writeEventFlag
-	"Flag parameters are true or false, indicating types of events to be handled."
-
-	"self forSocket: Socket new"
-
-	^ self new forSocket: aSocket
-			exceptions: exceptionEventFlag
-			readEvents: readEventFlag
-			writeEvents: writeEventFlag
-! !
-
-!PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 11/25/2006 10:49'!
-close
-	"When the FileStream or Socket handled by this aio handler is closed,
-	it should send #close to this handler."
-
-	eventGenerator ifNotNil: [eventGenerator terminate]! !
-
-!PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'RB 9/3/2010 11:52'!
-eventGeneratorProcess
-	"A process that generates periodic #changed events"
-
-	| d p|
-	d _ Delay forMilliseconds: 125.
-	p _ [[self changed.
-	d wait] repeat] newProcess.
-	^p resume.! !
-
-!PseudoAioEventHandler methodsFor: 'initialize-release' stamp: 'dtl 11/25/2006 13:15'!
-initialize
-
-	self eventGenerator.
-	^ super initialize! !
-
-!PseudoAioEventHandler methodsFor: 'accessing' stamp: 'dtl 11/25/2006 13:17'!
-eventGenerator
-	"Answer the value of eventGenerator"
-
-	^ eventGenerator ifNil: [eventGenerator _ self eventGeneratorProcess]! !
-
-!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 01:00'!
-asAsyncFileReadStream
-	"Answer a replacement for this object, with asynchronous event handling.
-	Do not close the fileID when this object is finalized."
-
-	self keepOpen.
-	^ AsyncFileReadStream
-		name: self name
-		attachTo: fileID
-		writable: self isReadOnly not
-! !
-
-!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 9/16/2002 17:59'!
-asAttachableFileStream
-
-	^ self
-! !
-
-!AttachableFileStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 01:00'!
-asBufferedAsyncFileReadStream
-	"Answer a replacement for this object, with asynchronous event handling
-	and buffered output. Do not close the fileID when this object is finalized."
-
-	self keepOpen.
-	^ BufferedAsyncFileReadStream
-		name: self name
-		attachTo: fileID
-		writable: self isReadOnly not
-! !
-
-!AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 9/17/2002 08:08'!
-autoClose
-	"Private. Answer true if the file should be automatically closed when 
-	this object is finalized."
-
-	^ autoClose
-		ifNil: [autoClose _ true]! !
-
-!AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 7/6/2006 22:17'!
-finalize
-
-	self autoClose
-		ifTrue: [[self primCloseNoError: fileID] on: Error do: []]! !
-
-!AttachableFileStream methodsFor: 'finalization' stamp: 'dtl 9/17/2002 08:05'!
-keepOpen
-	"Do not allow the file to be closed when this object is finalized."
-
-	autoClose _ false
-! !
-
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 8/20/2022 00:36'!
-close
-	"Close this file."
-
-	fileID ifNotNil:
-		[self primCloseNoError: fileID.
-			self unregister.
-			fileID _ nil]
-! !
-
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:00'!
-ensureOpen
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:00'!
-open
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:01'!
-open: fileName forWrite: writeMode
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:02'!
-openReadOnly
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream methodsFor: 'open/close' stamp: 'dtl 6/12/1999 16:02'!
-reopen
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream methodsFor: 'initialize-release' stamp: 'dtl 4/14/2006 09:34'!
-disableEventHandling
-	"Subclasses may disable event handling"! !
-
-!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 8/20/2022 00:36'!
-flush
-	"Flush the external OS stream (the one in the C library)."
-
-	OSProcess accessor flushExternalStream: fileID! !
-
-!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 12/9/2022 22:01:51'!
-nextPutAll: aString
-	^ super nextPutAll: aString asByteString! !
-
-!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 5/17/2009 14:11'!
-position
-	"Return the receiver's current file position. If the stream is not positionable,
-	as in the case of a Unix pipe stream, answer 0."
-
-	^ [super position]
-		on: Error
-		do: [0]
-! !
-
-!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 9/2/2006 17:17'!
-upToEnd
-	"Answer a subcollection from the current access position through the last element
-	of the receiver. This is slower than the method in StandardFileStream, but it
-	works with pipes which answer false to #atEnd when no further input is
-	currently available, but the pipe is not yet closed."
-
-	| newStream buffer nextBytes |
-	buffer _ buffer1 species new: 1000.
-	newStream _ WriteStream on: (buffer1 species new: 100).
-	[self atEnd or: [(nextBytes _ self nextInto: buffer) isEmpty]]
-		whileFalse: [newStream nextPutAll: nextBytes].
-	^ newStream contents
-! !
-
-!AttachableFileStream methodsFor: 'read, write, position' stamp: 'dtl 6/4/2006 16:02'!
-upToEndOfFile
-	"Answer a subcollection from the current access position through
-	the last element of the receiver.  Use #atEndOfFile to determine end
-	of file status with feof(), required for reliable end of file test on
-	OS pipes."
-
-	| newStream buffer |
-	buffer _ buffer1 species new: 1000.
-	newStream _ WriteStream on: (buffer1 species new: 100).
-	[self atEndOfFile] whileFalse: [newStream nextPutAll: (self nextInto: buffer)].
-	^ newStream contents! !
-
-!AttachableFileStream methodsFor: 'testing' stamp: 'dtl 3/26/2006 15:52'!
-isPipe
-
-	^ false
-! !
-
-!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 9/12/2023 18:55'!
-name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag
-	"Attach to an existing file handle, assumed to have been previously opened by the underlying operating system."
-
-	name _ aSymbolOrString.
-	fileID _ anIOHandle.
-	readWriteFlag ifTrue: [self readWrite] ifFalse: [self readOnly].
-	self useEncoding.
-	self register.
-! !
-
-!AttachableFileStream methodsFor: 'attaching' stamp: 'dtl 9/12/2023 19:06'!
-useEncoding
-	"Adopt the Cuis idiom, falling back on #ascii if not present. A stream that
-	is not in binary mode is assumed to be using a character encoder. Traditionally
-	this simply referred to eight bit characters as opposed to uninterpreted bytes."
-
-	^ (self respondsTo: #useCharacters)
-		ifTrue: [ self perform: #useCharacters ]
-		ifFalse: [self perform: #ascii ]
-! !
-
-!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 8/20/2022 00:36'!
-setBlocking
-
-	OSProcess accessor setBlocking: fileID! !
-
-!AttachableFileStream methodsFor: 'nonblocking' stamp: 'dtl 8/20/2022 00:36'!
-setNonBlocking
-
-	OSProcess accessor setNonBlocking: fileID! !
-
-!AttachableFileStream methodsFor: 'deprecated' stamp: 'dtl 8/20/2022 00:53'!
-ioHandle
-
-	"Deprecated, retained for support of older versions of CommandShell (19-Aug-2022)"
-
-	^ fileID! !
-
-!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 6/12/1999 15:53'!
-fileNamed: fileName
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 6/12/1999 15:53'!
-isAFileNamed: fileName
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 6/12/1999 15:54'!
-newFileNamed: fileName
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 6/12/1999 15:55'!
-oldFileNamed: fileName
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream class methodsFor: 'file creation' stamp: 'dtl 6/12/1999 15:56'!
-readOnlyFileNamed: fileName
-
-	self shouldNotImplement
-! !
-
-!AttachableFileStream class methodsFor: 'initialize-release' stamp: 'dtl 10/19/2001 21:53'!
-initialize
-
-	"AttachableFileStream initialize"
-
-	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle)
-! !
-
-!AttachableFileStream class methodsFor: 'instance creation' stamp: 'dtl 3/15/2006 19:50'!
-name: aSymbolOrString attachTo: anIOHandle writable: readWriteFlag 
-	"Create a new instance attached to anIOHandle, where anIOHandle
-	represents an open IO channel. For write streams, this represents two
-	Smalltalk streams which write to the same OS file or output stream,
-	presumably with interleaved output. The purpose of this method is to
-	permit a FileStream to be attached to an existing IOHandle, such as
-	the IOHandle for standard input, standard output, and standard error."
-
-	^ (super basicNew
-		name: aSymbolOrString
-		attachTo: anIOHandle
-		writable: readWriteFlag) initialize! !
-
-!AttachableFileStream class methodsFor: 'registry' stamp: 'dtl 8/25/2006 18:15'!
-register: anObject
-	"An attachable file stream is generally either a second reference to an
-	existing file stream, or a reference to a transient object such as a pipe
-	endpoint. There is no need to register it for finalization."
-
-	^ anObject! !
-
-!AttachableFileStream class methodsFor: 'registry' stamp: 'dtl 8/25/2006 18:15'!
-unregister: anObject
-	"An attachable file stream is generally either a second reference to an
-	existing file stream, or a reference to a transient object such as a pipe
-	endpoint. There is no need to register it for finalization."
-
-	^ anObject! !
-
-!AttachableFileStream class methodsFor: 'examples' stamp: 'dtl 8/20/2022 00:37'!
-stdIn
-
-	"self stdIn"
-
-	^ self name: 'stdIn' attachTo: OSProcess thisOSProcess stdIn fileID writable: false
-! !
-
-!AsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 6/17/2006 08:08'!
-actAsExecutor
-
-	super actAsExecutor.
-	eventHandler _ nil! !
-
-!AsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 9/3/2010 16:57'!
-finalize
-	"Shut the the event handler before closing the file, otherwise aio
-	functions may reference a closed file handle."
-
-	eventHandler ifNotNil: [eventHandler finalize].
-	super finalize
-! !
-
-!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 20:53'!
-asAsyncFileReadStream
-
-	^ self
-! !
-
-!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 01:00'!
-asAttachableFileStream
-	"Answer a replacement for this object, with no asynchronous event handling.
-	Do not close the fileID when this object is finalized."
-
-	self keepOpen.
-	^ AttachableFileStream
-		name: self name
-		attachTo: fileID
-		writable: self isReadOnly not
-! !
-
-!AsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 00:33'!
-asBufferedAsyncFileReadStream
-	"Answer a replacement for this object, with buffered output."
-
-	^ BufferedAsyncFileReadStream
-		name: self name
-		attachTo: fileID
-		writable: self isReadOnly not
-! !
-
-!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 7/8/2003 21:48'!
+!AioEventHandlerExample methodsFor: 'initialize-release' stamp: 'dtl 4/Sep/2003, 10:20:00 am (UTC)'!
 close
 
-	self disableEventHandling.
-	^ super close! !
-
-!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:33'!
-initialize
-
-	super initialize.
-	self readOnly.
-	OSProcess accessor setNonBlocking: fileID.
-	self enableEventHandling
+	self handler close.
+	self handler removeDependent: self
 ! !
 
-!AsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 7/8/2003 21:48'!
-open
+!AioEventHandlerExample methodsFor: 'updating' stamp: 'dtl 24/Feb/2013, 2:22:00 pm (UTC)'!
+getAvailableData
+	"Obtain all available data from ioStream. For a FileStream, keep reading until
+	a line terminator is reached. This allows use with a FileStream that has not been
+	set for nonblocking input."
 
-	^ super open initialize
+	| ws c buffer n |
+	buffer _ String new: 4000.
+	(self ioStream isKindOf: FileStream)
+		ifTrue:
+			[ws _ WriteStream on: String new.
+			[c _ ioStream next.
+			(c == Character lf)
+				ifTrue: [ws nextPut: Character cr]
+				ifFalse: [ws nextPut: c].
+			(c ~= Character lf) and: [c ~= Character cr]] whileTrue.
+			^ ws contents]
+		ifFalse:
+			[ioStream dataAvailable
+				ifTrue:
+					[n _ ioStream receiveDataInto: buffer.
+					^ buffer copyFrom: 1 to: n]
+				ifFalse:
+					[^ '']]
 ! !
 
-!AsyncFileReadStream methodsFor: 'read event handling' stamp: 'dtl 9/3/2010 16:50'!
-disableEventHandling
+!AioEventHandlerExample methodsFor: 'updating' stamp: 'dtl 5/Jul/2003, 10:23:00 pm (UTC)'!
+update: anObject
 
-	eventHandler
-		ifNotNil: [eventHandler removeDependent: self; close].
-	self eventHandler: nil! !
+	(anObject isKindOf: AioEventHandler)
+		ifTrue: [Transcript show: self getAvailableData]
+! !
 
-!AsyncFileReadStream methodsFor: 'read event handling' stamp: 'dtl 11/25/2006 10:56'!
-enableEventHandling
+!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 5/Jul/2003, 1:40:00 pm (UTC)'!
+handler
 
-	self eventHandler: (AioEventHandler aioPluginPresent
-		ifTrue: [AioEventHandler
-				forFileStream: self
+	^ handler! !
+
+!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 5/Jul/2003, 1:40:00 pm (UTC)'!
+handler: anAioHandler
+
+	handler _ anAioHandler! !
+
+!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 5/Jul/2003, 1:57:00 pm (UTC)'!
+ioStream
+
+	^ ioStream! !
+
+!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 5/Jul/2003, 1:57:00 pm (UTC)'!
+ioStream: aFileStream
+
+	ioStream _ aFileStream! !
+
+!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 4/Sep/2003, 10:22:00 am (UTC)'!
+osPipeExample
+	"Demonstrate an asynchronous read hander on an OS pipe. Output will
+	be displayed on the Transcript."
+
+	"self osPipeExample"
+
+	| pipe aio |
+	(Smalltalk hasClassNamed: #OSProcess)
+		ifFalse:
+			[self notify: 'this example requires OSProcess']
+		ifTrue:
+			[pipe _ (Smalltalk at: #OSPipe) new.
+			aio _ super new handler: (AioEventHandler for: pipe reader); ioStream: pipe reader.
+			aio handler addDependent: aio.
+			(1 to: 10) do:
+				[:i |
+				pipe nextPutAll: 'this is line ', i asString; cr.
+				(Delay forMilliseconds: 500) wait].
+			^ aio handler close]
+! !
+
+!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 4/Sep/2003, 10:22:00 am (UTC)'!
+showTtyOnTranscript: ttyName
+	"Enter lines on /dev/tty, and watch them show up on the Transcript. Normally,
+	/dev/tty corresponds to standard input for the Squeak process, so if you have
+	a serial port connected to something that generates data, try this example with
+	/dev/whatever to demonstrate asych input on a serial port.
+
+	Warning: This method does not set the file stream for nonblocking input, so
+	it can block the Squeak VM. The #getAvailableData attempts to work around this,
+	but save your image before testing with another serial interfaces."
+
+	"self showTtyOnTranscript: '/dev/tty'"
+
+	| inputStream handler example |
+	inputStream _ FileStream readOnlyFileNamed: '/dev/tty'.
+	handler _ AioEventHandler for: inputStream
 				exceptions: true
 				readEvents: true
-				writeEvents: false]
-		ifFalse: [PseudoAioEventHandler new]).
-	self eventHandler addDependent: self! !
-
-!AsyncFileReadStream methodsFor: 'read event handling' stamp: 'dtl 7/8/2003 19:29'!
-hasValidHandler
-
-	^ self eventHandler notNil and: [eventHandler hasValidHandler]
+				writeEvents: false.
+	example _ super new handler: handler; ioStream: inputStream.
+	handler addDependent: example.
+	Transcript cr; show: ''.
+	self notify: 'Enter lines on ', ttyName, ', watch the Transcript, and select "Proceed" when done'.
+	^ example handler close
 ! !
 
-!AsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/8/2003 19:26'!
-eventHandler
-	"The aio event handler. Provides notification whenever external data is available."
+!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 4/Sep/2003, 10:23:00 am (UTC)'!
+standardInputExample
+	"Enter lines on stdin, and watch them show up on the Transcript."
 
-	^ eventHandler! !
+	"self standardInputExample"
 
-!AsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/8/2003 19:26'!
-eventHandler: anAioEventHandler
-	"The aio event handler. Provides notification whenever external data is available."
-
-	eventHandler _ anAioEventHandler! !
-
-!AsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 9/2/2006 09:58'!
-upToEndOfFile
-	"Answer a subcollection from the current access position through
-	the last element of the receiver.  Use #atEndOfFile to determine end
-	of file status with feof(), required for reliable end of file test on
-	OS pipes. Close the file when end of file is detected."
-
-	| b |
-	b _ super upToEndOfFile.
-	self isReadOnly
-		ifTrue: [self close].
-	^ b! !
-
-!AsyncFileReadStream methodsFor: 'updating' stamp: 'dtl 7/8/2003 21:22'!
-update: aParameter
-
-	(aParameter == self eventHandler)
-		ifTrue: [self changed]
-! !
-
-!AsyncFileReadStream class methodsFor: 'examples' stamp: 'dtl 7/9/2003 20:16'!
-stdIn
-
-	"self stdIn"
-
-	^ super stdIn initialize
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'finalization' stamp: 'dtl 6/17/2006 08:10'!
-actAsExecutor
-
-	super actAsExecutor.
-	nonBlockingMode _ nil.
-	readBuffer _ nil.
-	readSyncSemaphore _ nil.
-	dataAvailableSemaphore _ nil
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/30/2023 15:54'!
-appendAllToBuffer: chars
-	"Append all chars to readBuffer, then signal dataAvailableSemaphore to inform
-	any blocked reader that the read can proceed. Also generate a #changed event
-	to inform any interested objects that new data has become available."
-
-	self readSyncSemaphore critical:
-		[ | pos |
-		pos _ self readBuffer position.
-		readBuffer setToEnd.
-		readBuffer nextPutAll: chars.
-		readBuffer position: pos].
-	self dataAvailableSemaphore signal.
-	self changed! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 10/1/2006 17:12'!
-appendToBuffer: aCharacter
-	"Append aCharacter to readBuffer, then signal dataAvailableSemaphore to inform
-	any blocked reader that the read can proceed, and trigger a #dataReady event to
-	inform any interested objects that new data has become available."
-
-	| pos |
-	self readSyncSemaphore critical:
-		[pos _ self readBuffer position.
-		readBuffer setToEnd.
-		readBuffer nextPut: aCharacter.
-		readBuffer position: pos].
-	self dataAvailableSemaphore signal.
-	self changed! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/30/2023 14:09'!
-moveAvailableDataFrom: sqFile
-
-	| count bufferSize buffer |
-	[ readBuffer notNil and: [readBuffer size > self readBufferMemoryWarningThreshold] ]
-		whileTrue: [ (Delay forSeconds: 2) wait ]. "Spin wait until space becomes available"
-	bufferSize _ self readAheadChunkSize.
-	buffer _ String new: bufferSize.
-	count _ self readAvailableDataFrom: sqFile into: buffer.
-	count > 0
-		ifTrue:
-			[count == bufferSize
-				ifTrue:
-					[self appendAllToBuffer: buffer]
-				ifFalse:
-					[self appendAllToBuffer: (buffer copyFrom: 1 to: count)]]
+	| aio stdin |
+	(Smalltalk hasClassNamed: #OSProcess)
 		ifFalse:
-			[(self closed or: [OSProcess accessor isAtEndOfFile: fileID])
-				ifTrue:
-					[self disableEventHandling]]
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 8/20/2022 00:38'!
-moveAvailableDataToBuffer
-
-	^ self moveAvailableDataFrom: fileID.
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 3/4/2017 14:06'!
-readAvailableDataFrom: sqFile into: buffer
-	"Some implementations of the read primitive may read character by character
-	from standard input. Handle that case by looping while data available. Answer
-	the number of bytes read into the buffer."
-
-	| bytesRead |
-	bytesRead _ 0.
-	[ | count |
-		[count _ self primRead: sqFile
-				into: buffer
-				startingAt: 1 + bytesRead
-				count: self readAheadChunkSize - bytesRead]
-			on: Error	"Could fail if closed"
-			do: [count _ 0].
-	bytesRead _ bytesRead + count.
-	count > 0] whileTrue.
-	^ bytesRead.
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/6/2003 10:15'!
-waitForBufferAvailable
-	"Block if the readBuffer has grown too large. No-op for now, but add
-	this later if large pipes prove to be a problem."! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 7/6/2003 10:15'!
-waitForDataReady
-	"Block until at least one character is available in the readBuffer. This is not
-	thread safe, and only one Process is permitted to send this message."
-
-	self dataAvailableSemaphore wait
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read ahead buffer' stamp: 'dtl 2/22/2007 08:09'!
-waitForDataReady: count 
-	"Block until at least count characters are available in the readBuffer"
-
-	[self readSyncSemaphore
-		critical: [self readBuffer size - readBuffer position < count]]
-		whileTrue: [self waitForDataReady]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 8/20/2022 00:37'!
-asAsyncFileReadStream
-	"Answer a replacement for this object, with asynchronous event handling but
-	no buffering."
-
-	^ AsyncFileReadStream
-		name: self name
-		attachTo: fileID
-		writable: self isReadOnly not
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'converting' stamp: 'dtl 7/8/2003 20:55'!
-asBufferedAsyncFileReadStream
-
-	^ self! !
-
-!BufferedAsyncFileReadStream methodsFor: 'testing' stamp: 'dtl 2/22/2007 08:00'!
-atEnd
-	"Answer whether the receiver can access any more objects.
-
-	Warning: If this instance represents the reader end of an OS pipe, it
-	is possible for the #atEnd test to give a false negative. In particular, after
-	closing the writer end of an empty OSPipe, the reader may not appear to
-	be atEnd until some time has elapsed, or until an explicit read on the pipe
-	causes the status to be updated. To illustrate the problem:
-
-		(OSPipe new setBufferedReader; yourself) closeWriter; atEnd>>false
-		(OSPipe new ) closeWriter; next; yourself; atEnd>>true
-		(OSPipe new setBufferedReader; yourself) closeWriter; next; yourself; atEnd>>true"
-
-	^ self readSyncSemaphore
-		critical: [self readBuffer atEnd
-				and: [super atEnd]]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'testing' stamp: 'dtl 2/22/2007 08:01'!
-atEndOfFile
-	"Answer whether the receiver is at its end based on the result of
-	the last read operation. This uses feof() to test the underlying file
-	stream status, and can be used as an alternative to #atEnd, which
-	does not properly report end of file status for an OSPipe."
-
-	^ self readSyncSemaphore
-		critical: [self readBuffer atEnd
-				and: [fileID isNil
-						or: [OSProcess accessor isAtEndOfFile: fileID]]]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'testing' stamp: 'dtl 7/9/2003 20:59'!
-isBlocking
-	"Answer true if set to blocking mode."
-
-	^ self nonBlockingMode not! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 2/22/2007 08:02'!
-basicNext
-	"Answer the next byte from this file, or nil if at the end of the file.
-	If the readBuffer is empty, force a basicNext in order to ensure that
-	the end of file flag is updated (in stdio stream)."
-
-	(self readSyncSemaphore
-			critical: [self readBuffer atEnd])
-		ifTrue: [^ super basicNext]
-		ifFalse: [[self isBlocking]
-				ifTrue: [self waitForDataReady].
-			^ self readSyncSemaphore
-				critical: [readBuffer next]]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 7/30/2023 21:35'!
-next
-
-	((self readSyncSemaphore
-				critical: [self readBuffer atEnd])
-			and: [self isBlocking])
-		ifTrue: [self waitForDataReady].
-	^ self readSyncSemaphore
-		critical: [readBuffer next ifNotNil: [ :char | readBuffer pruneCollection. char]]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 7/30/2023 21:02'!
-next: n into: aString startingAt: startIndex
-	"Read n bytes into the given string.
-	Return aString or a partial copy if less than n elements have been read."
-
-	| count |
-	count _ self readInto: aString startingAt: startIndex count: n.
-	count > 0 ifTrue: [ self readBuffer pruneCollection ].
-	count = n
-		ifTrue: [^ aString]
-		ifFalse: [^ aString copyFrom: 1 to: startIndex+count-1]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 9/3/2010 17:01'!
-peek
-	"Answer what would be returned if the message next were sent to the
-	receiver. If the receiver is at the end, answer nil. "
-
-	((self readSyncSemaphore
-				critical: [self readBuffer atEnd])
-			and: [self isBlocking])
-		ifTrue: [self waitForDataReady].
-	^ self readSyncSemaphore
-		critical: [readBuffer peek]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 3/21/2007 21:56'!
-readInto: byteArray startingAt: startIndex count: count 
-	"Read into the given array as specified, and return the count actually
-	transferred. "
-
-	| s size |
-	self isBlocking
-		ifTrue: [self waitForDataReady: count.
-			s _ self readSyncSemaphore
-						critical: [self readBuffer next: count].
-			size _ count]
-		ifFalse: [size _ self readBuffer size - readBuffer position min: count.
-			s _ self readSyncSemaphore
-						critical: [self readBuffer next: size]].
-	byteArray
-		replaceFrom: startIndex
-		to: startIndex + size - 1
-		with: s.
-	^ size! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 3/19/2007 18:28'!
-upTo: delim 
-
-	^ self readSyncSemaphore critical: [self readBuffer upTo: delim]
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'read, write, position' stamp: 'dtl 12/21/2007 13:14'!
-upToEndOfFile
-	"Answer a subcollection from the current access position through
-	the last element of the receiver.  Use #atEndOfFile to determine end
-	of file status with feof(), required for reliable end of file test on
-	OS pipes. Close the file when end of file is detected."
-
-	| newStream buffer |
-	buffer _ buffer1 species new: 1000.
-	newStream _ WriteStream on: (buffer1 species new: 100).
-	[self atEndOfFile] whileFalse:
-		[self moveAvailableDataToBuffer.
-		newStream nextPutAll: (self nextInto: buffer)].
-	self isReadOnly ifTrue: [self close].
-	^ newStream contents
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/6/2003 10:15'!
-dataAvailableSemaphore
-	"Signalled one or more times when data becomes available. Only one Process
-	is permitted to wait on this Semaphore."
-
-	^ dataAvailableSemaphore ifNil: [dataAvailableSemaphore _ Semaphore new]
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/9/2003 20:57'!
-nonBlockingMode
-	"True if nonblocking read behavior should be implemented"
-
-	^ nonBlockingMode ifNil: [nonBlockingMode _ true]
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/9/2003 20:58'!
-nonBlockingMode: trueOrFalse
-	"True if nonblocking read behavior should be implemented"
-
-	nonBlockingMode _ trueOrFalse
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/30/2023 20:53'!
-readBuffer
-	"Read ahead buffer, filled asynchronously as data becomes available on the IO channel"
-
-	^ readBuffer
-		ifNil: [readBuffer _ (ResettableBufferStream with: String new)
-						resetLimit: 20000]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/6/2003 10:15'!
-readBuffer: aStream
-
-	readBuffer _ aStream! !
-
-!BufferedAsyncFileReadStream methodsFor: 'accessing' stamp: 'dtl 7/6/2003 10:15'!
-readSyncSemaphore
-	"A semaphore for synchronizing access to readBuffer"
-
-	^ readSyncSemaphore ifNil: [readSyncSemaphore _ Semaphore forMutualExclusion]! !
-
-!BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 7/6/2003 10:15'!
-maxReadBufferSize
-	"Replace readBuffer when position exceeds this."
-
-	^ 40000
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 7/6/2003 10:15'!
-readAheadChunkSize
-	"The async read ahead process will read at most this many characters.
-	Notes: On my system (dtl), a chunk size of 2000 leads to ExternalCommandShell
-	overdriving the stdout stream when doing (for example) a long directory listing.
-	I have added error handling to accommodate this, but I do know know how
-	reliable it is, so I would prefer to avoid generating the condition. A chunk
-	size of 200 is small enough that performance is noticably impacted in a
-	CommandShell window. A chunk size of 1000 seems to produce good overall
-	behavior."
-
-	^ 1000! !
-
-!BufferedAsyncFileReadStream methodsFor: 'defaults' stamp: 'dtl 12/7/2012 19:54'!
-readBufferMemoryWarningThreshold
-	"A read buffer larger that this may start causing problems. Issue a warning
-	before the object memory becomes too large." 
-
-	^self maxReadBufferSize * 1000
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 7/9/2003 20:54'!
-setBlocking
-	"Set for blocking reads. Default is nonblocking mode."
-
-	self nonBlockingMode: false
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'initialize-release' stamp: 'dtl 7/9/2003 20:55'!
-setNonBlocking
-	"Set for nonblocking reads. This is the default mode."
-
-	self nonBlockingMode: true
-! !
-
-!BufferedAsyncFileReadStream methodsFor: 'updating' stamp: 'dtl 7/8/2003 22:06'!
-update: aParameter
-	"A #changed event is generated as a side effect of this method"
-
-	(aParameter == self eventHandler)
-		ifTrue: [self moveAvailableDataToBuffer]
-! !
-
-!BufferedAsyncFileReadStream class methodsFor: 'examples' stamp: 'dtl 7/9/2003 20:24'!
-stdIn
-
-	"self stdIn"
-
-	^ super stdIn
-! !
-
-!ResettableBufferStream methodsFor: 'collections - accessing' stamp: 'dtl 7/30/2023 21:06'!
-pruneCollection
-	"Assume that position refers to the stream position of elements most recently
-	read from the stream, and that there wil be no further need to read those elements.
-	Remove collection elements prior to position to maintain a small collection size."
-
-	position > self resetLimit
-		ifTrue: [ self removePreviouslyRead ]
-! !
-
-!ResettableBufferStream methodsFor: 'collections - accessing' stamp: 'dtl 7/23/2023 11:51'!
-removePreviouslyRead
-
-	| newReadLimit newWriteLimit |
-	newReadLimit _ readLimit - position .
-	newWriteLimit _ writeLimit - position.
-	collection _ collection allButFirst: position..
-	readLimit _ newReadLimit.
-	writeLimit _ newWriteLimit.
-	position _ 0.
-! !
-
-!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 7/30/2023 13:03'!
-resetLimit
-	"Previously read entries will be discarded from the collection when this limit is exceeded"
-
-	^ resetLimit ifNil: [ resetLimit _ 20000 ]
-! !
-
-!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 7/30/2023 12:41'!
-resetLimit: count
-
-	resetLimit _ count
-
-! !
-
-!ResettableBufferStream methodsFor: 'accessing' stamp: 'dtl 1/2/2024 09:27:43'!
-upToEnd
-	"Answer a subcollection from the current access position through the last element of the receiver."
-	
-	"Copied from Squeak PositionableStream>>upToEnd which is not currently implemented in Cuis"
-
-	| newStream |
-	newStream := WriteStream on: (self collectionSpecies new: 100).
-	[self atEnd] whileFalse: [ newStream nextPut: self next ].
-	^ newStream contents! !
-
-!ExternalPipe methodsFor: 'printing' stamp: 'dtl 4/2/2006 11:40'!
-printOn: aStream
-	"The implementation of Stream>>printOn: has bad side effects when used
-	for OSPipe. This implementation is copied from Object."
-
-	| title |
-	title _ self class name.
-	aStream
-		nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']);
-		nextPutAll: title! !
-
-!ExternalPipe methodsFor: 'testing' stamp: 'dtl 4/2/2006 21:14'!
-atEnd
-	"Answer whether the receiver can access any more objects."
-
-	^ writer closed and: [self peek == nil]
-! !
-
-!ExternalPipe methodsFor: 'testing' stamp: 'dtl 6/4/2006 16:01'!
-atEndOfFile
-	"Answer whether the receiver is at its end based on the result of
-	the last read operation. This uses feof() to test the underlying file
-	stream status, and can be used as an alternative to #atEnd, which
-	does not properly report end of file status for an OSPipe."
-
-	^ reader atEndOfFile
-! !
-
-!ExternalPipe methodsFor: 'testing' stamp: 'dtl 9/16/2002 17:35'!
-closed
-
-	^ reader closed! !
-
-!ExternalPipe methodsFor: 'testing' stamp: 'dtl 3/26/2006 15:48'!
-isPipe
-
-	^ true
-! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 20:00'!
-blocking
-	"True if reader end is set to blocking mode."
-
-	^ blocking ifNil: [blocking _ true]! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 20:00'!
-blocking: trueOrFalse
-	"True if reader end is set to blocking mode."
-
-	blocking _ trueOrFalse! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 4/16/2003 06:01'!
-contents
-	"Answer contents of the pipe, and return the contents to the pipe so it can still be read."
-
-	"ExternalPipe new nextPutAll: 'hello'; contents"
-
-	| s |
-	self closed ifTrue:
-		[self notify: self printString, ' ', self reader printString, ' closed'.
-		^ nil].
-	s _ self reader upToEnd.
-	s isEmpty ifFalse:
-		[self writer closed
-			ifTrue: [self notify: self printString, ' ', self writer printString,
-								' closed, cannot replace contents']
-			ifFalse: [self nextPutAll: s]].
-	^ s! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 4/12/2014 16:04'!
-flush
-	^writer flush! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 9/16/2002 17:33'!
-next
-	"Answer the next object accessible by the receiver."
-
-	^ reader next! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 9/16/2002 17:33'!
-next: anInteger 
-	"Answer the next anInteger elements of my collection."
-
-	^ reader next: anInteger
-! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
-nextPut: anObject 
-	"Insert the argument, anObject, as the next object accessible by the 
-	receiver. Answer anObject."
-
-	^ writer nextPut: anObject! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
-nextPutAll: aCollection 
-	"Append the elements of aCollection to the sequence of objects accessible 
-	by the receiver. Answer aCollection."
-
-	^ writer nextPutAll: aCollection! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 9/16/2002 17:34'!
-peek
-
-	^ reader peek! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
-reader
-	"Answer a stream on the read end of the pipe."
-
-	^ reader! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
-reader: aReadStream
-
-	reader _ aReadStream! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 9/18/2002 20:29'!
-upToEnd
-	"Answer the remaining elements in the string"
-
-	reader closed
-		ifTrue: [^ '']
-		ifFalse: [^ reader upToEnd]! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 11/11/2011 09:27'!
-upToEndOfFile
-	"Answer the remaining elements in the pipe.  Use #isAtEndOfFile: to
-	determine end of file status with feof(), required for reliable end of
-	file test on OS pipes."
-
-	reader closed
-		ifTrue: [^ '']
-		ifFalse: [^ reader upToEndOfFile]! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
-writer
-	"Answer a stream on the write end of the pipe."
-
-	^ writer! !
-
-!ExternalPipe methodsFor: 'accessing' stamp: 'dtl 3/7/2006 19:44'!
-writer: aWriteStream
-
-	writer _ aWriteStream! !
-
-!ExternalPipe methodsFor: 'finalization' stamp: 'dtl 3/7/2006 19:44'!
-close
-
-	self closeWriter; closeReader
-! !
-
-!ExternalPipe methodsFor: 'finalization' stamp: 'dtl 3/7/2006 19:44'!
-closeReader
-
-	reader ifNotNil: [reader close]
-! !
-
-!ExternalPipe methodsFor: 'finalization' stamp: 'dtl 3/7/2006 19:44'!
-closeWriter
-
-	writer ifNotNil: [writer close]
-! !
-
-!ExternalPipe methodsFor: 'character writing' stamp: 'dtl 3/7/2006 19:44'!
-cr
-	"Append a return character to the receiver."
-
-	self writer cr! !
-
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 3/25/2006 14:08'!
-initialize
-
-	^ self makePipe
-! !
-
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 8/19/2022 19:35'!
-makePipe
-	"Create an OS pipe and attach it to my input and output streams."
-
-	| handleArray |
-	handleArray _ OSProcess accessor primCreatePipe.
-	handleArray isNil
+			[self notify: 'this example requires OSProcess']
 		ifTrue:
-			[self error: 'cannot create OS pipe']
+			[Transcript cr; show: ''.
+			stdin _ (Smalltalk at: #OSProcess) thisOSProcess stdIn.
+			aio _ super new handler: (AioEventHandler for: stdin); ioStream: stdin.
+			aio handler addDependent: aio.
+			self notify: 'Enter lines on standard input, watch the Transcript, and select "Proceed" when done'.
+			^ aio handler close]
+! !
+
+!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 4/Sep/2003, 10:24:00 am (UTC)'!
+tcpSocketExample
+	"Loosely based on OldSocket>>remoteTestServerTCP. Output is displayed on the Transcript."
+
+	"self tcpSocketExample"
+
+	| port serverTcpSocket serverName clientTcpSocket handler example useOldStyleSockets |
+	port _ 8086.
+	serverName _ '127.0.0.1'.
+
+	"The networking code was updated for Squeak 3.6. This checks for which version to use."
+	useOldStyleSockets _ Socket respondsTo: #initializeNetworkIfFail:.
+
+	Transcript show: 'initializing network ... '.
+
+	useOldStyleSockets
+		ifTrue:
+			[Socket initializeNetworkIfFail: [^Transcript show:'failed']]
 		ifFalse:
-			[self reader: (AttachableFileStream
-							name: 'pipeReader'
-							attachTo: (handleArray at: 1)
-							writable: false).
-			self writer: (AttachableFileStream
-							name: 'pipeWriter'
-							attachTo: (handleArray at: 2)
-							writable: true)]
-! !
-
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:38'!
-setBlocking
-	"Set the reader side of the pipe for blocking reads."
-
-	reader ifNotNil: [OSProcess accessor setBlocking: reader fileID].
-	self blocking: true
-! !
-
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 4/2/2006 19:06'!
-setBufferedReader
-	"Use an event driven AsyncFileReadStream to represent the reader end of the pipe.
-	This should be used if the pipe will be read by a Smalltalk process. It should not
-	be used if the pipe is to be read by an external OS process."
-
-	reader ifNotNil:
-		[reader removeDependent: self.
-		reader unregister.
-		self reader: reader asBufferedAsyncFileReadStream.
-		self setNonBlocking.
-		reader addDependent: self.
-		^ true].
-	^ false
-! !
-
-!ExternalPipe methodsFor: 'initialize-release' stamp: 'dtl 8/20/2022 00:38'!
-setNonBlocking
-	"Set the reader side of the pipe for non-blocking reads."
-
-	reader ifNotNil: [OSProcess accessor setNonBlocking: reader fileID].
-	self blocking: false
-! !
-
-!ExternalPipe methodsFor: 'updating' stamp: 'dtl 3/15/2006 07:17'!
-triggerDataReady
-	"Notify any object waiting for data ready on the pipe."
-
-	self triggerEvent: #dataReady.
-! !
-
-!ExternalPipe methodsFor: 'updating' stamp: 'dtl 1/18/2003 14:31'!
-update: aParameter
-	"Notify any object waiting for data ready on the pipe."
-
-	self changed.
-	self triggerDataReady.
-	^ super update: aParameter
-! !
-
-!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 4/2/2006 21:34'!
-blockingPipe
-	"Warning: a read on a blocking pipe will hang the VM if there is insufficient
-	data in the pipe to fulfill the read request."
-
-	"OSPipe blockingPipe"
-
-	^ super basicNew initialize; setBlocking
-! !
-
-!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 4/2/2006 21:34'!
-bufferedBlockingPipe
-	"Warning: a read on a blocking pipe will hang the VM if there is insufficient
-	data in the pipe to fulfill the read request."
-
-	"OSPipe bufferedBlockingPipe"
-
-	^ (super basicNew initialize; setBlocking) setBufferedReader; yourself
-! !
-
-!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 4/2/2006 21:33'!
-bufferedNonBlockingPipe
-
-	"OSPipe bufferedNonBlockingPipe"
-
-	^ (super basicNew initialize; setNonBlocking) setBufferedReader; yourself
-! !
-
-!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 4/2/2006 21:35'!
-new
-
-	"ExternalPipe new"
-
-	^ self nonBlockingPipe
-! !
-
-!ExternalPipe class methodsFor: 'instance creation' stamp: 'dtl 3/25/2006 14:14'!
-nonBlockingPipe
-
-	"OSPipe nonBlockingPipe"
-
-	^ super basicNew initialize; setNonBlocking
-! !
-
-!ExternalPipe class methodsFor: 'examples' stamp: 'dtl 3/7/2006 19:44'!
-testPipe
-	"OSPipe testPipe inspect"
-
-	| pipe result |
-	pipe _ self new.
-	pipe nextPutAll: 'string to send through an OSPipe'.
-	pipe writer close.
-	result _ pipe upToEnd.
-	pipe close.
-	^ result
-! !
-
-!OSPipe methodsFor: 'accessing' stamp: 'dtl 10/14/2001 12:16'!
-next
-	"Answer the next object accessible by the receiver."
-
-	| c |
-	nextChar isNil
-		ifTrue:
-			[^ [reader next]
+			[[Socket initializeNetwork]
 				on: Error
-				do: [nil]]
-		ifFalse:
-			[c _ nextChar.
-			nextChar _ nil.
-			^ c]
-! !
+				do: [:ex | ^Transcript show:'failed']].
+	Transcript show:'ok';cr.
 
-!OSPipe methodsFor: 'accessing' stamp: 'dtl 2/24/2013 10:24'!
-next: anInteger 
-	"Answer the next anInteger elements of my collection."
-
-	| c strm |
-	strm _ WriteStream on: String new.
-	(1 to: anInteger) do:
-		[:index |
-		c _ self next.
-		c isNil
-			ifTrue: [^ strm contents]	
-			ifFalse: [strm nextPut: c. false]].
-	^ strm contents
-! !
-
-!OSPipe methodsFor: 'accessing' stamp: 'dtl 5/16/2006 06:52'!
-peek
-
-	^ nextChar isNil
-		ifTrue: [reader closed
-				ifFalse: [nextChar _ reader next]]
-		ifFalse: [nextChar]! !
-
-!OSPipe methodsFor: 'accessing' stamp: 'dtl 2/24/2013 10:24'!
-upToEnd
-	"Answer the remaining elements in the string. This method is retained for backward
-	compatibility with older versions of CommandShell."
-
-	| strm s |
-	strm _ WriteStream on: String new.
-	[(s _ self next: 2000) isEmpty
-		ifTrue: [^ strm contents]
-		ifFalse: [strm nextPutAll: s]] repeat
-! !
-
-!OSPipe methodsFor: 'accessing' stamp: 'dtl 2/24/2013 10:24'!
-upToEndOfFile
-	"Answer the remaining elements in the pipe. Use #atEndOfFile to
-	determine end of file status with feof(), required for reliable end of
-	file test on OS pipes. Compare #upToEnd, which uses the generic end
-	of file test in FilePlugin."
-
-	| strm d s |
-	strm _ WriteStream on: String new.
-	d _ Delay forMilliseconds: 200.
-	[(s _ self next: 2000) isEmpty
-		ifTrue: [self atEndOfFile
-			ifTrue: [^ strm contents]
-			ifFalse: [d wait]]
-		ifFalse: [strm nextPutAll: s]] repeat
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'accessing' stamp: 'dtl 4/30/2006 13:47'!
-delay
-	"Answer the value of delay"
-
-	^ delay! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'remote image commands' stamp: 'dtl 12/15/2013 15:50'!
-doRemote: remoteBlock doLocal: localBlock
-	"Evaluate remoteBlock in a remote Squeak image. While the remote Squeak is
-	still running, evaluate localBlock. When done, terminate the remote Squeak
-	image and answer the result of evaluating localBlock."
-
-	"self new
-		doRemote: [OSProcess thisOSProcess stdOut nextPutAll: 'hello from child Squeak';
-						nextPut: Character lf]
-		doLocal: [(Delay forSeconds: 1) wait.
-						OSProcess thisOSProcess stdOut nextPutAll: 'hello from parent Squeak';
-					nextPut: Character lf]"
-
-	| result |
-	self shouldnt: [remoteProcess _ OSProcess thisOSProcess forkHeadlessSqueak]
-		raise: Warning.
-	self assert: remoteProcess notNil. "Fail if fork did not succeed"
-	(remoteProcess == OSProcess thisOSProcess)
+	"Create the server (reader) socket"
+	serverTcpSocket _ Socket newTCP.
+	serverTcpSocket listenOn: port.
+	[Transcript show: 'server endpoint created on port ', port asString; cr.
+	useOldStyleSockets
 		ifTrue:
-			["remote child Squeak"
-			remoteBlock value]
+			[serverTcpSocket waitForConnectionUntil: Socket standardDeadline]
 		ifFalse:
-			["parent Squeak"
-			[[remoteProcess isRunning] whileFalse: [self delay wait].
-			self delay wait.
-			result _ localBlock value]
-				ensure:	[remoteProcess terminate.
-					[remoteProcess isComplete] whileFalse: [self delay wait].
-					self delay wait.
-					result]].
-	^ result
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'remote image commands' stamp: 'dtl 4/30/2006 13:47'!
-quitImage
-
-	fileStream close.
-	OSProcess snapshot: false andQuit: true
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'failures' stamp: 'eem 3/27/2014 11:28'!
-expectedFailures
-	^UnixOSProcessAccessor basicNew safeToForkSqueak
-		ifTrue: [#()]
-		ifFalse: [#(	testCooperatingProcesses01
-					testCooperatingProcesses02
-					testCooperatingProcesses03
-					testCooperatingProcesses04
-					testCooperatingProcesses05
-					testFailFileLockOnLockedFile
-					testFailLockOnLockedOverlappedRegion
-					testFailLockOnLockedRegion
-					testFailLockOnLockedSupersetRegion
-					testFailRegionLockOnLockedFile
-					testLockEntireFileForWrite01
-					testLockEntireFileForWrite02
-					testLockEntireFileForWrite03
-					testLockEntireFileForWrite04
-					testLockEntireFileForWrite05
-					testLockEntireFileForWrite06
-					testLockRegionForRead01
-					testLockRegionForRead02
-					testLockRegionForWrite01
-					testLockRegionForWrite02
-					testLockRegionForWrite03
-					testLockRegionForWrite04
-					testLockRegionForWrite05
-					testLockRegionForWrite06
-					testLockRegionForWrite07
-					testLockRegionForWrite08
-					testNoFailLockOnAdjacentLockedRegions
-					testNoFailLockOnDifferentLockedRegion)]! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'initialize' stamp: 'dtl 12/17/2016 17:54'!
-initialize
-
-	initialCompatibilitySetting
-		ifNil: [initialCompatibilitySetting _ OSProcess accessor emulateWin32FileLocking]! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 1/15/2018 21:55:39'!
-setUp
-
-	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
-		ifTrue: [self perform: #timeout: with: 30].
-	delay _ Delay forMilliseconds: 150.
-	accessor _ ThisOSProcess accessor.
-	OSProcess deleteFileNamed: 'junkfile'.
-	fileStream _ OSProcess fileNamed: 'junkfile'.
-	1000 timesRepeat: (fileStream nextPutAll: 'hello world ').
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 12/17/2016 17:55'!
-tearDown
-
-	| d |
-	OSProcessAccessor emulateWin32FileLocking: initialCompatibilitySetting.
-	d _ Delay forMilliseconds: 50.
-	fileStream close.
-	remoteProcess ifNotNil:
-		[remoteProcess terminate.
-		[remoteProcess isComplete] whileFalse: [d wait].
-		remoteProcess _ nil]
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 12/17/2016 16:30'!
-testCooperatingProcesses01
-	"Two cooperating Squeak processes using file region locking to coordinate their
-	writes to a shared file."
-
-	"(self selector: #testCooperatingProcesses01) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			fileStream position: 100.
-			fileStream nextPutAll: 'THIS '; flush.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			delay wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 108.
-			fileStream nextPutAll: 'A '; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			delay wait.
-			self quitImage]
-		doLocal:
-			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
-			fileStream position: 105.
-			fileStream nextPutAll: 'is '; flush.
-			accessor unlockFile: fileStream from: 104 to: 120.
-			delay wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 110.
-			fileStream nextPutAll: 'test '; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			delay wait].
-	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
-	fileStream position: 100.
-	result _ fileStream next: 14.
-	accessor unlockFile: fileStream from: 100 to: 140.
-	self assert: result = 'THIS is A test'
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 12/17/2016 16:31'!
-testCooperatingProcesses02
-	"Two cooperating Squeak processes using file region locking to coordinate their
-	writes to a shared file."
-
-	"(self selector: #testCooperatingProcesses02) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			fileStream position: 100.
-			fileStream nextPutAll: 'THIS 11111111111111111111111'; flush.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			delay wait; wait; wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 108.
-			fileStream nextPutAll: 'A 3333333333333333333333333'; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			self quitImage]
-		doLocal:
-			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
-			fileStream position: 105.
-			fileStream nextPutAll: 'IS 2222222222222222222222222'; flush.
-			accessor unlockFile: fileStream from: 104 to: 120.
-			delay wait; wait; wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 110.
-			fileStream nextPutAll: 'TEST 4444444444444444444444'; flush.
-			accessor unlockFile: fileStream from: 108 to: 120].
-	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
-	fileStream position: 100.
-	result _ fileStream next: 17.
-	accessor unlockFile: fileStream from: 100 to: 140.
-	self assert: result = 'THIS IS A TEST 44'
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 12/17/2016 16:32'!
-testCooperatingProcesses03
-	"Two cooperating Squeak processes using file region locking to coordinate their
-	writes to a shared file."
-
-	"(self selector: #testCooperatingProcesses03) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			fileStream position: 100.
-			fileStream nextPutAll: 'THIS 11111111111111111111111'; flush.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			delay wait; wait; wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 108.
-			fileStream nextPutAll: 'A 3333333333333333333333333'; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			self quitImage]
-		doLocal:
-			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
-			fileStream position: 105.
-			fileStream nextPutAll: 'IS 2222222222222222222222222'; flush.
-			accessor unlockFile: fileStream from: 104 to: 120.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 110.
-			fileStream nextPutAll: 'TEST 4444444444444444444444'; flush.
-			accessor unlockFile: fileStream from: 108 to: 120].
-	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
-	fileStream position: 100.
-	result _ fileStream next: 17.
-	accessor unlockFile: fileStream from: 100 to: 140.
-	self assert: result = 'THIS IS 22TEST 44'
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 12/17/2016 16:32'!
-testCooperatingProcesses04
-	"Two cooperating Squeak processes using file region locking to coordinate their
-	writes to a shared file."
-
-	"(self selector: #testCooperatingProcesses04) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			delay wait.
-			fileStream position: 100.
-			fileStream nextPutAll: 'THIS 11111111111111111111111'; flush.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			delay wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			delay wait.
-			fileStream position: 108.
-			fileStream nextPutAll: 'A 3333333333333333333333333'; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			delay wait.
-			self quitImage]
-		doLocal:
-			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
-			delay wait.
-			fileStream position: 105.
-			fileStream nextPutAll: 'IS 2222222222222222222222222'; flush.
-			accessor unlockFile: fileStream from: 104 to: 120.
-			delay wait.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			fileStream position: 110.
-			fileStream nextPutAll: 'TEST 4444444444444444444444; flush'.
-			accessor unlockFile: fileStream from: 108 to: 120].
-	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
-	fileStream position: 100.
-	result _ fileStream next: 17.
-	accessor unlockFile: fileStream from: 100 to: 140.
-	self assert: result = 'THIS IS A TEST 44'
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 12/17/2016 18:05'!
-testCooperatingProcesses05
-	"Two cooperating Squeak processes using file region locking to coordinate their
-	writes to a shared file."
-
-	"(self selector: #testCooperatingProcesses05) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[OSProcess thisOSProcess stdOut nextPutAll: 'starting remote squeak requesting lock on 100 to 120';
-				nextPut: Character lf.
-			(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock acquired on 100 to 120'; nextPut: Character lf; flush.
-			fileStream position: 100.
-			fileStream nextPutAll: 'THIS '; flush.
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak releasing lock on 100 to 120'; nextPut: Character lf; flush.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock released on 100 to 120'; nextPut: Character lf; flush.
-			delay wait.
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak requesting lock on 108 to: 120'; nextPut: Character lf; flush.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock acquired on 108 to: 120'; nextPut: Character lf; flush.
-			fileStream position: 108.
-			fileStream nextPutAll: 'A '; flush.
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak releasing lock on 108 to: 120'; nextPut: Character lf; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock released on 108 to: 120'; nextPut: Character lf; flush.
-			delay wait.
-			self quitImage]
-		doLocal:
-			[OSProcess thisOSProcess stdOut nextPutAll: 'starting local squeak requesting lock on 104 to: 120';
-				nextPut: Character lf.
-			self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock acquired on 104 to: 120'; nextPut: Character lf; flush.
-			fileStream position: 105.
-			fileStream nextPutAll: 'IS '; flush.
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak releasing lock on 104 to: 120'; nextPut: Character lf; flush.
-			accessor unlockFile: fileStream from: 104 to: 120.
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock released on 104 to: 120'; nextPut: Character lf; flush.
-			delay wait.
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak requesting lock on 108 to: 120'; nextPut: Character lf; flush.
-			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock acquired on 108 to: 120'; nextPut: Character lf; flush.
-			fileStream position: 110.
-			fileStream nextPutAll: 'TEST '; flush.
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak releasing lock on 108 to: 120'; nextPut: Character lf; flush.
-			accessor unlockFile: fileStream from: 108 to: 120.
-			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock released on 108 to: 120'; nextPut: Character lf; flush.
-			delay wait].
-	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
-	fileStream position: 100.
-	result _ fileStream next: 14.
-	accessor unlockFile: fileStream from: 100 to: 140.
-	self assert: result = 'THIS IS A TEST'
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 22:44'!
-testLockEntireFileForWrite01
-	"Local lock request should succeed"
-
-	"(self selector: #testLockEntireFileForWrite01) run"
-
-	| result |
-	result _ self
-		doRemote: [nil]
-		doLocal: [accessor lockFile: fileStream].
-	self delay wait; wait.
-	self assert: (result isKindOf: OSFileLock).
-	result _ accessor unlockFile: fileStream.
-	self assert: (result isKindOf: OSFileLock)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:40'!
-testLockEntireFileForWrite02
-	"Local lock request should fail"
-
-	"(self selector: #testLockEntireFileForWrite02) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[accessor lockFile: fileStream]
-		doLocal: [accessor lockFile: fileStream].
-	self delay wait; wait.
-	self assert: result isNil.
-	"Region is in the cache as a result of the (failed) lock request. This is legitimate
-	because the lock exists in some other image, so we want to mark it as locked
-	locally. However, it is not quite correct because the remote lock may pertain to
-	a different but overlapping region. Nevertheless, this seems like reasonable
-	behavior."
-	result _ accessor unlockFile: fileStream.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 22:45'!
-testLockEntireFileForWrite03
-	"Local lock request should succeed"
-
-	"(self selector: #testLockEntireFileForWrite03) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[accessor lockFile: fileStream.
-			accessor unlockFile: fileStream]
-		doLocal:
-			[accessor lockFile: fileStream].
-	self delay wait; wait.
-	self assert: (result isKindOf: OSFileLock).
-	result _ accessor unlockFile: fileStream.
-	self assert: (result isKindOf: OSFileLock)! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:48'!
-testLockEntireFileForWrite04
-	"Local lock should be available"
-
-	"(self selector: #testLockEntireFileForWrite04) run"
-
-	| result |
-	result _ self
-		doRemote: [nil]
-		doLocal: [accessor isLockableFile: fileStream].
-	self delay wait; wait.
-	self should: result.
-	"No lock on the region, so the unlock should fail."
-	result _ accessor unlockFile: fileStream.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:50'!
-testLockEntireFileForWrite05
-	"Local lock should be available"
-
-	"(self selector: #testLockEntireFileForWrite05) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[accessor lockFile: fileStream]
-		doLocal: [accessor isLockableFile: fileStream].
-	self delay wait; wait.
-	self shouldnt: result.
-	"No local lock in the cache for this file, so the unlock call will appear to fail.
-	Actually, it will have passed the unlock request through to the operating system,
-	and it will actually unlock the file."
-	result _ accessor unlockFile: fileStream.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:49'!
-testLockEntireFileForWrite06
-	"Local lock should be available"
-
-	"(self selector: #testLockEntireFileForWrite06) run"
-
-	| result |
-	result _ self
-		doRemote:
-			[accessor lockFile: fileStream.
-			accessor unlockFile: fileStream]
-		doLocal:
-			[accessor isLockableFile: fileStream].
-	self delay wait; wait.
-	self should: result.
-	"No local lock in the cache for this file, so the unlock call will appear to fail.
-	Actually, it will have passed the unlock request through to the operating system,
-	but it will have no effect because the file was never locked."
-	result _ accessor unlockFile: fileStream.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 22:46'!
-testLockRegionForRead01
-	"Read lock, the local lock request should succeed"
-
-	"(self selector: #testLockRegionForRead01) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false]
-		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false].
-	self delay wait; wait.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:53'!
-testLockRegionForRead02
-	"Read lock, the local lock request should fail when requesting a write lock"
-
-	"(self selector: #testLockRegionForRead02) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false].
-	self delay wait; wait.
-	self assert: result isNil.
-	result _ accessor unlockFile: fileStream from: 100 to: 199.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 22:46'!
-testLockRegionForWrite01
-	"Local lock request should succeed"
-
-	"(self selector: #testLockRegionForWrite01) run"
-
-	| result |
-	result _ self
-		doRemote: [nil]
-		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true].
-	self delay wait; wait.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	result _ accessor unlockFile: fileStream from: 100 to: 199.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 4/30/2006 13:47'!
-testLockRegionForWrite02
-	"Write lock, the local lock request should fail"
-
-	"(self selector: #testLockRegionForWrite02) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true].
-	self delay wait; wait.
-	self assert: result isNil.
-	"Lock is not in the local cache, so unlock will appear to fail. Actually, the region
-	will be unlocked."
-	accessor unlockFile: fileStream from: 100 to: 199.
-	self assert: result isNil.
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:55'!
-testLockRegionForWrite03
-	"Write lock, nonoverlapping regions, the lock check should succeed"
-
-	"(self selector: #testLockRegionForWrite03) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor isLockableFile: fileStream from: 200 to: 299 exclusive: true].
-	self delay wait; wait.
-	self assert: result.
-	result _ accessor unlockFile: fileStream from: 200 to: 299.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:53'!
-testLockRegionForWrite04
-	"Write lock, overlapping regions, the local lock request should fail"
-
-	"(self selector: #testLockRegionForWrite04) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor lockFile: fileStream from: 150 to: 249 exclusive: true].
-	self delay wait; wait.
-	self assert: result isNil.
-	result _ accessor unlockFile: fileStream from: 150 to: 249.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 22:47'!
-testLockRegionForWrite05
-	"Write lock, nonoverlapping regions, the local lock request should succeed"
-
-	"(self selector: #testLockRegionForWrite05) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor lockFile: fileStream from: 200 to: 299 exclusive: true].
-	self delay wait; wait.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (200 to: 299)).
-	result _ accessor unlockFile: fileStream from: 200 to: 299.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (200 to: 299))! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:53'!
-testLockRegionForWrite06
-	"Write lock, overlapping regions, the local lock request should fail"
-
-	"(self selector: #testLockRegionForWrite06) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor lockFile: fileStream from: 199 to: 199 exclusive: true].
-	self delay wait; wait.
-	self assert: result isNil.
-	result _ accessor unlockFile: fileStream from: 199 to: 199.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:55'!
-testLockRegionForWrite07
-	"Write lock, overlapping regions, the lock check should fail"
-
-	"(self selector: #testLockRegionForWrite07) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor isLockableFile: fileStream from: 100 to: 199 exclusive: true].
-	self delay wait; wait.
-	self deny: result.
-	result _ accessor unlockFile: fileStream from: 100 to: 199.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/13/2006 09:55'!
-testLockRegionForWrite08
-	"Write lock, overlapping regions, the lock check should fail"
-
-	"(self selector: #testLockRegionForWrite08) run"
-
-	| result |
-	result _ self
-		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
-		doLocal: [accessor isLockableFile: fileStream from: 150 to: 299 exclusive: true].
-	self delay wait; wait.
-	self deny: result.
-	result _ accessor unlockFile: fileStream from: 150 to: 299.
-	self assert: (self isValidUnlockResult: result)
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 12:56'!
-testWin32LockEmulation01
-	"Make sure the cache does what is expected, and that it can be disabled
-	Expect non-exclusive read locks to to succeed."
-
-	"(self selector: #testWin32LockEmulation01) run"
-
-	| result |
-	accessor class emulateWin32FileLocking: true.
-	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 5/7/2006 12:56'!
-testWin32LockEmulation02
-	"Make sure the cache does what is expected, and that it can be disabled.
-	Expect exclusive read-write locks to be protected by the cache."
-
-	"(self selector: #testWin32LockEmulation02) run"
-
-	| result |
-	accessor class emulateWin32FileLocking: true.
-	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: result isNil.
-	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:55:55'!
-testWin32LockEmulation03
-	"Make sure the cache does what is expected, and that it can be disabled.
-	Expect the cache to protect the file even if we open a second stream"
-
-	"(self selector: #testWin32LockEmulation03) run"
-
-	| result stream2 |
-	accessor class emulateWin32FileLocking: true.
-	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	stream2 _ OSProcess fileNamed: 'junkfile'.
-	[result _ accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
-	self assert: result isNil]
-		ensure: [stream2 close].
-	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:56:22'!
-testWin32LockEmulation04
-	"Make sure the cache does what is expected, and that it can be disabled.
-	Expect the cache to allow a lock after the stream has been closed (since the OS will have freed its lock)"
-
-	"(self selector: #testWin32LockEmulation04) run"
-
-	| result stream2 |
-	accessor class emulateWin32FileLocking: true.
-	stream2 _ OSProcess fileNamed: 'junkfile'.
-	[result _ accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))]
-		ensure: [stream2 close].
-	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199)).
-	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
-	self assert: (result isKindOf: OSFileRegionLock).
-	self assert: (result interval = (100 to: 199))! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 5/11/2006 07:22'!
-testLockFileIfFail
-
-	"(self selector: #testLockFileIfFail) run"
-
-	| fail |
-	fail _ false.
-	accessor lockFile: fileStream ifFail: [fail _ true].
-	self shouldnt: fail.
-	fileStream close.
-	accessor lockFile: fileStream ifFail: [fail _ true].
-	self should: fail
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 11/28/2010 19:05'!
-testLockFileRegionIfFail
-
-	"(self selector: #testLockFileRegionIfFail) run"
-
-	| fail |
-	fail _ false.
-	accessor
-		lockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail _ true].
-	self shouldnt: fail.
-	fileStream close.
-	accessor
-		lockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail _ true].
-	self should: fail.
-	accessor
-		lockFile: fileStream from: 100 to: 199
-		ifFail: [fail _ true].
-	self should: fail
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 5/11/2006 07:24'!
-testUnlockFileIfFail
-
-	"(self selector: #testUnlockFileIfFail) run"
-
-	| fail |
-	fail _ false.
-	accessor lockFile: fileStream ifFail: [fail _ true].
-	self shouldnt: fail.
-	accessor unlockFile: fileStream ifFail: [fail _ true].
-	self shouldnt: fail.
-	fileStream close.
-	accessor unlockFile: fileStream ifFail: [fail _ true].
-	self should: fail
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 11/28/2010 19:11'!
-testUnlockFileRegionIfFail
-
-	"(self selector: #testUnlockFileRegionIfFail) run"
-
-	| fail |
-	fail _ false.
-	accessor
-		lockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail _ true].
-	self shouldnt: fail.
-	accessor
-		unlockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail _ true].
-	self shouldnt: fail.
-	fileStream close.
-	accessor
-		unlockFile: fileStream from: 100 to: 199 exclusive: true
-		ifFail: [fail _ true].
-	self should: fail.
-	accessor
-		unlockFile: fileStream from: 100 to: 199
-		ifFail: [fail _ true].
-	self should: fail
-
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'private' stamp: 'dtl 4/30/2006 13:47'!
-tryUntil: aBlock
-	"Repeat until block evaluates true, but do not get in an infinite loop if a primitive is failing"
-
-	| result |
-	10 timesRepeat:
-		[result _ aBlock value.
-		result ifTrue: [^ result].
-		delay wait].
-	^ result
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/13/2006 09:36'!
-isValidUnlockResult: result
-
-	self subclassResponsibility
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/10/2006 07:04'!
-testLockPreviouslyLockedFile
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/10/2006 07:10'!
-testLockPreviouslyLockedFileRegion
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 06:53'!
-testUnlockPreviouslyLockedFile
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 06:54'!
-testUnlockPreviouslyLockedFileRegion
-
-	self subclassResponsibility! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 15:55'!
-testFailFileLockOnLockedFile
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail."
-
-	"(self selector: #testFailFileLockOnLockedFile) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:00'!
-testFailLockOnLockedOverlappedRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. Locked regions overlap by one character."
-
-	"(self selector: #testFailLockOnLockedOverlappedRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 104) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 104.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 15:51'!
-testFailLockOnLockedRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail."
-
-	"(self selector: #testFailLockOnLockedRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 120.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 100
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:01'!
-testFailLockOnLockedSupersetRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. Fail when requesting a lock on a subset of the locked region."
-
-	"(self selector: #testFailLockOnLockedSupersetRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 140.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:02'!
-testFailRegionLockOnLockedFile
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a file, the region lock attempt in parent
-	Squeak will fail."
-
-	"(self selector: #testFailRegionLockOnLockedFile) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream.
-			self quitImage]
-		doLocal:
-			[self should: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 100
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error
-				description: '#lockFile failed because child Squeak now holds a lock']
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:03'!
-testNoFailLockOnAdjacentLockedRegions
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. No failure occurs when the regions are adjacent but do not overlap."
-
-	"(self selector: #testNoFailLockOnAdjacentLockedRegions) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 103) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 100 to: 103.
-			self quitImage]
-		doLocal:
-			[self shouldnt: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error]
-! !
-
-!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 8/30/2009 16:03'!
-testNoFailLockOnDifferentLockedRegion
-	"Two cooperating Squeak processes using mandatory file locking. When
-	child Squeak takes a lock on a region, lock attempt in parent Squeak will
-	fail. No failure occurs if the regions are different and do not overlap."
-
-	"(self selector: #testNoFailLockOnDifferentLockedRegion) run"
-
-	self
-		doRemote:
-			[(self tryUntil: [(accessor lockFile: fileStream from: 50 to: 80) notNil]) ifNil: [self quitImage].
-			delay wait; wait; wait.
-			accessor unlockFile: fileStream from: 50 to: 80.
-			self quitImage]
-		doLocal:
-			[self shouldnt: [
-				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
-					accessor lockFile: fileStream
-							from: 104
-							to: 120
-							exclusive: true
-							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
-					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
-					delay wait]]
-				raise: Error]
-! !
-
-!AbstractUnixProcessFileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 4/30/2006 13:49'!
-isAbstract
-	"Override to true if a TestCase subclass is Abstract and should not have
-	TestCase instances built from it"
-
-	^ true! !
-
-!UnixProcessUnixFileLockingTestCase methodsFor: 'running' stamp: 'dtl 4/30/2006 14:05'!
-setUp
-
-	"Set system to use Unix file locking semantics. The tearDown method is expected to restore the setting."
-
-	OSProcessAccessor emulateWin32FileLocking: false.
-	^ super setUp
-! !
-
-!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/13/2006 09:38'!
-isValidUnlockResult: result
-	"With no lock cache, the unlock requests will succeed even though there
-	is no lock to be removed."	
-
-	^ result isKindOf: OSFileLock
-! !
-
-!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:12'!
-testLockPreviouslyLockedFile
-	"Locking a previously locked file is permitted"
-
-	"(self selector: #testLockPreviouslyLockedFile) run"
-
-	accessor lockFile: fileStream.
-	self should: (accessor isLockableFile: fileStream).
-	self should: ((accessor lockFile: fileStream) isKindOf: OSFileLock).
-	accessor unlockFile: fileStream! !
-
-!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:12'!
-testLockPreviouslyLockedFileRegion
-	"Locking a previously locked file region is permitted"
-
-	"(self selector: #testLockPreviouslyLockedFileRegion) run"
-
-	accessor
-		lockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true.
-	self should: (accessor
-		isLockableFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true).
-	self should: ((accessor
-		lockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true)
-		isKindOf: OSFileLock).
-	accessor unlockFile: fileStream! !
-
-!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:07'!
-testUnlockPreviouslyLockedFile
-	"The unlock operation will succeed even if no lock is in effect"
-
-	"(self selector: #testUnlockPreviouslyLockedFile) run"
-
-	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock).
-	accessor lockFile: fileStream.
-	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock)
-! !
-
-!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:07'!
-testUnlockPreviouslyLockedFileRegion
-	"The unlock operation will succeed even if no lock is in effect"
-
-	"(self selector: #testUnlockPreviouslyLockedFileRegion) run"
-
-	self should: ((accessor
-		unlockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true) isKindOf: OSFileLock).
-	accessor
-		lockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true.
-	self should: ((accessor
-		unlockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true) isKindOf: OSFileLock)
-! !
-
-!UnixProcessUnixFileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 1/13/2007 15:40'!
-isAbstract
-	"Override to true if a TestCase subclass is Abstract and should not have
-	TestCase instances built from it"
-
-	^self name = #TestCase
-! !
-
-!UnixProcessWin32FileLockingTestCase methodsFor: 'running' stamp: 'dtl 4/30/2006 14:06'!
-setUp
-
-	"Set system to use Windows file locking semantics. The tearDown method is expected to restore the setting."
-
-	OSProcessAccessor emulateWin32FileLocking: true.
-	^ super setUp
-! !
-
-!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/13/2006 09:47'!
-isValidUnlockResult: result
-	"With a lock cache, the unlock requests will fail when if there
-	is no lock to be removed."	
-
-	^ result == nil
-! !
-
-!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:13'!
-testLockPreviouslyLockedFile
-	"A previously locked file cannot be locked."
-
-	"(self selector: #testLockPreviouslyLockedFile) run"
-
-	accessor lockFile: fileStream.
-	self shouldnt: (accessor isLockableFile: fileStream).
-	self should: (accessor lockFile: fileStream) isNil.
-	accessor unlockFile: fileStream! !
-
-!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:13'!
-testLockPreviouslyLockedFileRegion
-	"A previously locked file region cannot be locked."
-
-	"(self selector: #testLockPreviouslyLockedFileRegion) run"
-
-	accessor
-		lockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true.
-	self shouldnt: (accessor
-		isLockableFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true).
-	self should: ((accessor
-		lockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true) isNil).
-	accessor unlockFile: fileStream! !
-
-!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/11/2006 07:08'!
-testUnlockPreviouslyLockedFile
-	"The unlock operation will fail if lock is in effect"
-
-	"(self selector: #testUnlockPreviouslyLockedFile) run"
-
-	self shouldnt: ((accessor unlockFile: fileStream) isKindOf: OSFileLock).
-	accessor lockFile: fileStream.
-	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock).
-	self shouldnt: ((accessor unlockFile: fileStream) isKindOf: OSFileLock)
-! !
-
-!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 5/12/2006 07:48'!
-testUnlockPreviouslyLockedFileRegion
-	"The unlock operation will fail if a lock is in effect"
-
-	"(self selector: #testUnlockPreviouslyLockedFileRegion) run"
-
-	self shouldnt: ((accessor
-		unlockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true) isKindOf: OSFileLock).
-	accessor
-		lockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true.
-	self should: ((accessor
-		unlockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true) isKindOf: OSFileLock).
-	self shouldnt: ((accessor
-		unlockFile: fileStream
-		from: 100
-		to: 199
-		exclusive: true) isKindOf: OSFileLock)
-! !
-
-!UnixProcessWin32FileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 1/13/2007 15:40'!
-isAbstract
-	"Override to true if a TestCase subclass is Abstract and should not have
-	TestCase instances built from it"
-
-	^self name = #TestCase
-! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
-testEnableHandleAndDisable
-
-	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult aioDisableResult |
-	eventHandler _ AioEventHandler new.
-	anOpenFile _ OSProcess fileNamed: 'delete.me'.
-	fileHandle _ eventHandler descriptorForFile: anOpenFile.
-	sema _ Semaphore new.
-	[semaIndex _ Smalltalk registerExternalObject: sema.
-	[aioEnableResult _ eventHandler
-			aioEnable: fileHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-	self assert: semaIndex == aioEnableResult.
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: true
-		readEvents: true
-		writeEvents: true.
-	self assert: aioHandleResult == 2r0111. "return bitmask, all three bits set"
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: true
-		readEvents: false
-		writeEvents: true.
-	self assert: aioHandleResult == 2r0101.
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: false
-		writeEvents: true.
-	self assert: aioHandleResult == 2r0100.
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: true
-		readEvents: false
-		writeEvents: false.
-	self assert: aioHandleResult == 2r0001.
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: false
-		writeEvents: false.
-	self assert: aioHandleResult == 2r0000.
-	aioDisableResult _ eventHandler aioDisable: fileHandle.
-	self assert: aioDisableResult == fileHandle]
-		ensure:
-			[Smalltalk unregisterExternalObject: sema.
-			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]].
-	anOpenFile close.
-	OSProcess deleteFileNamed: 'delete.me'.
-! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
-testFileReadableEvent
-
-	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
-	fileName _ 'DeleteThisTemporaryFile'.
-
-	eventHandler _ AioEventHandler new.
-	OSProcess deleteFileNamed: fileName.
-	[anOpenFile _ OSProcess fileNamed: fileName.
-	fileHandle _ eventHandler descriptorForFile: anOpenFile.
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	[aioEnableResult _ eventHandler
-			aioEnable: fileHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-	self assert: semaIndex == aioEnableResult.
-
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self assert: aioHandleResult == 2r010.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin reading data based on having received this initial signal."
-	sema wait. "consume the signal"
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self deny: sema isSignaled. "Nothing has happened to indicate more data available."
-
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self assert: aioHandleResult == 2r010.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin reading data based on having received this initial signal."
-	sema wait. "consume the signal"
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self deny: sema isSignaled. "Nothing has happened to indicate more data available."
-
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self assert: aioHandleResult == 2r010.
-	anOpenFile nextPutAll: 'write some stuff to the file'; flush.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin reading data based on having received this initial signal."
-	sema wait. "consume the signal"
-
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self assert: aioHandleResult == 2r010.
-	anOpenFile upToEnd.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin reading data based on having received this initial signal."
-	sema wait. "consume the signal"
-
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self deny: sema isSignaled. "handler has not been reset"]
-		ensure:
-			[[anOpenFile close] on: Error do: [].
-			Smalltalk unregisterExternalObject: sema.
-			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
-testFileWritableEvent
-
-	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
-	fileName _ 'DeleteThisTemporaryFile'.
-
-	eventHandler _ AioEventHandler new.
-	OSProcess deleteFileNamed: fileName.
-	[anOpenFile _ OSProcess fileNamed: fileName.
-	fileHandle _ eventHandler descriptorForFile: anOpenFile.
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	[aioEnableResult _ eventHandler
-			aioEnable: fileHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-	self assert: semaIndex == aioEnableResult.
-
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: false
-		writeEvents: true.
-	self assert: aioHandleResult == 2r0100.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin writing data based on having received this initial signal."
-	sema wait. "consume the signal"
-	self deny: sema isSignaled.
-
-	"Reset handler"
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: false
-		writeEvents: true.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin writing data based on having received this initial signal."
-	sema wait. "consume the signal"
-	self deny: sema isSignaled.
-
-	"Reset handler"
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: false
-		writeEvents: true.
-	anOpenFile upToEnd.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin writing data based on having received this initial signal."
-	sema wait. "consume the signal"
-	self deny: sema isSignaled.
-
-	"Reset handler"
-	aioHandleResult _ eventHandler
-		aioHandle: fileHandle
-		exceptionEvents: false
-		readEvents: false
-		writeEvents: true.
-	anOpenFile nextPutAll: 'write some stuff to the file'; flush.
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
-	presumably in the interest of priming the pump. A listening process would
-	begin writing data based on having received this initial signal."
-	sema wait. "consume the signal"
-	self deny: sema isSignaled.
-
-	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
-	self deny: sema isSignaled. "handler has not been reset"]
-		ensure:
-			[[anOpenFile close] on: Error do: [].
-			Smalltalk unregisterExternalObject: sema.
-			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:26'!
-testHandleForFile
-
-	| eventHandler anOpenFile fileHandle |
-	eventHandler _ AioEventHandler new.
-	anOpenFile _ OSProcess fileNamed: 'delete.me'.
-	fileHandle _ eventHandler descriptorForFile: anOpenFile.
-	anOpenFile close.
-	OSProcess deleteFileNamed: 'delete.me'.
-	self assert: fileHandle notNil.
-	self assert: (fileHandle isKindOf: Integer)
-! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 8/19/2022 23:28'!
-testHandleForSocket
-
-	| eventHandler socket socketHandle |
-	eventHandler _ AioEventHandler new.
-	socket _ Socket newTCP.
-	socketHandle _ eventHandler desriptorForSocket: socket.
-	self assert: socketHandle notNil.
-	self assert: (socketHandle isKindOf: Integer).
-	self assert: (socketHandle ~= 0) "0 is stdin on unix, unlikely to be used on other platforms"
-! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 7/9/2005 16:41'!
-testPrimAioModuleName
-
-	| eventHandler moduleName |
-	eventHandler _ AioEventHandler new.
-	moduleName _ eventHandler primAioModuleName.
-	self assert: ('AioPlugin*' match: moduleName)
-! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 7/9/2005 16:42'!
-testPrimAioModuleVersionString
-
-	| eventHandler versionString |
-	eventHandler _ AioEventHandler new.
-	versionString _ eventHandler primAioModuleName.
-	self assert: (versionString isKindOf: String)
-! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:15'!
-testSocketExceptionEvent
-	"Close the client socket to generate an event on the server socket"
-
-	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port _ 8086.
-	serverName _ '127.0.0.1'.
-	Socket initializeNetwork.
-
-	"Create the server (reader) socket"
-	serverTcpSocket _ Socket newTCP.
-	serverTcpSocket listenOn: port.
+			[serverTcpSocket waitForConnectionFor: 10]] fork.
+	(Delay forMilliseconds: 1000) wait.
 
 	"Create the client (writer) socket"
 	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
+	useOldStyleSockets
+		ifTrue:
+			[clientTcpSocket waitForConnectionUntil: Socket standardDeadline]
+		ifFalse:
+			[clientTcpSocket waitForConnectionFor: 10].
+	Transcript show: 'client endpoint connected to ', serverName, ' port ', port asString; cr.
 
-	"Esstablish socket connection"
-	[serverTcpSocket waitForConnectionFor: 10] fork.
-	clientTcpSocket waitForConnectionFor: 10.
+	"Set up a read event handler on the server socket"
+	handler _ AioEventHandler for: serverTcpSocket
+				exceptions: true
+				readEvents: true
+				writeEvents: false.
+	example _ super new handler: handler; ioStream: serverTcpSocket.
+	handler addDependent: example.
+	Transcript show: 'event handler started'; cr.
 
-	["Set up a read event handler on the server socket"
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
-
-	"An aio handler may already have been established for the socket
-	by the SocketPlugin. The following request disables any existing handling
-	in order to prevent a warning message on the console stderr."
-	eventHandler aioDisable: socketHandle.
-
-	"Now set our own handler."
-	[eventHandler
-			aioEnable: socketHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: true
-		readEvents: false
-		writeEvents: false.
-	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	self deny: sema isSignaled.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	self deny: sema isSignaled.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	clientTcpSocket close.
-	(Delay forMilliseconds: 200) wait.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	(Delay forMilliseconds: 200) wait.
-"	self assert: sema isSignaled.	FIXME: no error generated; need to find a way to generate an error -dtl"
-	self deny: sema isSignaled.
-	serverTcpSocket close]
-		ensure:
-			[Smalltalk unregisterExternalObject: sema.
-			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:15'!
-testSocketExceptionEvent2
-	"Close the client socket to generate an event on the server socket"
-
-	| port serverTcpSocket sema semaIndex socketHandle eventHandler |
-	port _ 8086.
-	Socket initializeNetwork.
-
-	"Create the server (reader) socket"
-	serverTcpSocket _ Socket newTCP.
-	serverTcpSocket listenOn: port.
-
-	["Set up an exception event handler on the server socket"
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
-
-	"An aio handler may already have been established for the socket
-	by the SocketPlugin. The following request disables any existing handling
-	in order to prevent a warning message on the console stderr."
-	eventHandler aioDisable: socketHandle.
-
-	"Now set our own handler."
-	[eventHandler
-			aioEnable: socketHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: true
-		readEvents: false
-		writeEvents: true.
-	self deny: sema isSignaled.
-	[serverTcpSocket
-		primSocket: serverTcpSocket socketHandle
-		sendData: 'a string to send' asByteArray
-		startIndex: 1
-		count: 10] on: Error do: [self halt].
-	serverTcpSocket
-		receiveSomeDataInto: (String new: 1000)
-		startingAt: 1.
-
-"	self assert: sema isSignaled.	FIXME: no error generated; need to find a way to generate an error -dtl"
-	self deny: sema isSignaled.
-
-	serverTcpSocket close]
-		ensure:
-			[Smalltalk unregisterExternalObject: sema.
-			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:16'!
-testSocketReadableEvent
-
-	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port _ 8086.
-	serverName _ '127.0.0.1'.
-	Socket initializeNetwork.
-
-	"Create the server (reader) socket"
-	serverTcpSocket _ Socket newTCP.
-	serverTcpSocket listenOn: port.
-
-	"Create the client (writer) socket"
-	clientTcpSocket _ Socket newTCP.
-	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
-
-	"Establish socket connection"
-	[serverTcpSocket waitForConnectionFor: 10] fork.
-	clientTcpSocket waitForConnectionFor: 10.
-
-	["Set up a read event handler on the server socket"
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
-
-	"An aio handler may already have been established for the socket
-	by the SocketPlugin. The following request disables any existing handling
-	in order to prevent a warning message on the console stderr."
-	eventHandler aioDisable: socketHandle.
-
-	"Now set our own handler."
-	[eventHandler
-			aioEnable: socketHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	self assert: sema isSignaled.
-	sema wait. "consume the signal"
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	self assert: sema isSignaled.
-	sema wait. "consume the signal"
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	self assert: sema isSignaled.
-	sema wait. "consume the signal"
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-
-	clientTcpSocket close.
-	serverTcpSocket close]
-		ensure:
-			[Smalltalk unregisterExternalObject: sema.
-			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:16'!
-testSocketReadableEventWithMaskNotSet
-	"Same as testSocketReadableEvent, except that the mask bit for read events is not set,
-	so we expect to not receive the event notification. This is just a check to ensure that
-	the event mask is working."
-
-	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port _ 8086.
-	serverName _ '127.0.0.1'.
-	Socket initializeNetwork.
-
-	"Create the server (reader) socket"
-	serverTcpSocket _ Socket newTCP.
-	serverTcpSocket listenOn: port.
-
-	"Create the client (writer) socket"
-	clientTcpSocket _ Socket newTCP.
-	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
-
-	"Establish socket connection"
-	[serverTcpSocket waitForConnectionFor: 10] fork.
-	clientTcpSocket waitForConnectionFor: 10.
-
-	["Set up a read event handler on the server socket"
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
-
-	"An aio handler may already have been established for the socket
-	by the SocketPlugin. The following request disables any existing handling
-	in order to prevent a warning message on the console stderr."
-	eventHandler aioDisable: socketHandle.
-
-	"Now set our own handler."
-	[eventHandler
-			aioEnable: socketHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: true
-		readEvents: false	"Read event bit not set"
-		writeEvents: false.
-	self deny: sema isSignaled.
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	self deny: sema isSignaled. "This time we should not receive a signal"
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	clientTcpSocket close.
-	serverTcpSocket close]
-		ensure:
-			[Smalltalk unregisterExternalObject: sema.
-			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
-
-!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 12/18/2022 20:17'!
-testSuspendAioForSocketReadableEvent
-
-	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
-	port _ 8086.
-	serverName _ '127.0.0.1'.
-	Socket initializeNetwork.
-
-	"Create the server (reader) socket"
-	serverTcpSocket _ Socket newTCP.
-	serverTcpSocket listenOn: port.
-
-	"Create the client (writer) socket"
-	clientTcpSocket _ Socket newTCP.
-	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
-
-	"Establish socket connection"
-	[serverTcpSocket waitForConnectionFor: 10] fork.
-	clientTcpSocket waitForConnectionFor: 10.
-
-	["Set up a read event handler on the server socket"
-	sema _ Semaphore new.
-	semaIndex _ Smalltalk registerExternalObject: sema.
-	eventHandler _ AioEventHandler new.
-	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
-
-	"An aio handler may already have been established for the socket
-	by the SocketPlugin. The following request disables any existing handling
-	in order to prevent a warning message on the console stderr."
-	eventHandler aioDisable: socketHandle.
-
-	"Now set our own handler."
-	[eventHandler
-			aioEnable: socketHandle
-			forSemaphore: semaIndex
-			externalObject: true]
-		on: Warning
-		do: ["Suppress warning dialog. Unit test will fail next assert."].
-
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-
-	self deny: sema isSignaled.
-
-	"Handler generates a signal"
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	self assert: sema isSignaled.
-	sema wait.
-	self deny: sema isSignaled.
-
-	"Handler has not been reset, so no signal this time"
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	self deny: sema isSignaled.
-
-	"Reset the handler"
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-
-	"Handler generates a signal"
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	self assert: sema isSignaled.
-	sema wait.
-	self deny: sema isSignaled.
-
-	"Reset the handler"
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-	"But temporarily disable it"
-	eventHandler aioSuspend: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-
-	"Handler suspended, so no signal this time"
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	self deny: sema isSignaled.
-
-	"Reset the handler"
-	eventHandler
-		aioHandle: socketHandle
-		exceptionEvents: false
-		readEvents: true
-		writeEvents: false.
-
-	"Handler generates a signal"
-	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
-	(Delay forMilliseconds: 200) wait.
-	receivedData _ serverTcpSocket receiveAvailableData.
-	self assert: 'some data to send to the socket' = receivedData.
-	self assert: sema isSignaled.
-	sema wait.
-	self deny: sema isSignaled.
-
-	clientTcpSocket close.
-	serverTcpSocket close]
-		ensure:
-			[Smalltalk unregisterExternalObject: sema.
-			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
-
-!OSPipeTestCase methodsFor: 'private' stamp: 'dtl 11/28/2010 14:05'!
-primTestEndOfFileFlag: aSqFileStruct
-	"Answer whether the file represented by aSqFileStruct is at end of file, as determined
-	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
-	true if the file pointer is at the end of the file, but which does not call feof() to
-	determine that an end of file condition has occurred. The difference is significant
-	if aSqFileStruct represents a pipe or a device file, which may not be positionable
-	in the sense of a conventional disk file."
-
-	<primitive: 'primitiveTestEndOfFileFlag' module: 'UnixOSProcessPlugin'>
-	^ nil! !
-
-!OSPipeTestCase methodsFor: 'private' stamp: 'dtl 6/4/2006 16:03'!
-readFromAndClose: aPipe writingTo: aStream
-
-	| s |
-	[aPipe atEndOfFile] whileFalse:
-		[s _ aPipe next: 10000.
-		aStream nextPutAll: s asString.
-		(Delay forMilliseconds: 100) wait].
-	(aPipe respondsTo: #reader) ifTrue: [aPipe reader close].
-	^ aStream
-! !
-
-!OSPipeTestCase methodsFor: 'private' stamp: 'dtl 3/25/2006 18:29'!
-writeStuffOnThenClose: aPipe
-
-	^ [(1 to: 10) do:
+	"Send a few lines of data to the client socket, waiting briefly between lines.
+	The event handler will watch the server socket, and copy data to the Transcript
+	each time a new line of data is available to the server."
+	(1 to: 10) do:
 		[:i |
-		[aPipe nextPutAll: 'this is line ', i printString; cr]
-			on: Error
-			do: ["Ignore error. Test case will still fail, and throwing an error in this
-				process would cause a debugger to be scheduled inconveniently."].
-		(Delay forMilliseconds: 50) wait].
-	(aPipe respondsTo: #writer)
-		ifTrue: [[aPipe writer close]
-					on: Error
-					do: ["Ignore error to avoid a debugger"]]
-		ifFalse: [[aPipe close]
-					on: Error
-					do: ["Ignore error to avoid a debugger"]]]
-		forkAt: Processor userBackgroundPriority! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 4/12/2014 16:07'!
-testBlocking
-
-	"(OSPipeTestCase selector: #testBlocking) run"
-
-	| p |
-	p _ OSPipe blockingPipe.
-	(1 to: 10) do: [:i | p nextPutAll: 'this is line ', i printString; cr].
-	p flush. "protect against buggy clib that may never flush output"
-	self should: ['this is line 1*' match: (p next: 15)].
-	self should: ['this is line 2*' match: (p next: 15)].
-	self should: ['this is line 3*' match: (p next: 15)].
-	self should: ['this is line 4*' match: (p next: 15)].
-	self should: ['this is line 5*' match: (p next: 15)].
-	self should: ['this is line 6*' match: (p next: 15)].
-	self should: ['this is line 7*' match: (p next: 15)].
-	self should: ['this is line 8*' match: (p next: 15)].
-	self should: ['this is line 9*' match: (p next: 15)].
-	p writer close.
-	self shouldnt: p atEnd.
-	self should: ['this is line 10*' match: (p next: 16)].
-	self should: p atEnd.
-	p close
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 6/6/2015 09:27'!
-testBlockingBufferedPipe
-
-	"(OSPipeTestCase selector: #testBlockingBufferedPipe) run"
-
-	| p |
-	p _ ExternalPipe bufferedBlockingPipe.
-	[(1 to: 10) do: [:i | p nextPutAll: 'this is line ', i printString; cr; flush].
-	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	self should: ['this is line 1*' match: (p next: 15)].
-	self should: ['this is line 2*' match: (p next: 15)].
-	self should: ['this is line 3*' match: (p next: 15)].
-	self should: ['this is line 4*' match: (p next: 15)].
-	self should: ['this is line 5*' match: (p next: 15)].
-	self should: ['this is line 6*' match: (p next: 15)].
-	self should: ['this is line 7*' match: (p next: 15)].
-	self should: ['this is line 8*' match: (p next: 15)].
-	self should: ['this is line 9*' match: (p next: 15)].
-	p writer close.
-	self shouldnt: p atEnd.
-	self should: ['this is line 10*' match: (p next: 16)].
-	self should: p atEnd]
-		ensure: [p close]
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:55'!
-testBlockingPeek
-
-	"(OSPipeTestCase selector: #testBlockingPeek) run"
-
-	| p |
-	p _ OSPipe blockingPipe.
-	p nextPutAll: 'abc'.
-	p flush. "protect against buggy clib that may never flush output"
-	self assert: (p peek = $a).
-	self assert: (p next = $a).
-	self assert: (p peek = $b).
-	self assert: (p next = $b).
-	self assert: (p peek = $c).
-	self deny: p atEnd.
-	self assert: (p next = $c).
-	self deny: p atEnd.
-	p closeWriter.
-	self assert: p atEnd.
-	p close
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:56'!
-testBlockingPeekBufferedPipe
-
-	"(OSPipeTestCase selector: #testBlockingPeekBufferedPipe) run"
-
-	| p |
-	p _ ExternalPipe bufferedBlockingPipe.
-	[p nextPutAll: 'abc'; flush.
-	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	self assert: (p peek = $a).
-	self assert: (p next = $a).
-	self assert: (p peek = $b).
-	self assert: (p next = $b).
-	self assert: (p peek = $c).
-	self deny: p atEnd.
-	self assert: (p next = $c).
-	self deny: p atEnd.
-	p closeWriter.
-	self assert: p atEnd]
-		ensure: [p close]
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 5/17/2006 23:36'!
-testBufferedUpToEnd
-
-	"(OSPipeTestCase selector: #testBufferedUpToEnd) debug"
-
-	| s p r1 r2 |
-	s _ 'some data to put through the pipe'.
-	p _ OSPipe new.
-	self primTestEndOfFileFlag: p reader fileID. "check that OSPP is updated"
-	self assert: p setBufferedReader.
-	[p nextPutAll: s.
-	p closeWriter.
-	r1 _ p upToEnd. "#atEnd does not detect EOF on a pipe"
-	self assert: r1 isEmpty.
-	r2 _ p upToEndOfFile. "detects EOF correctly, gets remaining data"
-	self assert: r2 = s]
-		ensure: [p close]
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:57'!
-testIsAtEndOfFile
-
-	"(OSPipeTestCase selector: #testIsAtEndOfFile) debug"
-
-	| p |
-	p _ OSPipe new.
-	self primTestEndOfFileFlag: p reader fileID. "check that OSPP is updated"
-	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
-	self deny: p reader atEnd.
-	self deny: p atEnd.
-	self assert: (p reader basicNext == nil).
-	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
-	self deny: p reader atEnd.
-	self deny: p atEnd.
-	p writer nextPut: $X; flush.
-	self assert: (p reader basicNext = $X).
-	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
-	self deny: p reader atEnd.
-	self deny: p atEnd.
-	self assert: (p reader basicNext == nil).
-	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
-	self deny: p reader atEnd.
-	self deny: p atEnd.
-
-	p writer close.
-	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
-	self deny: p atEndOfFile. "no read yet, so flag has not been set"
-	self deny: p reader atEnd description: 'Failure here is likely caused by stdio hacks in sqFileAtEnd() support code. Don''t do that.'.
-	self assert: p atEnd. "writer closed and read gives nil"
-
-	self assert: (p reader basicNext == nil). "read operation should set flag"
-	self assert: (OSProcess accessor isAtEndOfFile: p reader fileID).
-	self deny: p reader atEnd. "#atEnd does not detect EOF on a pipe"
-	self assert: p reader atEndOfFile.
-	self assert: p atEnd.
-	p close
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 6/6/2015 09:23'!
-testIsAtEndOfFile2
-
-	"(OSPipeTestCase selector: #testIsAtEndOfFile2) debug"
-
-	| p s |
-	p _ OSPipe new.
-	[p nextPutAll: 'hello'; flush.
-	s _ p next: 100.
-	self assert: s = 'hello'.
-	self deny: p atEndOfFile.
-	p closeWriter.
-	self deny: p atEndOfFile.
-	s _ p next: 100.
-	self assert: s = ''.
-	self assert: p atEndOfFile]
-		ensure: [p close]
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 3/25/2006 13:44'!
-testNonBlocking
-
-	"(OSPipeTestCase selector: #testNonBlocking) run"
-
-	| p ws str |
-	p _ OSPipe nonBlockingPipe.
-	self writeStuffOnThenClose: p.
-	ws _ self readFromAndClose: p writingTo: (WriteStream on: String new).
-	str _ (ws contents last: 16).
-	self should: ['this is line 10*' match: str].
-	p close
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 4/2/2006 21:40'!
-testNonBlockingBufferedPipe
-
-	"(OSPipeTestCase selector: #testNonBlockingBufferedPipe) run"
-
-	| p ws str |
-	p _ ExternalPipe bufferedNonBlockingPipe.
-	[self writeStuffOnThenClose: p.
-	self assert: (p peek == nil).
-	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	ws _ self readFromAndClose: p writingTo: (WriteStream on: String new).
-	str _ (ws contents last: 16).
-	self should: ['this is line 10*' match: str]]
-		ensure: [p close]
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:57'!
-testNonBlockingPeek
-
-	"(OSPipeTestCase selector: #testNonBlockingPeek) run"
-
-	| p |
-	p _ OSPipe nonBlockingPipe.
-	p nextPutAll: 'abc'; flush.
-	self assert: (p peek = $a).
-	self assert: (p next = $a).
-	self assert: (p peek = $b).
-	self assert: (p next = $b).
-	self assert: (p peek = $c).
-	self deny: p atEnd.
-	self assert: (p next = $c).
-	self deny: p atEnd.
-	p closeWriter.
-	self assert: p atEnd.
-	p close
-! !
-
-!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/16/2022 19:58'!
-testNonBlockingPeekBufferedPipe
-
-	"(OSPipeTestCase selector: #testNonBlockingPeekBufferedPipe) run"
-
-	| p |
-	p _ ExternalPipe bufferedNonBlockingPipe.
-	[p nextPutAll: 'abc'; flush.
-	self assert: (p peek = nil).
-	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
-	self assert: (p peek = $a).
-	self assert: (p next = $a).
-	self assert: (p peek = $b).
-	self assert: (p next = $b).
-	self assert: (p peek = $c).
-	self deny: p atEnd.
-	self assert: (p next = $c).
-	self deny: p atEnd.
-	p closeWriter.
-	self assert: p atEnd]
-		ensure: [p close]
-! !
-
-!ResettableBufferStreamTest methodsFor: 'tests' stamp: 'dtl 7/23/2023 11:15'!
-testReadWrite
-	"Basic read and write behavior"
-
-	"(ResettableBufferStreamTest selector: #testReadWrite) debug"
-
-	| strm |
-	strm _ ResettableBufferStream with: 'some characters'.
-	self assert: 15 equals: strm position.
-	self assert: 15 equals: strm size.
-	self assert: 'some characters' equals: strm contents.
-	strm nextPutAll: ' XXX'.
-	self assert: 19 equals: strm position.
-	self assert: 19 equals: strm size.
-	self assert: 'some characters XXX' equals: strm contents.
-	self assert: '' equals: strm upToEnd.
-	strm position: 10.
-	self assert: 'cters XXX' equals: strm upToEnd.
-
-
-! !
-
-!ResettableBufferStreamTest methodsFor: 'tests' stamp: 'dtl 7/23/2023 11:51'!
-testRemovePreviouslyRead
-	"Basic read and write behavior"
-
-	"(ResettableBufferStreamTest selector: #testRemovePreviouslyRead) debug"
-
-	| strm |
-	strm _ ResettableBufferStream with: 'some characters'.
-	self assert: 15 equals: strm position.
-	self assert: 15 equals: strm size.
-	self assert: 'some characters' equals: strm contents.
-	strm reset.
-	strm removePreviouslyRead.
-	self assert: 0 equals: strm position.
-	self assert: 15 equals: strm size.
-	self assert: 'some characters' equals: strm contents.
-	strm reset; next: 5.
-	strm removePreviouslyRead.
-	self assert: 0 equals: strm position.
-	self assert: 10 equals: strm size.
-	self assert: 'characters' equals: strm contents.
-	self assert: 'characters' equals: strm upToEnd.
-	self assert: 10 equals: strm position.
-	strm removePreviouslyRead.
-	self assert: 0 equals: strm position.
-	self assert: 0 equals: strm size.
-	self assert: '' equals: strm contents.
-	self assert: '' equals: strm upToEnd.
-	self assert: 0 equals: strm position.
-	strm nextPutAll: 'XXX'.
-	strm reset.
-	self assert: 'XXX' equals: strm contents.
-	self assert: 'XXX' equals: strm upToEnd.
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 1/1/2024 10:33'!
-contentsOfFile: path
-	| fs contents |
-	fs _ OSProcess oldFileNamed: path.
-	contents _ fs contentsOfEntireFile.
-	fs close.
-	^ contents
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 3/1/2002 18:02'!
-runAll
-
-	"UnixProcessAccessorTestCase new runAll"
-
-	| result suite |
-	suite _ TestSuite new.
-	suite addTest: (UnixProcessAccessorTestCase selector: #testSessionIdentifier).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testCanAccessSystem).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testMakePipeHandles).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testUnixFileNumber).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testFileProtectionMask).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testFileStat).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testIsExecutable).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testIsExecutableForUserInGroup).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testIsReadable).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testIsReadableForUserInGroup).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testIsWritable).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testIsWritableForUserInGroup).
-
-	suite addTest: (UnixProcessAccessorTestCase selector: #runExternalProcessAccess).
-	suite addTest: (UnixProcessAccessorTestCase selector: #runForkAndExec).
-
-	result _ suite run.
-	self should: [result defects size == 0].
-	^ result
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 8/3/2003 18:02'!
-runExternalProcessAccess
-
-	"UnixProcessAccessorTestCase new runExternalProcessAccess"
-
-	| result suite |
-	suite _ TestSuite new.
-	suite addTest: (UnixProcessAccessorTestCase selector: #testCanAccessSystem).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testChDir).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAt).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAtPut).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimUnsetEnv).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testGetStdInHandle).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testGetStdOutHandle).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testGetStdErrHandle).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimArgumentAt).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetPid).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetGid).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetEGid).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetPid).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetPPid).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetUid).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetSession).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testRealpath).
-
-	result _ suite run.
-	self should: [result defects size == 0].
-	^ result
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 10/6/2001 11:37'!
-runForkAndExec
-	"Most of this must be tested from class UnixProcess"
-
-	"UnixProcessAccessorTestCase new runForkAndExec"
-
-	| result suite |
-	suite _ TestSuite new.
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetChildExitStatus).
-	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimForkAndExec).
-	result _ suite run.
-	self should: [result defects size == 0].
-	^ result
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 10/6/2001 08:29'!
-setUp
-
-	accessor _ ThisOSProcess accessor! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/6/2001 08:36'!
-testCanAccessSystem
-
-	"(UnixProcessAccessorTestCase selector: #testCanAccessSystem) run"
-
-	self assert: accessor canAccessSystem! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 12/26/2023 19:19'!
-testDupTo
-	"Perform a dup2() call to assign IO to a new file stream"
-
-	"(UnixProcessAccessorTestCase selector: #testDupTo) run"
-
-	| f1 f2 fd1 fd2 result contents1 contents2 |
-	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
-	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
-	f1 _ OSProcess newFileNamed: '/tmp/delete-1.me'.
-	f2 _ OSProcess newFileNamed: '/tmp/delete-2.me'.
-	fd1 _ OSProcess accessor primUnixFileNumber: f1 fileID.
-	fd2 _ OSProcess accessor primUnixFileNumber: f2 fileID.
-	result _ OSProcess accessor primDup: fd1 to: fd2.
-	"f1 and f2 now both refer to the same IO stream"
-	self assert: result = fd2.
-	f2 nextPutAll: 'write something to the original f2 file stream that will appear in duped f1 instead'; flush.
-	f1 reset.
-	contents1 _ f1 upToEnd.
-	"Note, the f1 file stream is not aware that we have changed the underlying file descriptor.
-	In earlier versions of Squeak and/or Linux stdio runtimes, the contents of f1 matched
-	that of f2, and in more recent versions the f1 content appear empty even though the
-	underlying file has been written due to the dup2() call. The difference is not important
-	for purposes of this test, so the assertions below are commented out. dtl Dec 2023"
-	"self deny: contents1 isEmpty.
-	self assert: ('write something*' match: contents1)."
-	f2 reset.
-	contents2 _ f2 upToEnd.
-	self deny: contents2 isEmpty.
-	self assert: ('write something*' match: contents2).
-	f1 close.
-	f2 close.
-	"check the contents of the actual files"
-	contents1 _ (OSProcess fileNamed: '/tmp/delete-1.me') contentsOfEntireFile.
-	self assert: ('write something*' match: contents1).
-	contents2 _ (OSProcess fileNamed: '/tmp/delete-2.me') contentsOfEntireFile.
-	self assert: contents2 isEmpty.
-	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
-	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/6/2001 11:59'!
-testFileProtectionMask
-
-	"(UnixProcessAccessorTestCase selector: #testFileProtectionMask) run"
-
-	| mask |
-	mask _ accessor fileProtectionMask: '/bin/rm'.
-	self assert: (mask isKindOf: Array).
-	self assert: (mask size == 4)
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/6/2001 12:06'!
-testFileStat
-
-	"(UnixProcessAccessorTestCase selector: #testFileStat) run"
-
-	| stat |
-	stat _ accessor fileStat: '/bin/rm'.
-	self assert: (stat isKindOf: Array).
-	self assert: (stat size == 3).
-	self assert: ((stat at: 1) isKindOf: Integer).
-	self assert: ((stat at: 2) isKindOf: Integer).
-	self assert: ((stat at: 3) isKindOf: Array).
-	self assert: ((stat at: 3) size == 4)
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/6/2001 12:08'!
-testIsExecutable
-
-	"(UnixProcessAccessorTestCase selector: #testIsExecutable) run"
-
-	self should: [accessor isExecutable: '/bin/sh'].
-	self shouldnt: [accessor isExecutable: '/etc/hosts']
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/23/2013 21:35'!
-testIsExecutableForUserInGroup
-
-	"(UnixProcessAccessorTestCase selector: #testIsExecutableForUserInGroup) run"
-
-	self shouldnt: [OSProcess waitForCommand: 'touch /tmp/delete.me']
-		raise: Warning.
-	OSProcess waitForCommand: 'chmod 550 /tmp/delete.me'.
-	"explicitly set file group because OS X may have set it to something other than current gid"
-	OSProcess waitForCommand: 'chgrp ', accessor primGetGid asString, ' /tmp/delete.me'.
-	self should: [accessor isExecutable: '/bin/sh'
-					forUser: accessor primGetUid
-					inGroup: accessor primGetGid].
-	self shouldnt: [accessor isExecutable: '/etc/hosts'
-					forUser: accessor primGetUid
-					inGroup: accessor primGetGid].
-	self should: [accessor isExecutable: '/tmp/delete.me'
-					forUser: accessor primGetUid
-					inGroup: 99999].
-	self should: [accessor isExecutable: '/tmp/delete.me'
-					forUser: 99999
-					inGroup: accessor primGetGid].
-	self shouldnt: [accessor isExecutable: '/tmp/delete.me'
-					forUser: 99999
-					inGroup: 99999].
-	OSProcess deleteFileNamed: '/tmp/delete.me'
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/20/2001 11:39'!
-testIsReadable
-
-	"(UnixProcessAccessorTestCase selector: #testIsReadable) run"
-
-	self should: [accessor isReadable: '/bin/sh'].
-	OSProcess waitForCommand: 'touch /tmp/delete.me'.
-	OSProcess waitForCommand: 'chmod 440 /tmp/delete.me'.
-	(Delay forMilliseconds: 200) wait.
-	self should: [accessor isReadable: '/tmp/delete.me'].
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/23/2013 21:35'!
-testIsReadableForUserInGroup
-
-	"(UnixProcessAccessorTestCase selector: #testIsReadableForUserInGroup) run"
-
-	self shouldnt: [OSProcess waitForCommand: 'touch /tmp/delete.me']
-		raise: Warning.
-	OSProcess waitForCommand: 'chmod 550 /tmp/delete.me'.
-	"explicitly set file group because OS X may have set it to something other than current gid"
-	OSProcess waitForCommand: 'chgrp ', accessor primGetGid asString, ' /tmp/delete.me'.
-	self should: [accessor isReadable: '/bin/sh'
-					forUser: accessor primGetUid
-					inGroup: accessor primGetGid].
-	self should: [accessor isReadable: '/tmp/delete.me'
-					forUser: accessor primGetUid
-					inGroup: 99999].
-	self should: [accessor isReadable: '/tmp/delete.me'
-					forUser: 99999
-					inGroup: accessor primGetGid].
-	self shouldnt: [accessor isReadable: '/tmp/delete.me'
-					forUser: 99999
-					inGroup: 99999].
-	OSProcess deleteFileNamed: '/tmp/delete.me'
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/20/2001 11:38'!
-testIsWritable
-
-	"(UnixProcessAccessorTestCase selector: #testIsWritable) run"
-
-	self shouldnt: [accessor isWritable: '/bin/sh'].
-	OSProcess waitForCommand: 'touch /tmp/delete.me'.
-	OSProcess waitForCommand: 'chmod 770 /tmp/delete.me'.
-	(Delay forMilliseconds: 200) wait.
-	self should: [accessor isWritable: '/tmp/delete.me'].
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/23/2013 21:35'!
-testIsWritableForUserInGroup
-
-	"(UnixProcessAccessorTestCase selector: #testIsWritableForUserInGroup) run"
-
-	self shouldnt: [OSProcess waitForCommand: 'touch /tmp/delete.me']
-		raise: Warning.
-	OSProcess waitForCommand: 'chmod 770 /tmp/delete.me'.
-	"explicitly set file group because OS X may have set it to something other than current gid"
-	OSProcess waitForCommand: 'chgrp ', accessor primGetGid asString, ' /tmp/delete.me'.
-	self shouldnt: [accessor isWritable: '/bin/sh'
-					forUser: accessor primGetUid
-					inGroup: accessor primGetGid].
-	self should: [accessor isWritable: '/tmp/delete.me'
-					forUser: accessor primGetUid
-					inGroup: 99999].
-	self should: [accessor isWritable: '/tmp/delete.me'
-					forUser: 99999
-					inGroup: accessor primGetGid].
-	self shouldnt: [accessor isWritable: '/tmp/delete.me'
-					forUser: 99999
-					inGroup: 99999].
-	OSProcess deleteFileNamed: '/tmp/delete.me'
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 10/6/2001 11:48'!
-testMakePipeHandles
-
-	"(UnixProcessAccessorTestCase selector: #testMakePipeHandles) run"
-
-	| p |
-	p _ OSPipe new.
-	self assert: p reader closed not.
-	self assert: p writer closed not.
-	p close! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 12/31/2023 11:58'!
-testRedirectStdOutTo
-	"Perform a dup2() call on the standard output descriptor to assign it
-	to a new file stream"
-
-	"(UnixProcessAccessorTestCase selector: #testRedirectStdOutTo) run"
-
-	| out aFileStream contents outFd saveFd newFileNo saveFs |
-	out _ OSProcess thisOSProcess stdOut.
-	"save file number to allow cleanup at end of test"
-	OSProcess deleteFileNamed: '/tmp/delete.2.me'.	
-	saveFs _ OSProcess newFileNamed: '/tmp/delete.2.me'.
-	outFd _ OSProcess accessor primUnixFileNumber: out fileID.
-	saveFd _ OSProcess accessor primUnixFileNumber: saveFs fileID.
-	OSProcess accessor primDup: outFd to: saveFd.
-	"Original stdout file descriptor is saved as safeFd, to be restored at end of test"
-
-	OSProcess deleteFileNamed: '/tmp/delete.me'.	
-	aFileStream _ OSProcess newFileNamed: '/tmp/delete.me'.
-	"nb - #contentsOfEntireFile closes the file, do not use"
-	aFileStream reset.
-	self assert: aFileStream upToEnd isEmpty.
-	"note - do not close aFileStream as this affects actual stdout"
-	out nextPutAll: 'foo'; flush.
-	aFileStream reset.
-	self assert: aFileStream upToEnd isEmpty.
-	OSProcess thisOSProcess redirectStdOutTo: aFileStream.
-	out nextPutAll: 'foo'; flush.
-	contents _ self contentsOfFile: '/tmp/delete.me'.
-	self deny: contents isEmpty.
-	self assert: contents = 'foo'. "assume noone else is using stdout right now"
-	"ensure the we can still find the real stdout"
-	self deny: OSProcess thisOSProcess stdOut closed.
-	OSProcess thisOSProcess stdOut nextPutAll: 'bar'; flush.
-	contents _ self contentsOfFile: '/tmp/delete.me'.
-	self deny: contents isEmpty.
-	self assert: (contents endsWith: 'bar').
-	"Restore the original file number. The stdOut stream is cached in ThisOSProcess
-	(and should probably be recalculated following a dup2(), so find the real handle
-	with getStdOutHandle."
-	newFileNo _ OSProcess accessor primUnixFileNumber: OSProcess accessor getStdOutHandle.
-	OSProcess accessor primDup: saveFd to: newFileNo.
-	OSProcess thisOSProcess stdOut lf; nextPutAll: 'UnixProcessAccessorTestCase>>testRedirectStdOutTo - this should appear on original console stdout'; lf.
-	saveFs close.
-	aFileStream close.	
-	OSProcess deleteFileNamed: '/tmp/delete.me'.	
-	OSProcess deleteFileNamed: '/tmp/delete.2.me'.	
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/19/2021 21:32'!
-testSessionIdentifier
-	"This is an indirect way to make sure that the primitive for obtaining the session ID does
-	not get out of kilter with respect to the method for obtaining session ID from an existing
-	open file. The dangerous failure mode is if the SQFile data stucture format changes and
-	OSProcess does not get updated to reflect the change.
-
-	As of approximately Squeak 3.8 and beyond, the session id has been moved to the
-	first slot of the data structure. Deducing the session ID from an open file will not
-	work for a Squeak VM beyond that point, and will not work for any 64 bit VM.
-	OSPP version 4.0 or higher obtains session ID from the interpreter, so this is no
-	longer an issue. Skip this test for OSPP 4.0 and higher."
-
-	"(UnixProcessAccessorTestCase selector: #testSessionIdentifier) debug"
-
-	| installedOSPPMajorVersion |
-	self should: [accessor getSessionIdentifier isKindOf: ByteArray].
-	installedOSPPMajorVersion _ Integer readFrom:
-		(OSProcess accessor osppModuleVersionString ifNil: ['-1']) readStream.
-	(installedOSPPMajorVersion >= 4)
-		ifTrue: ["ignore this test"]
-		ifFalse: [self should:
-			[accessor getSessionIdentifierFromSourcesFile = accessor getSessionIdentifier]]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'eem 3/27/2014 11:32'!
-testSignalNumbers
-	"Signal numbers as reported by UnixOSProcessPlugin. Note that some signal definitions
-	are architecture dependent, with specific number assignments differing between e.g. Intel
-	and Sparc. Intel architecture is assumed for this test."
-
-	"NOTE OSPP prior to version 4.4.12 had several incorrect signal number assignments.
-	Check the version level of OSPP by evaluating this expression:
-
-		OSProcess accessor primOSProcessPluginModuleVersionString"
-
-	self assert: OSProcess accessor primSigHupNumber = 1.
-	self assert: OSProcess accessor primSigIntNumber = 2.
-	self assert: OSProcess accessor primSigKillNumber = 9.
-	self assert: OSProcess accessor primSigPipeNumber = 13.
-	self assert: OSProcess accessor primSigQuitNumber = 3.
-	self assert: OSProcess accessor primSigTermNumber = 15.
-	OSProcess platformName caseOf:
-		{ ['unix']		->
-			[self assert: OSProcess accessor primSigUsr1Number = 10.
-			 self assert: OSProcess accessor primSigUsr2Number = 12.
-			 self assert: OSProcess accessor primSigChldNumber = 17.].
-		   ['Mac OS']	->
-			[self assert: OSProcess accessor primSigUsr1Number = 30.
-			 self assert: OSProcess accessor primSigUsr2Number = 31.
-			 self assert: OSProcess accessor primSigChldNumber = 20.]}
-	
-	
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 1/15/2018 21:59:06'!
-testUnixFileNumber
-	"For purposes of this test, assume that stdin and stderr have not been
-	directed."
-
-	"(UnixProcessAccessorTestCase selector: #testUnixFileNumber) run"
-
-	| err errFileNo errHandle in inFileNo inHandle aFileStream fFileNo fHandle |
-	err _ OSProcess thisOSProcess stdErr.
-	errHandle _ err fileID.
-	errFileNo _ OSProcess accessor unixFileNumber: errHandle.
-	self assert: errFileNo == 2.
-	in _ OSProcess thisOSProcess stdIn.
-	inHandle _ in fileID.
-	inFileNo _ OSProcess accessor unixFileNumber: inHandle.
-	self assert: inFileNo == 0.
-	aFileStream _ OSProcess fileNamed: '/tmp/delete.me'.
-	fHandle _ aFileStream fileID.
-	fFileNo _ OSProcess accessor unixFileNumber: fHandle.
-	self assert: fFileNo notNil.
-	self assert: fFileNo > 2.
-	aFileStream close
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:57:58'!
-testIsLockableFile
-
-	"(UnixProcessAccessorTestCase selector: #testIsLockableFile) debug"
-
-	| fs result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-
-	result _ OSProcess accessor isLockableFile: fs.
-	self should: result.
-
-	result _ OSProcess accessor lockFile: fs.
-	self should: (result isKindOf: OSFileLock).
-	result _ OSProcess accessor isLockableFile: fs.
-	self should: result.
-
-	OSProcess accessor unlockFile: fs.
-	result _ OSProcess accessor isLockableFile: fs.
-	self should: result.
-
-	fs close.
-	result _ OSProcess accessor isLockableFile: fs.
-	self shouldnt: result.
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:08'!
-testLockFile
-
-	"(UnixProcessAccessorTestCase selector: #testLockFile) debug"
-
-	| fs result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	result _ OSProcess accessor lockFile: fs.
-	self should: (result isKindOf: OSFileLock).
-	fs close.
-	result _ OSProcess accessor lockFile: fs.
-	self should: (result == nil).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:17'!
-testOSFileLockLock
-
-	"(UnixProcessAccessorTestCase selector: #testOSFileLockLock) debug"
-
-	| fs fileLock result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	fileLock _ OSFileLock onFile: fs exclusive: true.
-	result _ fileLock lock.
-	self should: (result == true).
-	result _ fileLock lock.
-	self should: (result == true).
-	fs close.
-	result _ fileLock lock.
-	self should: (result == false).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:24'!
-testOSFileLockTest
-
-	"(UnixProcessAccessorTestCase selector: #testOSFileLockTest) debug"
-
-	| fs fileLock result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	fileLock _ OSFileLock onFile: fs exclusive: true.
-	result _ fileLock test.
-	self should: (result == true).
-	result _ fileLock lock.
-	self should: (result == true).
-	result _ fileLock test.
-	self should: (result == true).
-	result _ fileLock unlock.
-	self should: (result == true).
-	result _ fileLock test.
-	self should: (result == true).
-	fs close.
-	result _ fileLock test.
-	self should: (result == false).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:33'!
-testOSFileLockUnlock
-
-	"(UnixProcessAccessorTestCase selector: #testOSFileLockUnlock) debug"
-
-	| fs fileLock result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	fileLock _ OSFileLock onFile: fs exclusive: true.
-	result _ fileLock unlock.
-	self should: (result == true).
-	result _ fileLock lock.
-	self should: (result == true).
-	result _ fileLock unlock.
-	self should: (result == true).
-	fs close.
-	result _ fileLock unlock.
-	self should: (result == false).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:41'!
-testOSFileRegionLockLock
-
-	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockLock) debug"
-
-	| fs fileLock result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
-	result _ fileLock lock.
-	self should: (result == true).
-	result _ fileLock lock.
-	self should: (result == true).
-	fs close.
-	result _ fileLock lock.
-	self should: (result == false).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:49'!
-testOSFileRegionLockTest
-
-	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockTest) debug"
-
-	| fs fileLock result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
-	result _ fileLock test.
-	self should: (result == true).
-	result _ fileLock lock.
-	self should: (result == true).
-	result _ fileLock test.
-	self should: (result == true).
-	result _ fileLock unlock.
-	self should: (result == true).
-	result _ fileLock test.
-	self should: (result == true).
-	fs close.
-	result _ fileLock test.
-	self should: (result == false).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:58:57'!
-testOSFileRegionLockUnlock
-
-	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockUnlock) debug"
-
-	| fs fileLock result |
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[fs nextPutAll: 'ABCDEFG'.
-	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
-	result _ fileLock unlock.
-	self should: (result == true).
-	result _ fileLock lock.
-	self should: (result == true).
-	result _ fileLock unlock.
-	self should: (result == true).
-	fs close.
-	result _ fileLock unlock.
-	self should: (result == false).
-	] ensure: [fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:59:17'!
-testUnlockFileUnixCompatible
-
-	"(UnixProcessAccessorTestCase selector: #testUnlockFileUnixCompatible) debug"
-
-	| mode fs result |
-	mode _ OSProcess accessor emulateWin32FileLocking. "remember setting"
-
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[OSProcessAccessor emulateWin32FileLocking: false. "unix mode"
-	fs nextPutAll: 'ABCDEFG'.
-	result _ OSProcess accessor unlockFile: fs.
-	"On Unix, the fcntl call to unlock the file will succeed even if
-	the file is not locked."
-	self should: (result isKindOf: OSFileLock).
-
-	result _ OSProcess accessor lockFile: fs.
-	self should: (result isKindOf: OSFileLock).
-	result _ OSProcess accessor unlockFile: fs.
-	self should: (result isKindOf: OSFileLock).
-
-	fs close.
-	result _ OSProcess accessor unlockFile: fs.
-	self should: result == nil] ensure:
-		[OSProcessAccessor emulateWin32FileLocking: mode.
-		fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 1/15/2018 21:59:24'!
-testUnlockFileWin32Compatible
-
-	"(UnixProcessAccessorTestCase selector: #testUnlockFileWin32Compatible) debug"
-
-	| mode fs result |
-	mode _ OSProcess accessor emulateWin32FileLocking. "remember setting"
-
-	fs _ OSProcess fileNamed: 'junkfile'.
-	[OSProcessAccessor emulateWin32FileLocking: true. "win32 mode"
-	fs nextPutAll: 'ABCDEFG'.
-	result _ OSProcess accessor unlockFile: fs.
-	self should: result == nil.
-
-	result _ OSProcess accessor lockFile: fs.
-	self should: (result isKindOf: OSFileLock).
-	result _ OSProcess accessor unlockFile: fs.
-	self should: (result isKindOf: OSFileLock).
-
-	fs close.
-	result _ OSProcess accessor unlockFile: fs.
-	self should: result == nil] ensure:
-		[OSProcessAccessor emulateWin32FileLocking: mode.
-		fs close]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 7/11/2005 19:00'!
-primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: count
-	"This primitive call exists only for purposes of testing the
-	fixPointersInArrayOfStrings:withOffsets:count: method. I believe it to be
-	reasonably machine and compiler independent, but have no way of verifying
-	this on a variety of machines, so I'll leave this test method here in case
-	someone runs into problems on other hardware or compilers. -dtl"
-
-	"| a |
-	a _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: UnixProcess env.
-	UnixProcessAccessorTestCase new
-		primFixPointersInArrayOfStrings: (a at: 1)
-		withOffsets: (a at: 2)
-		count: (a at: 2) size"
-
-	<primitive: 'primitiveFixPointersInArrayOfStrings' module: 'UnixOSProcessPlugin'>
-	^ nil! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 12/18/2022 10:56'!
-testArgsAsFlatArrayAndOffsets
-	"Test conversion of an array of strings into the form used to create a C **char
-	in UnixOSProcessPlugin."
-
-	"(UnixProcessAccessorTestCase selector: #testArgsAsFlatArrayAndOffsets) debug"
-
-	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
-	pointerSize _ OSProcess accessor sizeOfPointer.
-	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character null) asString ].
-	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
-	self assert: stringsAndOffsets size == 2.
-	self assert: stringsAndOffsets second size == 3.
-	lengthOfCStrings _ (a collect: [:e | e size]) sum.
-	totalLength _ 4 * pointerSize + lengthOfCStrings.
-	self assert: stringsAndOffsets first size == totalLength.
-	stringsAndOffsets second do: [:offset |
-		(stringsAndOffsets first at: offset) == (Character null)].
-
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: 4 * pointerSize.
-	s _  rs next: 3.
-	rs next.
-	self assert: s = 'one' asByteArray.
-	s _  rs next: 3.
-	rs next.
-	self assert: s = 'two' asByteArray.
-	s _  rs next: 5.
-	rs next.
-	self assert: s = 'three' asByteArray.
-
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: (stringsAndOffsets second at: 1).
-	s _  rs next: 3.
-	self assert: s = 'one' asByteArray.
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: (stringsAndOffsets second at: 2).
-	s _  rs next: 3.
-	self assert: s = 'two' asByteArray.
-	rs _ ReadStream on: stringsAndOffsets first.
-	rs next: (stringsAndOffsets second at: 3).
-	s _  rs next: 5.
-	self assert: s = 'three' asByteArray.
-
-	arrayWithMachineDependentPointers _ self
-		primFixPointersInArrayOfStrings: stringsAndOffsets first
-		withOffsets: stringsAndOffsets second
-		count: stringsAndOffsets second size.
-	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
-	rs _ ReadStream on: arrayWithMachineDependentPointers.
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
-	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 12/18/2022 11:14'!
-testEnvAsFlatArrayAndOffsets
-	"Test conversion of a dictionary of key-value environment variables into the
-	form used to create a C **char in UnixOSProcessPlugin."
-
-	"(UnixProcessAccessorTestCase selector: #testEnvAsFlatArrayAndOffsets) debug"
-
-	| pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers d |
-	pointerSize _ OSProcess accessor sizeOfPointer.
-	d _ Dictionary new.
-	d at: #ONE put: 'one'.
-	d at: #TWO put: 'two'.
-	d at: #THREE put: 'three'.
-	stringsAndOffsets _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: d.
-	self assert: stringsAndOffsets size == 2.
-	self assert: stringsAndOffsets second size == 3.
-
-	lengthOfCStrings _ d keys
-		inject: 0
-		into: [:sum :e | sum + e size + '=' size + (d at: e) size + (String new: 1) size].
-
-	totalLength _ 4 * pointerSize + lengthOfCStrings.
-	self assert: stringsAndOffsets first size == totalLength.
-	stringsAndOffsets second do: [:offset |
-		(stringsAndOffsets first at: offset) == (Character null)].
-
-	arrayWithMachineDependentPointers _ self
-		primFixPointersInArrayOfStrings: stringsAndOffsets first
-		withOffsets: stringsAndOffsets second
-		count: stringsAndOffsets second size.
-	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
-	rs _ ReadStream on: arrayWithMachineDependentPointers.
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s ~= (String new: pointerSize). "a C pointer"
-	s _ rs next: pointerSize.
-	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
-	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 12/26/2023 11:28'!
-testChDir
-
-	"(UnixProcessAccessorTestCase selector: #testChDir) run"
-
-	| cwd new |
-	cwd _ accessor primGetCurrentWorkingDirectory.
-	new _ '/usr/bin'.
-	"Note, do not use /tmp because OS X implements it as a sym link to private/tmp
-	and do not use /bin because some Linux implementations may link it to /usr/bin"
-	accessor chDir: new.
-	self should: [new = accessor primGetCurrentWorkingDirectory].
-	accessor chDir: cwd.
-	self should: [cwd = accessor primGetCurrentWorkingDirectory].
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 08:53'!
-testEnvironmentAt
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAt) run"
-
-	| path |
-	path _ accessor environmentAt: 'PATH'.
-	self should: [path notNil and: [path isEmpty not]]! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 2/24/2013 10:26'!
-testEnvironmentAtPut
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut) run"
-
-	| oldPath newPath resetPath s |
-	oldPath _ accessor environmentAt: 'PATH'.
-	newPath _ 'this is a test string'.
-	accessor environmentAt: 'PATH' put: newPath.
-	resetPath _ accessor environmentAt: 'PATH'.
-	self should: [newPath = resetPath].
-	accessor environmentAt: 'PATH' put: oldPath.
-	resetPath _ accessor environmentAt: 'PATH'.
-	self should: [oldPath = resetPath].
-	s _ WriteStream on: String new.
-	10000 timesRepeat: [s nextPutAll: 'Do something to provoke garbage collection'].
-	resetPath _ accessor environmentAt: 'PATH'.
-	self should: [oldPath = resetPath].
-
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/7/2001 11:47'!
-testEnvironmentAtPut1
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1) run"
-
-	| oldVal newVal resetVal |
-	oldVal _ accessor environmentAt: 'AAAA'.
-	newVal _ 'this is a test string'.
-	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal notNil and: [resetVal isEmpty not]].
-	self should: [newVal = resetVal].
-	accessor environmentAt: 'AAAA' put: oldVal.
-	self should: [oldVal = (accessor environmentAt: 'AAAA')]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/7/2001 12:14'!
-testEnvironmentAtPut2
-	"This looks for a bug in which the enviroment is successfully, but later gets
-	invalidated by memory moves or reallocation."
-
-	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2) run"
-
-	| oldVal newVal resetVal count ws goodResults notFound totallyBogus |
-	oldVal _ accessor environmentAt: 'AAAA'.
-	newVal _ 'this is a test string'.
-	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal notNil and: [resetVal isEmpty not]].
-	self should: [newVal = resetVal].
-
-	count _ 50000.
-	ws _ WriteStream on: Array new.
-	count timesRepeat: [ws nextPut: (accessor environmentAt: 'AAAA')].
-	goodResults _ ws contents select: [:e | e = newVal].
-	notFound _ ws contents select: [:e | e isNil].
-	totallyBogus _ ws contents select: [:e | e notNil and: [e ~= newVal]].
-
-	"Uncomment the following to see when the problem is happening"
-	"(Array with: goodResults with: notFound with: totallyBogus) inspect."
-
-	self should: [goodResults size == count].
-	self should: [notFound isEmpty].
-	self should: [totallyBogus isEmpty].
-
-	accessor environmentAt: 'AAAA' put: oldVal.
-	self should: [oldVal = (accessor environmentAt: 'AAAA')]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:36'!
-testGetStdErrHandle
-
-	"(UnixProcessAccessorTestCase selector: #testGetStdErrHandle) run"
-
-	| handle |
-	handle _ accessor primGetStdErrHandle.
-	self assert: handle notNil
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:36'!
-testGetStdInHandle
-
-	"(UnixProcessAccessorTestCase selector: #testGetStdInHandle) run"
-
-	| handle |
-	handle _ accessor primGetStdInHandle.
-	self assert: handle notNil
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:36'!
-testGetStdOutHandle
-
-	"(UnixProcessAccessorTestCase selector: #testGetStdOutHandle) run"
-
-	| handle |
-	handle _ accessor primGetStdOutHandle.
-	self assert: handle notNil
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:42'!
-testPrimArgumentAt
-
-	"(UnixProcessAccessorTestCase selector: #testPrimArgumentAt) run"
-
-	| progName |
-	progName _ accessor primArgumentAt: 1.
-	self should: [progName notNil and: [progName isEmpty not]]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:45'!
-testPrimErrorMessageAt
-
-	"(UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt) run"
-
-	| msg |
-	msg _ accessor primErrorMessageAt: 1.
-	self should: [msg notNil and: [msg isEmpty not]].
-	msg _ accessor primErrorMessageAt: 0.
-	self should: [msg notNil and: [msg isEmpty not]]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 08:45'!
-testPrimGetCurrentWorkingDirectory
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory) run"
-
-	| cwd |
-	cwd _ accessor primGetCurrentWorkingDirectory.
-	self should: [cwd notNil and: [cwd isEmpty not]]! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:49'!
-testPrimGetEGid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetEGid) run"
-
-	| id |
-	id _ accessor primGetEGid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:49'!
-testPrimGetEUid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetEUid) run"
-
-	| id |
-	id _ accessor primGetEUid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetGid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetGid) run"
-
-	| id |
-	id _ accessor primGetGid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetPPid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetPPid) run"
-
-	| id |
-	id _ accessor primGetPPid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetPid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetPid) run"
-
-	| id |
-	id _ accessor primGetPid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 8/19/2005 06:32'!
-testPrimGetSession
-	"As of OSPP version 4 and greater, the session ID should always be obtained from
-	the interpreter. Previously it was deduced by looking at the handle of an open file."
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetSession) run"
-
-	| id expectedSessionSize |
-	expectedSessionSize _ [OSProcess accessor sizeOfInt] on: Error do: [4].
-	id _ OSProcess accessor primGetSession.
-	self assert: (id isNil or: [id isKindOf: ByteArray]).
-	id _ OSProcess accessor getSessionIdentifier.
-	self assert: (id isKindOf: ByteArray).
-	self assert: (id size / expectedSessionSize) == 1
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 09:50'!
-testPrimGetUid
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetUid) run"
-
-	| id |
-	id _ accessor primGetUid.
-	self should: [id isKindOf: Integer]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/7/2001 14:07'!
-testPrimUnsetEnv
-
-	"(UnixProcessAccessorTestCase selector: #testPrimUnsetEnv) run"
-
-	| oldVal newVal resetVal |
-	oldVal _ accessor environmentAt: 'AAAA'.
-	newVal _ 'this is a test string'.
-	accessor environmentAt: 'AAAA' put: newVal.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal notNil and: [resetVal isEmpty not]].
-	self should: [newVal = resetVal].
-
-	accessor primUnsetEnv: 'AAAA', (Character null) asString.
-	resetVal _ accessor environmentAt: 'AAAA'.
-	self should: [resetVal isNil].
-
-	accessor environmentAt: 'AAAA' put: oldVal.
-	self should: [oldVal = (accessor environmentAt: 'AAAA')]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 10/6/2001 10:03'!
-testRealpath
-
-	"(UnixProcessAccessorTestCase selector: #testRealpath) run"
-
-	| p |
-	p _ accessor realpath: '/usr/bin'.
-	self should: [p notNil and: [p isEmpty not]].
-	p _ accessor realpath: '/bogus/path/name'.
-	self should: [p isNil]
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - fork and exec' stamp: 'dtl 6/11/2011 12:25'!
-testPrimForkAndExec
-	"These methods can only be tested properly from UnixProcess, which knows how
-	to set up the parameters on the stack."
-
-	"(UnixProcessAccessorTestCase selector: #testPrimForkAndExec) run"
-
-	| p |
-	self shouldnt: [p _ UnixProcess command: 'ls /bin']
-		raise: Warning.
-	(Delay forMilliseconds: 500) wait.
-	self should: [p isComplete].
-	self should: [p exitStatus == 0]
-
-! !
-
-!UnixProcessAccessorTestCase methodsFor: 'tests - fork and exec' stamp: 'dtl 10/6/2001 10:44'!
-testPrimGetChildExitStatus
-	"Cannot really test this here, because it needs to be wired into the interrupt
-	handler. Just make sure it returns nil when there is nothing to do."
-
-	"(UnixProcessAccessorTestCase selector: #testPrimGetChildExitStatus) run"
-
-	| stat |
-	stat _ accessor primGetChildExitStatus: -1.
-	self should: [stat isNil].
-	stat _ accessor primGetChildExitStatus: 1.
-	self should: [stat isNil]
-! !
-
-!UnixProcessFileLockTestCase methodsFor: 'asserting' stamp: 'jf 2/22/2004 19:07'!
-assertLock: lock1 lock: lock2 conflicts: aBoolean
-	self assert: (lock1 conflictsWith: lock2) = aBoolean.
-	self assert: (lock2 conflictsWith: lock1) = aBoolean.! !
-
-!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'dtl 12/17/2016 17:37'!
-entireExclusiveLock
-	^ OSFileLock onFile: fileStream exclusive: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'dtl 12/17/2016 17:37'!
-entireSharedLock
-	^ OSFileLock onFile: fileStream exclusive: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'jf 2/22/2004 19:22'!
-regionExclusiveLock
-	^ self regionLockFrom: 10 to: 20 exclusive: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'dtl 12/17/2016 17:37'!
-regionLockFrom: from to: to exclusive: exclusive
-	^ OSFileRegionLock onFile: fileStream from: from to: to exclusive: exclusive! !
-
-!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'jf 2/22/2004 19:22'!
-regionSharedLock
-	^ self regionLockFrom: 10 to: 20 exclusive: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'accessing' stamp: 'jf 2/21/2004 18:14'!
-fileStream
-	^ fileStream! !
-
-!UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 1/15/2018 22:18:35'!
-setUp
-	OSProcess deleteFileNamed: 'junkfile'.
-	fileStream _ OSProcess fileNamed: 'junkfile'.! !
-
-!UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 1/23/2013 19:42'!
-tearDown
-	fileStream close.
-	OSProcess deleteFileNamed: fileStream fullName! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:27'!
-testDistinctExclusiveRegionWithExclusiveRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
-		lock: (self regionLockFrom: 30 to: 40 exclusive: true)
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:27'!
-testDistinctExclusiveRegionWithSharedRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
-		lock: (self regionLockFrom: 30 to: 40 exclusive: false)
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:27'!
-testDistinctSharedRegionWithExclusiveRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
-		lock: (self regionLockFrom: 30 to: 40 exclusive: true)
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
-testDistinctSharedRegionWithSharedRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
-		lock: (self regionLockFrom: 30 to: 40 exclusive: false)
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:12'!
-testEntireExclusiveWithEntireExclusive
-	self
-		assertLock: self entireExclusiveLock
-		lock: self entireExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:16'!
-testEntireExclusiveWithExclusiveRegion
-	self
-		assertLock: self entireExclusiveLock
-		lock: self regionExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:17'!
-testEntireExclusiveWithSharedRegion
-	self
-		assertLock: self entireExclusiveLock
-		lock: self regionSharedLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:12'!
-testEntireSharedWithEntireExclusive
-	self
-		assertLock: self entireSharedLock
-		lock: self entireExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:12'!
-testEntireSharedWithEntireShared
-	self
-		assertLock: self entireSharedLock
-		lock: self entireSharedLock
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:14'!
-testEntireSharedWithExclusiveRegion
-	self
-		assertLock: self entireSharedLock
-		lock: self regionExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:15'!
-testEntireSharedWithSharedRegion
-	self
-		assertLock: self entireSharedLock
-		lock: self regionSharedLock
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:18'!
-testExclusiveRegionWithExclusiveRegion
-	self
-		assertLock: self regionExclusiveLock
-		lock: self regionExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:25'!
-testIdenticalExclusiveRegionWithExclusiveRegion
-	self
-		assertLock: self regionExclusiveLock
-		lock: self regionExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:24'!
-testIdenticalSharedRegionWithExclusiveRegion
-	self
-		assertLock: self regionSharedLock
-		lock: self regionExclusiveLock
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:24'!
-testIdenticalSharedRegionWithSharedRegion
-	self
-		assertLock: self regionSharedLock
-		lock: self regionSharedLock
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:25'!
-testOverlappingExclusiveRegionWithExclusiveRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
-testOverlappingExclusiveRegionWithSharedRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
-testOverlappingSharedRegionWithExclusiveRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:26'!
-testOverlappingSharedRegionWithSharedRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
-		conflicts: false! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:21'!
-testSupersetExclusiveRegionWithExclusiveRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 40 exclusive: true)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:23'!
-testSupersetExclusiveRegionWithSharedRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 40 exclusive: true)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:23'!
-testSupersetSharedRegionWithExclusiveRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 40 exclusive: false)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
-		conflicts: true! !
-
-!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 2/22/2004 19:24'!
-testSupersetSharedRegionWithSharedRegion
-	self
-		assertLock: (self regionLockFrom: 10 to: 40 exclusive: false)
-		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
-		conflicts: false! !
-
-!UnixProcessTestCase methodsFor: 'failures' stamp: 'eem 3/27/2014 11:29'!
-expectedFailures
-	^UnixOSProcessAccessor basicNew safeToForkSqueak
-		ifTrue: [#()]
-		ifFalse: [#(	testClassForkHeadlessSqueakAndDo
-					testClassForkHeadlessSqueakAndDoThenQuit
-					testClassForkSqueak
-					testClassForkSqueakAndDo
-					testClassForkSqueakAndDoThenQuit
-					testEightLeafSqueakTree
-					testForkHeadlessSqueakAndDo
-					testForkHeadlessSqueakAndDoThenQuit
-					testForkSqueak
-					testForkSqueakAndDo
-					testForkSqueakAndDoThenQuit
-					testHeadlessChild
-					testSpawnTenHeadlessChildren)]! !
-
-!UnixProcessTestCase methodsFor: 'private' stamp: 'dtl 2/8/2019 23:03'!
-numberOfOpenFiles
-	"Answer the number of files currently open for this OS process. This works
-	only on a system with a /proc filesystem and file descriptors located in a
-	directory called /proc/<pid>/fd. On other systems, just answer 0."
-
-	"UnixProcessTestCase new numberOfOpenFiles"
-
-	| path |
-	path _ '/proc/' , OSProcess thisOSProcess pid printString, '/fd'.
-	(OSProcess directoryExists: path) ifFalse: [ ^ 0].
-	^ OSProcess useFileMan
-		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #withPathName: with: path) children size]
-		ifFalse: [OSProcess useFileSystem
-			ifTrue: [ (path perform: #asFileReference) children size ]
-			ifFalse: [ ((Smalltalk at: #FileDirectory) on: path) entries size ]]
-! !
-
-!UnixProcessTestCase methodsFor: 'running' stamp: 'dtl 3/10/2002 10:52'!
-runAll
-	"If you get intermittent failures, try doing a garbage collect. Some of these
-	tests can fail intermittently on the open file handle count checks"
-
-	"UnixProcessTestCase new runAll"
-
-	| result suite |
-	Smalltalk garbageCollect.
-	suite _ TestSuite new.
-	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueak).
-	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueakAndDo).
-	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit).
-	suite addTest: (UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDo).
-	suite addTest: (UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDoThenQuit).
-	suite addTest: (UnixProcessTestCase selector: #testForkSqueak).
-	suite addTest: (UnixProcessTestCase selector: #testForkSqueakAndDo).
-	suite addTest: (UnixProcessTestCase selector: #testForkSqueakAndDoThenQuit).
-	suite addTest: (UnixProcessTestCase selector: #testForkHeadlessSqueakAndDo).
-	suite addTest: (UnixProcessTestCase selector: #testForkHeadlessSqueakAndDoThenQuit).
-	suite addTest: (UnixProcessTestCase selector: #testHeadlessChild).
-	suite addTest: (UnixProcessTestCase selector: #testSpawnTenHeadlessChildren).
-	suite addTest: (UnixProcessTestCase selector: #testEightLeafSqueakTree).
-	suite addTest: (UnixProcessTestCase selector: #testCatAFile).
-	suite addTest: (UnixProcessTestCase selector: #testCatFromFileToFiles).
-	suite addTest: (UnixProcessTestCase selector: #testRunCommand).
-	suite addTest: (UnixProcessTestCase selector: #testPipe).
-	suite addTest: (UnixProcessTestCase selector: #testPipeLine).
-
-	result _ suite run.
-	self should: [result defects size == 0].
-	^ result
-! !
-
-!UnixProcessTestCase methodsFor: 'running' stamp: 'dtl 7/30/2010 16:47'!
-setUp
-
-	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
-		ifTrue: [self perform: #timeout: with: 60].
-	thisOSProcess _ OSProcess thisOSProcess
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/11/2011 12:26'!
-testCatAFile
-
-	"(UnixProcessTestCase selector: #testCatAFile) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt: [p _ UnixProcess catAFile]
-		raise: Warning.
-	self assert: p notNil.
-	self should: [p isRunning].
-	[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-	self should: [p isComplete].
-	self should: [p exitStatus == 0].
-	self should: [p initialStdIn closed]. "Used a file for input, should be closed"
-	self shouldnt: [p initialStdOut closed]. "Shared stdout with the VM, should be open"
-	self shouldnt: [p initialStdErr closed]. "Shared stderr with the VM, should be open"
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 1/15/2018 22:14:01'!
-testCatFromFileToFiles
-
-	"(UnixProcessTestCase selector: #testCatFromFileToFiles) run"
-
-	| p f openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	OSProcess deleteFileNamed: '/tmp/deleteMe.out'.
-	OSProcess deleteFileNamed: '/tmp/deleteMe.err'.
-	self shouldnt: [p _ UnixProcess catFromFileToFiles]
-		raise: Warning.
-	self assert: p notNil.
-	self should: [p isRunning].
-	[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-	self should: [p isComplete].
-	self should: [p exitStatus == 0].
-	self should: [p initialStdIn closed].
-	self should: [p initialStdOut closed].
-	self should: [p initialStdErr closed].
-	f _ OSProcess oldFileNamed: '/tmp/deleteMe.out'.
-	self shouldnt: [f upToEnd isEmpty].
-	f close.
-	f _ OSProcess oldFileNamed: '/tmp/deleteMe.err'.
-	self should: [f upToEnd isEmpty].
-	f close.
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/10/2011 15:55'!
-testEightLeafSqueakTree
-
-	"(UnixProcessTestCase selector: #testEightLeafSqueakTree) run"
-
-	| a openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt: [a _ UnixProcess eightLeafSqueakTree]
-		raise: Warning.
-	self assert: (a isKindOf: Array).
-	self assert: a size == 3.
-	(a includes: 0)
-		ifTrue:
-			[Smalltalk quitPrimitive].
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'NM 10/16/2021 16:09:26'!
-testExitCode 
-
-	"The exit code you expect in POSIX systems. "
-
-	|out|
-	out _ OSProcess waitForCommand: ' sh -c "exit 33" '. 
-	self assert: (out exitCode = 33). 
-
-
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/29/2005 14:32'!
-testHeadlessChild
-
-	"(UnixProcessTestCase selector: #testHeadlessChild) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt: [p _ UnixProcess headlessChild]
-		raise: Warning. "Catch warning if fork fails"
-	[p isComplete] whileFalse: [(Delay forMilliseconds: 100) wait].
-	self assert: p isComplete.
-	self assert: p exitStatus == 0.
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 10/12/2001 08:32'!
-testPipe
-
-	"(UnixProcessTestCase selector: #testPipe) run"
-
-	| openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self should: [UnixProcess testPipe = 'this is some text to write into the pipe'].
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 10/12/2001 08:32'!
-testPipeLine
-
-	"(UnixProcessTestCase selector: #testPipeLine) run"
-
-	| openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self should: ['This is the text to write*' match: UnixProcess testPipeLine].
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 1/15/2018 22:14:16'!
-testRunCommand
-
-	"(UnixProcessTestCase selector: #testRunCommand) run"
-
-	| p f openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	OSProcess deleteFileNamed: '/tmp/deleteMe.out'.
-	OSProcess deleteFileNamed: '/tmp/deleteMe.err'.
-	self shouldnt: [p _ UnixProcess testRunCommand]
-		raise: Warning.
-	self assert: p notNil.
-	self should: [p isRunning].
-	[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-	self should: [p isComplete].
-	self should: [p exitStatus > 0].	"Forced an error exit status"
-	"stdin was shared with the Squeak VM, so it should not have been closed."
-	self shouldnt: [p initialStdIn closed].
-	"but the output and error streams should have been closed."
-	self should: [p initialStdOut closed].
-	self should: [p initialStdErr closed].
-	f _ OSProcess oldFileNamed: '/tmp/deleteMe.out'.
-	self shouldnt: [f upToEnd isEmpty].
-	f close.
-	f _ OSProcess oldFileNamed: '/tmp/deleteMe.err'.
-	self shouldnt: [f upToEnd isEmpty].
-	f close.
-	self assert: self numberOfOpenFiles == openFileCount
-
-
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 6/29/2005 14:33'!
-testSpawnTenHeadlessChildren
-
-	"(UnixProcessTestCase selector: #testSpawnTenHeadlessChildren) run"
-
-	| a openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt: [a _ UnixProcess spawnTenHeadlessChildren]
-		raise: Warning. "Catch warning if fork fails"
-	[(a detect: [:p | p isComplete not] ifNone: []) notNil]
-		whileTrue: [(Delay forMilliseconds: 100) wait].
-	self should: [(a select: [:p | p isComplete not]) isEmpty].
-	self assert: self numberOfOpenFiles == openFileCount
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/29/2005 14:24'!
-testClassForkHeadlessSqueakAndDo
-
-	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDo) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-		[p _ UnixProcess forkHeadlessSqueakAndDo:
-			[(Delay forMilliseconds: 100) wait.
-			OSProcess snapshot: false andQuit: true]]
-		raise: Warning. "Catch warning if fork fails"
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/29/2005 14:26'!
-testClassForkHeadlessSqueakAndDoThenQuit
-
-	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDoThenQuit) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-		[p _ UnixProcess forkHeadlessSqueakAndDoThenQuit:
-			[(Delay forMilliseconds: 100) wait]]
-		raise: Warning. "Catch warning if fork fails"
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/10/2011 15:38'!
-testClassForkSqueak
-
-	"(UnixProcessTestCase selector: #testClassForkSqueak) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt: [p _ UnixProcess forkSqueak]
-		raise: Warning.
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifTrue:
-			["Child Squeak"
-			p inspect.
-			(Delay forMilliseconds: 100) wait.
-			OSProcess snapshot: false andQuit: true]
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/10/2011 15:43'!
-testClassForkSqueakAndDo
-
-	"(UnixProcessTestCase selector: #testClassForkSqueakAndDo) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-			[p _ UnixProcess forkSqueakAndDo:
-					[(Delay forMilliseconds: 100) wait.
-					OSProcess snapshot: false andQuit: true]]
-		raise: Warning.
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 6/10/2011 15:43'!
-testClassForkSqueakAndDoThenQuit
-
-	"(UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-			[p _ UnixProcess forkSqueakAndDoThenQuit:
-					[(Delay forMilliseconds: 100) wait]]
-		raise: Warning.
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:47'!
-testForkHeadlessSqueakAndDo
-
-	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDo) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-			[p _ thisOSProcess forkHeadlessSqueakAndDo:
-					[(Delay forMilliseconds: 100) wait.
-					OSProcess snapshot: false andQuit: true]]
-		raise: Warning. "Catch warning if fork fails"
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:47'!
-testForkHeadlessSqueakAndDoThenQuit
-
-	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDoThenQuit) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-			[p _ thisOSProcess forkHeadlessSqueakAndDoThenQuit:
-					[(Delay forMilliseconds: 100) wait]]
-		raise: Warning. "Catch warning if fork fails"
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/29/2005 14:30'!
-testForkSqueak
-
-	"(UnixProcessTestCase selector: #testForkSqueak) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt: [p _ thisOSProcess forkSqueak]
-		raise: Warning. "Catch warning if fork fails"
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifTrue:
-			["Child Squeak"
-			p inspect.
-			(Delay forMilliseconds: 100) wait.
-			OSProcess snapshot: false andQuit: true]
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:45'!
-testForkSqueakAndDo
-
-	"(UnixProcessTestCase selector: #testForkSqueakAndDo) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-			[p _ thisOSProcess forkSqueakAndDo:
-					[(Delay forMilliseconds: 100) wait.
-					OSProcess snapshot: false andQuit: true]]
-		raise: Warning.
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 6/10/2011 15:46'!
-testForkSqueakAndDoThenQuit
-
-	"(UnixProcessTestCase selector: #testForkSqueakAndDoThenQuit) run"
-
-	| p openFileCount |
-	openFileCount _ self numberOfOpenFiles.
-	self shouldnt:
-			[p _ thisOSProcess forkSqueakAndDoThenQuit:
-					[(Delay forMilliseconds: 100) wait]]
-		raise: Warning.
-	self assert: p notNil.
-	(p == thisOSProcess)
-		ifFalse:
-			["Parent Squeak process"
-			self should: [p isRunning].
-			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
-			self should: [p isComplete].
-			self should: [p exitStatus == 0].
-			self assert: self numberOfOpenFiles == openFileCount]
-! !
-
-!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 12/5/2020 11:33'!
-testIsExternalProcess
-	self deny: ThisOSProcess thisOSProcess isExternalProcess.
-	self deny: OSProcess thisOSProcess isExternalProcess.
-	self assert: ExternalOSProcess new isExternalProcess.
-	self assert: (ExternalOSProcess command: 'pwd') isExternalProcess.! !
-
-!UnixProcessTestCase class methodsFor: 'failures' stamp: 'eem 3/27/2014 11:20'!
-expectedFailures
-	^UnixOSProcessAccessor basicNew safeToForkSqueak
-		ifTrue: [#()]
-		ifFalse: [#(	testClassForkHeadlessSqueakAndDo
-					testClassForkHeadlessSqueakAndDoThenQuit
-					testClassForkSqueak
-					testClassForkSqueakAndDo
-					testClassForkSqueakAndDoThenQuit
-					testForkHeadlessSqueakAndDo
-					testForkHeadlessSqueakAndDoThenQuit
-					testForkSqueak
-					testForkSqueakAndDo
-					testForkSqueakAndDoThenQuit
-					testHeadlessChild
-					testSpawnTenHeadlessChildren)]! !
-
-!OSFileLock methodsFor: 'comparing' stamp: 'dtl 11/28/2010 09:18'!
+		clientTcpSocket sendData: 'this is line ', i asString, Character cr asString.
+		(Delay forMilliseconds: 500) wait].
+
+	clientTcpSocket closeAndDestroy.
+	Transcript show: 'client endpoint closed'; cr.
+	serverTcpSocket closeAndDestroy.
+	Transcript show: 'server endpoint closed'; cr.
+	example close.
+	Transcript show: 'event handler stopped'; cr.
+	^ Array with: example with: serverTcpSocket with: clientTcpSocket! !
+
+!OSFileLock methodsFor: 'comparing' stamp: 'dtl 28/Nov/2010, 1:18:00 pm (UTC)'!
 = aFileLock
 	^ ((self species = aFileLock species)
 		and: [self fileStream == aFileLock fileStream])
 			and: [self exclusive == aFileLock exclusive]! !
 
-!OSFileLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 18:32'!
+!OSFileLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 10:32:00 pm (UTC)'!
 hash
 	^ (self fileStream hash + self exclusive hash) hashMultiply! !
 
-!OSFileLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 16:31'!
+!OSFileLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 8:31:00 pm (UTC)'!
 overlaps: aFileLock
 	"Answer true if the receiver represents an addressable region that overlaps aFileLock"
 	
 	^ aFileLock fileStream fullName = self fileStream fullName! !
 
-!OSFileLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 16:35'!
+!OSFileLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 8:35:00 pm (UTC)'!
 overlapsRegion: aFileRegionLock
 	^ aFileRegionLock fileStream fullName = self fileStream fullName! !
 
-!OSFileLock methodsFor: 'conflict testing' stamp: 'jf 2/22/2004 16:38'!
+!OSFileLock methodsFor: 'conflict testing' stamp: 'jf 22/Feb/2004, 8:38:00 pm (UTC)'!
 conflictsWith: otherFileLock
 	^ (self isExclusive or: [otherFileLock isExclusive])
 		and: [self overlaps: otherFileLock]! !
 
-!OSFileLock methodsFor: 'accessing' stamp: 'jf 2/22/2004 16:00'!
+!OSFileLock methodsFor: 'accessing' stamp: 'jf 22/Feb/2004, 8:00:00 pm (UTC)'!
 exclusive
 	"Answer the value of exclusive. Default is true, indicating a read-write lock
 	as opposed to a shared read lock."
 
 	^ exclusive ifNil: [exclusive _ true].! !
 
-!OSFileLock methodsFor: 'accessing' stamp: 'jf 2/22/2004 16:00'!
+!OSFileLock methodsFor: 'accessing' stamp: 'jf 22/Feb/2004, 8:00:00 pm (UTC)'!
 exclusive: anObject
 	"Set the value of exclusive"
 
 	exclusive _ anObject! !
 
-!OSFileLock methodsFor: 'accessing' stamp: 'jf 2/22/2004 16:00'!
+!OSFileLock methodsFor: 'accessing' stamp: 'jf 22/Feb/2004, 8:00:00 pm (UTC)'!
 fileStream
 	"Answer the value of fileStream"
 
 	^ fileStream! !
 
-!OSFileLock methodsFor: 'accessing' stamp: 'jf 2/22/2004 16:00'!
+!OSFileLock methodsFor: 'accessing' stamp: 'jf 22/Feb/2004, 8:00:00 pm (UTC)'!
 fileStream: anObject
 	"Set the value of fileStream"
 
 	fileStream _ anObject! !
 
-!OSFileLock methodsFor: 'testing' stamp: 'jf 2/22/2004 18:13'!
+!OSFileLock methodsFor: 'testing' stamp: 'jf 22/Feb/2004, 10:13:00 pm (UTC)'!
 isActive
 	^ self fileStream closed not! !
 
-!OSFileLock methodsFor: 'testing' stamp: 'jf 2/22/2004 16:01'!
+!OSFileLock methodsFor: 'testing' stamp: 'jf 22/Feb/2004, 8:01:00 pm (UTC)'!
 isExclusive
 	^ self exclusive! !
 
-!OSFileLock methodsFor: 'private' stamp: 'jf 2/22/2004 18:07'!
+!OSFileLock methodsFor: 'private' stamp: 'jf 22/Feb/2004, 10:07:00 pm (UTC)'!
 length
 	^ 0! !
 
-!OSFileLock methodsFor: 'private' stamp: 'jf 2/22/2004 18:02'!
+!OSFileLock methodsFor: 'private' stamp: 'jf 22/Feb/2004, 10:02:00 pm (UTC)'!
 offset
 	^ 0! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 5/8/2006 06:52'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/May/2006, 10:52:00 am (UTC)'!
 lock
 	"Answer true on success"
 
 	^ self lockIfFail: [false]
 ! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/19/2022 22:46'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 20/Aug/2022, 2:46:00 am (UTC)'!
 lockIfFail: failBlock
 
 	| result |
@@ -10087,7 +6357,7 @@ lockIfFail: failBlock
 		ifFalse: [^ failBlock value]
 ! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/19/2022 19:26'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 19/Aug/2022, 11:26:00 pm (UTC)'!
 test
 	"Answer true if this is a lockable file or region"
 
@@ -10101,14 +6371,14 @@ test
 		ifTrue: [false]
 		ifFalse: [result first]! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 5/8/2006 06:58'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/May/2006, 10:58:00 am (UTC)'!
 unlock
 	"Answer true on success"
 
 	^ self unlockIfFail: [false]
 ! !
 
-!OSFileLock methodsFor: 'system locking' stamp: 'dtl 8/19/2022 19:27'!
+!OSFileLock methodsFor: 'system locking' stamp: 'dtl 19/Aug/2022, 11:27:00 pm (UTC)'!
 unlockIfFail: failBlock
 
 	| result |
@@ -10121,123 +6391,123 @@ unlockIfFail: failBlock
 		ifFalse: [^ failBlock value]
 ! !
 
-!OSFileLock methodsFor: 'initialize-release' stamp: 'jf 2/22/2004 16:02'!
+!OSFileLock methodsFor: 'initialize-release' stamp: 'jf 22/Feb/2004, 8:02:00 pm (UTC)'!
 onFile: aFileStream exclusive: writeLockFlag
 
 	self fileStream: aFileStream.
 	self exclusive: writeLockFlag
 ! !
 
-!OSFileLock class methodsFor: 'instance creation' stamp: 'jf 2/22/2004 17:35'!
+!OSFileLock class methodsFor: 'instance creation' stamp: 'jf 22/Feb/2004, 9:35:00 pm (UTC)'!
 onFile: aFileStream exclusive: writeLockFlag
 	"A region representing the whole file"
 
 	^ super new onFile: aFileStream exclusive: writeLockFlag
 ! !
 
-!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 18:33'!
+!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 10:33:00 pm (UTC)'!
 = aFileRegion
 
 	^ (super = aFileRegion) and: [self interval = aFileRegion interval]
 ! !
 
-!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 18:33'!
+!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 10:33:00 pm (UTC)'!
 hash
 
 	^ (super hash + self interval hash) hashMultiply
 ! !
 
-!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 19:47'!
+!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 11:47:00 pm (UTC)'!
 overlaps: aFileLock
 	"Call #overlapsRegion: on aFileLock since we know we're a region but we don't know whether aFileLock is"
 	
 	^ aFileLock overlapsRegion: self! !
 
-!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 2/22/2004 18:56'!
+!OSFileRegionLock methodsFor: 'comparing' stamp: 'jf 22/Feb/2004, 10:56:00 pm (UTC)'!
 overlapsRegion: aFileRegionLock
 	^ (super overlapsRegion: aFileRegionLock) and: [(self interval intersection: aFileRegionLock interval) isEmpty not]! !
 
-!OSFileRegionLock methodsFor: 'accessing' stamp: 'dtl 3/10/2005 20:23'!
+!OSFileRegionLock methodsFor: 'accessing' stamp: 'dtl 11/Mar/2005, 12:23:00 am (UTC)'!
 interval
 	"Answer the value of interval"
 
 	^ interval! !
 
-!OSFileRegionLock methodsFor: 'accessing' stamp: 'dtl 3/10/2005 20:23'!
+!OSFileRegionLock methodsFor: 'accessing' stamp: 'dtl 11/Mar/2005, 12:23:00 am (UTC)'!
 interval: anObject
 	"Set the value of interval"
 
 	interval _ anObject! !
 
-!OSFileRegionLock methodsFor: 'private' stamp: 'jf 2/22/2004 18:02'!
+!OSFileRegionLock methodsFor: 'private' stamp: 'jf 22/Feb/2004, 10:02:00 pm (UTC)'!
 length
 	^ self interval size! !
 
-!OSFileRegionLock methodsFor: 'private' stamp: 'jf 2/22/2004 18:02'!
+!OSFileRegionLock methodsFor: 'private' stamp: 'jf 22/Feb/2004, 10:02:00 pm (UTC)'!
 offset
 	^ self interval first! !
 
-!OSFileRegionLock methodsFor: 'initialize-release' stamp: 'jf 2/22/2004 16:03'!
+!OSFileRegionLock methodsFor: 'initialize-release' stamp: 'jf 22/Feb/2004, 8:03:00 pm (UTC)'!
 onFile: aFileStream interval: anInterval exclusive: writeLockFlag
 
 	self onFile: aFileStream exclusive: writeLockFlag.
 	self interval: anInterval.! !
 
-!OSFileRegionLock class methodsFor: 'instance creation' stamp: 'dtl 2/22/2004 13:58'!
+!OSFileRegionLock class methodsFor: 'instance creation' stamp: 'dtl 22/Feb/2004, 5:58:00 pm (UTC)'!
 onFile: aFileStream from: start to: end exclusive: writeLockFlag
 	"A region representing part of a file"
 
 	^ self onFile: aFileStream interval: (start to: end) exclusive: writeLockFlag
 ! !
 
-!OSFileRegionLock class methodsFor: 'instance creation' stamp: 'dtl 2/22/2004 13:59'!
+!OSFileRegionLock class methodsFor: 'instance creation' stamp: 'dtl 22/Feb/2004, 5:59:00 pm (UTC)'!
 onFile: aFileStream interval: anInterval exclusive: writeLockFlag
 	"A region representing part of a file"
 
 	^ super new onFile: aFileStream interval: anInterval exclusive: writeLockFlag
 ! !
 
-!OSProcess methodsFor: 'printing' stamp: 'dtl 10/17/1999 21:12'!
+!OSProcess methodsFor: 'printing' stamp: 'dtl 18/Oct/1999, 1:12:00 am (UTC)'!
 printOn: aStream
 
 	super printOn: aStream. aStream nextPutAll: ' with pid '. self pid printOn: aStream! !
 
-!OSProcess methodsFor: 'initialize - release' stamp: 'dtl 5/31/1999 13:54'!
+!OSProcess methodsFor: 'initialize - release' stamp: 'dtl 31/May/1999, 5:54:00 pm (UTC)'!
 initialize
 
 	self subclassResponsibility! !
 
-!OSProcess methodsFor: 'testing' stamp: 'dtl 7/14/2001 21:12'!
+!OSProcess methodsFor: 'testing' stamp: 'dtl 15/Jul/2001, 1:12:00 am (UTC)'!
 isExternalProcess
 
 	^ true! !
 
-!OSProcess methodsFor: 'private' stamp: 'dtl 8/30/2003 10:11'!
+!OSProcess methodsFor: 'private' stamp: 'dtl 30/Aug/2003, 2:11:00 pm (UTC)'!
 noAccessorAvailable
 
 	^ self class noAccessorAvailable
 ! !
 
-!OSProcess methodsFor: 'accessing' stamp: 'dtl 3/18/2000 13:57'!
+!OSProcess methodsFor: 'accessing' stamp: 'dtl 18/Mar/2000, 5:57:00 pm (UTC)'!
 pid
 
 	^ pid
 ! !
 
-!OSProcess methodsFor: 'accessing' stamp: 'dtl 3/18/2000 13:58'!
+!OSProcess methodsFor: 'accessing' stamp: 'dtl 18/Mar/2000, 5:58:00 pm (UTC)'!
 pid: processIdentifier
 
 	pid _ processIdentifier
 ! !
 
-!OSProcess class methodsFor: 'external process access' stamp: 'dtl 6/27/2020 16:00'!
+!OSProcess class methodsFor: 'external process access' stamp: 'dtl 27/Jun/2020, 8:00:00 pm (UTC)'!
 accessor
 	"Answer an OSProcessAccessor for this OS process."
 
 	^ self thisOSProcess ifNotNil: [ :osp | osp processAccessor ]
 ! !
 
-!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 1/15/2018 22:08:41'!
+!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 16/Jan/2018, 2:08:41 am (UTC)'!
 allTestResults
 	"Run all available sUnit tests and save the results in a file named
 	'OSProcessTestResults-<platform>.txt'. Display results on the Transcript as
@@ -10298,7 +6568,7 @@ allTestResults
 	Transcript show: 'tests results have been saved in a file named ''' , resultsFileName , ''''; cr.
 	^ results! !
 
-!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 1/20/2018 19:25:27'!
+!OSProcess class methodsFor: 'sUnit' stamp: 'dtl 20/Jan/2018, 11:25:27 pm (UTC)'!
 authorInitials
 	"Get the author initials from the system."
 
@@ -10309,7 +6579,7 @@ authorInitials
 		ifTrue: [ ^ (Smalltalk at: #Author) fullName select: [ :c | c isUppercase ] ].
 	^ (Smalltalk at: #Utilities) authorInitials! !
 
-!OSProcess class methodsFor: 'external system access' stamp: 'dtl 1/7/2001 12:32'!
+!OSProcess class methodsFor: 'external system access' stamp: 'dtl 7/Jan/2001, 4:32:00 pm (UTC)'!
 arguments
 
 	"OSProcess arguments"
@@ -10317,7 +6587,7 @@ arguments
 	^ self thisOSProcess arguments
 ! !
 
-!OSProcess class methodsFor: 'external system access' stamp: 'dtl 1/7/2001 12:32'!
+!OSProcess class methodsFor: 'external system access' stamp: 'dtl 7/Jan/2001, 4:32:00 pm (UTC)'!
 programName
 
 	"OSProcess programName"
@@ -10325,18 +6595,18 @@ programName
 	^ self thisOSProcess programName
 ! !
 
-!OSProcess class methodsFor: 'private' stamp: 'dtl 1/7/2001 13:13'!
+!OSProcess class methodsFor: 'private' stamp: 'dtl 7/Jan/2001, 5:13:00 pm (UTC)'!
 classForThisOSProcess
 	"Answer the class which represents the OS process in which Squeak runs."
 
 	^ ThisOSProcess concreteClass! !
 
-!OSProcess class methodsFor: 'private' stamp: 'dtl 6/29/2005 14:18'!
+!OSProcess class methodsFor: 'private' stamp: 'dtl 29/Jun/2005, 6:18:00 pm (UTC)'!
 noAccessorAvailable
 
 	self notify: 'process accessor module not available'! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 1/7/2001 12:09'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 7/Jan/2001, 4:09:00 pm (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library,
 	except that aCommandString runs asynchronously in a child process."
@@ -10346,7 +6616,7 @@ command: aCommandString
 	^ self thisOSProcess command: aCommandString
 ! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 5/3/2020 12:51'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 3/May/2020, 4:51:00 pm (UTC)'!
 editOutputOf: aCommandString
 	"Evaluate aCommandString and display the output in an editor"
 
@@ -10355,7 +6625,7 @@ editOutputOf: aCommandString
  
 	^ self outputOf: aCommandString, ' | edit'! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 2/8/2020 15:35'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 8/Feb/2020, 7:35:00 pm (UTC)'!
 evaluate: aCommandString
 	"Evaluate a command pipeline created from aCommandString. Answer a
 	ProxyPipeline that evaluated the command string. Use #upToEndOfFile
@@ -10374,7 +6644,7 @@ evaluate: aCommandString
 	self notify: 'CommandShell not found'
 ! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 7/6/2022 10:56'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 6/Jul/2022, 2:56:00 pm (UTC)'!
 outputOf: aCommandString
 	"Evaluate a command pipeline created from aCommandString. Answer a
 	the output of the evaluation. If the command string resulted in error outputs,
@@ -10393,7 +6663,7 @@ outputOf: aCommandString
 	^ out
 ! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 1/7/2001 13:06'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 7/Jan/2001, 5:06:00 pm (UTC)'!
 squeak
 	"Start a new instance of Squeak running in a child OS process. The new instance
 	will restart from the image file, so it is a clone of this image as it existed at the
@@ -10406,7 +6676,7 @@ squeak
 
 ! !
 
-!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 1/7/2001 12:11'!
+!OSProcess class methodsFor: 'external command processing' stamp: 'dtl 7/Jan/2001, 4:11:00 pm (UTC)'!
 waitForCommand: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library.
 	The active Smalltalk process waits for completion of the external command process."
@@ -10416,7 +6686,7 @@ waitForCommand: aCommandString
 	^ self thisOSProcess waitForCommand: aCommandString
 ! !
 
-!OSProcess class methodsFor: 'debugging' stamp: 'dtl 4/2/2005 12:32'!
+!OSProcess class methodsFor: 'debugging' stamp: 'dtl 2/Apr/2005, 4:32:00 pm (UTC)'!
 debugMessage: aString
 	"Print aString on standard output. The debug message is prefixed with the
 	identity of the process in which the method is being evaluated, and the
@@ -10433,7 +6703,7 @@ debugMessage: aString
 			on: Error
 			do: []! !
 
-!OSProcess class methodsFor: 'debugging' stamp: 'dtl 4/2/2005 12:32'!
+!OSProcess class methodsFor: 'debugging' stamp: 'dtl 2/Apr/2005, 4:32:00 pm (UTC)'!
 trace
 	"Print the sender's context on standard output. The debug message is
 	prefixed with the identity of the process in which the method is being
@@ -10452,7 +6722,7 @@ trace
 			on: Error
 			do: []! !
 
-!OSProcess class methodsFor: 'debugging' stamp: 'dtl 4/2/2005 12:30'!
+!OSProcess class methodsFor: 'debugging' stamp: 'dtl 2/Apr/2005, 4:30:00 pm (UTC)'!
 trace: debugMessageString
 	"Print trace information followed by a debug message"
 
@@ -10469,14 +6739,14 @@ trace: debugMessageString
 			on: Error
 			do: []! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 3/5/2005 11:32'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 5/Mar/2005, 3:32:00 pm (UTC)'!
 getSystemAttribute: attributeID 
 	"After Squeak version 3.6, #getSystemAttribute was moved to SmalltalkImage "
 
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk getSystemAttribute: attributeID]) current getSystemAttribute: attributeID! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/20/2018 19:26:21'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 20/Jan/2018, 11:26:21 pm (UTC)'!
 isPharo3AndLater
 	"True if this image is a pharo of major version 3 or greater"
 
@@ -10487,7 +6757,7 @@ isPharo3AndLater
 	^false
 ! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/20/2018 19:27:17'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 20/Jan/2018, 11:27:17 pm (UTC)'!
 isPharo5Update50558AndLater
 	"True if this image is a pharo of major version 5 at upldate 50558 or greater"
 	
@@ -10501,14 +6771,14 @@ isPharo5Update50558AndLater
 	^false
 ! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 10/27/2007 10:55'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 27/Oct/2007, 2:55:00 pm (UTC)'!
 listLoadedModules
 	"After Squeak version 3.6, #listLoadedModules was moved to SmalltalkImage "
 
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk listLoadedModules]) current listLoadedModules! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 9/5/2013 11:13'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 5/Sep/2013, 3:13:00 pm (UTC)'!
 osVersion
 	"After Squeak version 3.6, #osVersion was moved to SmalltalkImage. Some
 	versions of Pharo move this to OSPlatform and issue deprecation warnings
@@ -10525,7 +6795,7 @@ osVersion
 		ifFalse: [((Smalltalk classNamed: 'SmalltalkImage')
 				ifNil: [^ Smalltalk osVersion]) current]) osVersion! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/2/2014 20:54'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 3/Jan/2014, 12:54:00 am (UTC)'!
 platformName 
 	"After Squeak version 3.6, #platformName was moved to SmalltalkImage Some
 	versions of Pharo move this to OSPlatform and issue deprecation warnings
@@ -10546,7 +6816,7 @@ platformName
 		ifFalse: [((Smalltalk classNamed: 'SmalltalkImage')
 				ifNil: [^ Smalltalk osVersion]) current]) platformName! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 9/4/2013 08:00'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 4/Sep/2013, 12:00:00 pm (UTC)'!
 platformSubtype 
 	"After Squeak version 3.6, #platformSubtype was moved to SmalltalkImage "
 
@@ -10557,7 +6827,7 @@ platformSubtype
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk platformSubtype]) current platformSubtype! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/20/2018 20:08:52'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 21/Jan/2018, 12:08:52 am (UTC)'!
 snapshot: save andQuit: quit
 	"After Squeak version 3.6, #snapshot:andQuit: was moved to SmalltalkImage. Cuis has a
 	different but distinct method signature so check for that first."
@@ -10575,21 +6845,21 @@ snapshot: save andQuit: quit
 				withArguments: { save . quit . false } ])
 			current snapshot: save andQuit: quit! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/15/2018 08:33:37'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 15/Jan/2018, 12:33:37 pm (UTC)'!
 useFileMan
 	"If true use FileMan for directory and file access. See senders for methods with file
 	system dependencies."
 
 	^ Smalltalk hasClassNamed: #FileIOAccessor! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 1/27/2013 21:48'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'dtl 28/Jan/2013, 1:48:00 am (UTC)'!
 useFileSystem
 	"If true use FileSystem, otherwise use traditional FileDirectory. See senders
 	for methods with file system dependencies."
 
 	^ Smalltalk hasClassNamed: #FileReference! !
 
-!OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 9/5/2013 11:12'!
+!OSProcess class methodsFor: 'version dependent' stamp: 'ThierryGoubier 5/Sep/2013, 3:12:00 pm (UTC)'!
 vmVersion 
 	"After Squeak version 3.6, #vmVersion was moved to SmalltalkImage. Pharo3 deprecated vmVersion."
 
@@ -10598,7 +6868,7 @@ vmVersion
 	^ ((Smalltalk classNamed: 'SmalltalkImage')
 		ifNil: [^ Smalltalk vmVersion]) current vmVersion! !
 
-!OSProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 21:52'!
+!OSProcess class methodsFor: 'examples' stamp: 'dtl 13/Jul/2000, 1:52:00 am (UTC)'!
 helloStdErr
 	"Write a message on the standard error stream of the OS process, normally
 	the terminal or window from which Squeak is being run. Most operating
@@ -10612,7 +6882,7 @@ helloStdErr
 	this stdErr ifNil: [self noAccessorAvailable. ^ nil].
 	^ this stdErr nextPutAll: 'Hello stderr'; nextPut: (Character lf); yourself! !
 
-!OSProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 21:53'!
+!OSProcess class methodsFor: 'examples' stamp: 'dtl 13/Jul/2000, 1:53:00 am (UTC)'!
 helloWorld
 	"Write a message on the standard output stream of the OS process, normally
 	the terminal or window from which Squeak is being run. Most operating
@@ -10626,7 +6896,7 @@ helloWorld
 	this stdOut ifNil: [self noAccessorAvailable. ^ nil].
 	^ this stdOut nextPutAll: 'Hello world'; nextPut: Character lf; yourself! !
 
-!OSProcess class methodsFor: 'examples' stamp: 'dtl 8/20/2022 00:39'!
+!OSProcess class methodsFor: 'examples' stamp: 'dtl 20/Aug/2022, 4:39:00 am (UTC)'!
 readFromStdIn
 	"Type some text on the standard input terminal, followed by <return> or <enter>,
 	then call this method. Any available input text in the stdin stream will be read.
@@ -10649,7 +6919,7 @@ readFromStdIn
 	^ resultString
 ! !
 
-!OSProcess class methodsFor: 'initialize-release' stamp: 'dtl 10/19/2001 18:44'!
+!OSProcess class methodsFor: 'initialize-release' stamp: 'dtl 19/Oct/2001, 10:44:00 pm (UTC)'!
 initialize
 
 	"OSProcess initialize"
@@ -10657,7 +6927,7 @@ initialize
 	UseIOHandle _ (Smalltalk hasClassNamed: #IOHandle)
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 1/19/2021 21:39'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 20/Jan/2021, 1:39:00 am (UTC)'!
 isNonUnixMac
 	"True if the platform is Mac OS prior to OSX"
 
@@ -10668,7 +6938,7 @@ isNonUnixMac
 	^ (self platformName = 'Mac OS') and: [numericOsVersion < 1000]
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:42'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 5/Mar/2005, 3:42:00 pm (UTC)'!
 isOS2
 	"True if the platform is OS2"
 	"FIXME please - What is the correct platform name for OS2?"
@@ -10678,14 +6948,14 @@ isOS2
 	^ self platformName = 'OS2'
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 8/24/2003 09:52'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 24/Aug/2003, 1:52:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class has responsibilities for the platform on which the
 	Squeak VM is currently running."
 
 	^ self subclassResponsibility! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:43'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 5/Mar/2005, 3:43:00 pm (UTC)'!
 isRiscOS
 	"True if the platform is RiscOS"
 
@@ -10693,7 +6963,7 @@ isRiscOS
 
 	^ self platformName = 'RiscOS'! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 1/19/2021 21:42'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 20/Jan/2021, 1:42:00 am (UTC)'!
 isUnix
 	"True if the platform is Unix (including Linux, Mac OS X, or other unix-like OS).
 	Note: Keep this method in sync with UnixOSProcessPlugin>>isResponsibleForThisPlatform."
@@ -10707,7 +6977,7 @@ isUnix
 		(self platformName = 'Mac OS') and: [numericOsVersion >= 1000]]
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 1/19/2021 21:43'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 20/Jan/2021, 1:43:00 am (UTC)'!
 isUnixMac
 	"True if the platform is Mac OS on OSX"
 
@@ -10720,7 +6990,7 @@ isUnixMac
 			(self platformName = 'Mac OS') and: [numericOsVersion >= 1000] "John's VM"]
 ! !
 
-!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 3/5/2005 11:46'!
+!OSProcess class methodsFor: 'platform identification' stamp: 'dtl 5/Mar/2005, 3:46:00 pm (UTC)'!
 isWindows
 	"True if the platform is an MS Windows OS"
 
@@ -10728,7 +6998,7 @@ isWindows
 
 	^ self platformName = 'Win32'! !
 
-!OSProcess class methodsFor: 'utility' stamp: 'dtl 1/24/2013 19:59'!
+!OSProcess class methodsFor: 'utility' stamp: 'dtl 24/Jan/2013, 11:59:00 pm (UTC)'!
 makeVM
 	"Rebuild the virtual machine and plugins, assuming that this Squeak
 	is running from a home directory in the appropriate place in the
@@ -10740,7 +7010,7 @@ makeVM
 	^ self makeVmIn: OSProcess defaultPathString, OSProcess pathSeparator, 'build'
 ! !
 
-!OSProcess class methodsFor: 'utility' stamp: 'dtl 1/25/2013 18:58'!
+!OSProcess class methodsFor: 'utility' stamp: 'dtl 25/Jan/2013, 10:58:00 pm (UTC)'!
 makeVmIn: buildDirectoryPathName
 	"Rebuild the virtual machine and plugins in the buildDirectoryPathName
 	directory. If the build is successful, save the image and restart using the
@@ -10753,7 +7023,7 @@ makeVmIn: buildDirectoryPathName
 
 ! !
 
-!OSProcess class methodsFor: 'utility' stamp: 'dtl 1/7/2001 12:35'!
+!OSProcess class methodsFor: 'utility' stamp: 'dtl 7/Jan/2001, 4:35:00 pm (UTC)'!
 quitAndRestart
 	"Save image, start a new instance from the saved image, and quit this instance.
 	This is useful if the VM has been recompiled or if a new pluggable primitive
@@ -10772,7 +7042,7 @@ quitAndRestart
 	this pid = firstPid ifTrue: [self squeak ifNotNil: [Smalltalk quitPrimitive]].
 	^ this! !
 
-!OSProcess class methodsFor: 'utility' stamp: 'dtl 3/5/2005 11:34'!
+!OSProcess class methodsFor: 'utility' stamp: 'dtl 5/Mar/2005, 3:34:00 pm (UTC)'!
 systemAttributes
 	"Answer a Dictionary of all of the system attributes which can be obtained from
 	SystemDictionary>>getSystemAttribute."
@@ -10808,7 +7078,7 @@ systemAttributes
 
 ! !
 
-!OSProcess class methodsFor: 'instance creation' stamp: 'dtl 1/7/2001 12:03'!
+!OSProcess class methodsFor: 'instance creation' stamp: 'dtl 7/Jan/2001, 4:03:00 pm (UTC)'!
 thisOSProcess
 	"Answer the single instance of the class corresponding to the OS process in which
 	this Smalltalk image is executing."
@@ -10818,7 +7088,7 @@ thisOSProcess
 	^ ThisOSProcess thisOSProcess
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 8/7/2003 07:28'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 7/Aug/2003, 11:28:00 am (UTC)'!
 versionInformation
 
 	"OSProcess versionInformation"
@@ -10843,14 +7113,14 @@ versionInformation
 		with:  osppVersion
 ! !
 
-!OSProcess class methodsFor: 'version testing' stamp: 'dtl 12/31/2023 12:03'!
+!OSProcess class methodsFor: 'version testing' stamp: 'dtl 19/Apr/2026, 10:11:00 pm (UTC)'!
 versionString
 
 	"OSProcess versionString"
 
-	^ '4.7.6'! !
+	^ '4.7.9'! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 20:51:19'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 16/Jan/2018, 12:51:19 am (UTC)'!
 defaultPathString
 
 	^ self useFileMan
@@ -10860,7 +7130,7 @@ defaultPathString
 			ifFalse: [(Smalltalk at: #FileDirectory) default pathName]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 deleteFileNamed: fileName
 	"Delete the file with the given name."
 	
@@ -10879,7 +7149,7 @@ deleteFileNamed: fileName
 			ifFalse:
 				[ (Smalltalk at: #FileDirectory) default deleteFileNamed: fileName ] ]! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 directoryExists: path
 	"Answer true if a directory of the given name exists. The given name may
 	be either a full path name or a local directory within this directory."
@@ -10891,7 +7161,7 @@ directoryExists: path
 			ifFalse: [ (Smalltalk at: #FileDirectory) default directoryExists: path ]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 fileExists: path
 	"Answer true if a file of the given name exists. The given name may be
 	either a full path name or a local file within this directory."
@@ -10903,7 +7173,7 @@ fileExists: path
 			ifFalse: [ (Smalltalk at: #FileDirectory) default fileExists: path ]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 fileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
@@ -10912,14 +7182,14 @@ fileNamed: path
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 newFileNamed: path
 	^ self useFileMan
 		ifTrue: [ ((Smalltalk at: #FileEntry) perform: #withPathName: with: path) writeStream ]
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 oldFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
@@ -10928,7 +7198,7 @@ oldFileNamed: path
 		ifFalse: [ FileStream fileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 1/15/2018 09:04:06'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 15/Jan/2018, 1:04:06 pm (UTC)'!
 pathSeparator
 
 	^ self useFileMan
@@ -10938,7 +7208,7 @@ pathSeparator
 			ifFalse: [(Smalltalk at: #FileDirectory) slash]]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 2/8/2019 23:02'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 9/Feb/2019, 3:02:00 am (UTC)'!
 readOnlyFileNamed: path
 	^ self useFileMan
 		ifTrue: [ | entry |
@@ -10947,7 +7217,7 @@ readOnlyFileNamed: path
 		ifFalse: [ FileStream readOnlyFileNamed: path ]
 ! !
 
-!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 3/21/2020 11:37'!
+!OSProcess class methodsFor: 'compatibility' stamp: 'dtl 21/Mar/2020, 3:37:00 pm (UTC)'!
 saveChangesInFileNamed: aString
 
 	self useFileMan
@@ -10962,7 +7232,7 @@ saveChangesInFileNamed: aString
 				ifTrue: [Smalltalk saveChangesInFileNamed: aString].
 			(Smalltalk classNamed: #SmalltalkImage) current perform: #saveChangesInFileNamed: with: aString]! !
 
-!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:11'!
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 18/Oct/2020, 4:11:00 pm (UTC)'!
 confnameTokens: tokenPrefix
 	"Find the cpp macro definitions corresponding to tokenPrefix in system header files.
 	Assumptions: Running on a gnu-linux platform with system configuration parameters
@@ -10974,7 +7244,7 @@ confnameTokens: tokenPrefix
 	^names collect: [:e |  (e findTokens: String tab, String space) second.].
 ! !
 
-!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:12'!
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 18/Oct/2020, 4:12:00 pm (UTC)'!
 confstr
 	"Answer a dictionary of available confstr(3) values for this platform.
 
@@ -10988,7 +7258,7 @@ confstr
 	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor confstr: i - 1 ) ].
 	^Dictionary withAll: entries.! !
 
-!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:13'!
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 18/Oct/2020, 4:13:00 pm (UTC)'!
 fpathconf: fileStream
 	"For the given file stream, answer a dictionary of available fpathconf(3) values for this platform.
 
@@ -11003,7 +7273,7 @@ fpathconf: fileStream
 	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor fpathconf: aFileStream index: i - 1 ) ].
 	^Dictionary withAll: entries.! !
 
-!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:35'!
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 18/Oct/2020, 4:35:00 pm (UTC)'!
 gnuLinuxConf
 	"Answer system configuration values for the current platform, assuming
 	a gnu-linux or similar platform.. For file parameters use the Squeak sources
@@ -11017,7 +7287,7 @@ gnuLinuxConf
 		#fpathconf -> (self fpathconf: SourceFiles first)
 	}.! !
 
-!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:14'!
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 18/Oct/2020, 4:14:00 pm (UTC)'!
 pathconf: path
 	"For a file at path, answer a dictionary of available pathconf(3) values for this platform.
 
@@ -11032,7 +7302,7 @@ pathconf: path
 	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor pathconf: aPath index: i - 1 ) ].
 	^Dictionary withAll: entries.! !
 
-!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 10/18/2020 12:14'!
+!OSProcess class methodsFor: 'utility - sysconf' stamp: 'dtl 18/Oct/2020, 4:14:00 pm (UTC)'!
 sysconf
 	"Answer a dictionary of available sysconf(3) values for this platform.
 
@@ -11046,14 +7316,14 @@ sysconf
 	entries _ tokens withIndexCollect: [ :e :i | e asSymbol -> ( OSProcess accessor sysconf: i - 1 ) ].
 	^Dictionary withAll: entries.! !
 
-!ExternalOSProcess methodsFor: 'printing' stamp: 'dtl 3/18/2000 14:07'!
+!ExternalOSProcess methodsFor: 'printing' stamp: 'dtl 18/Mar/2000, 6:07:00 pm (UTC)'!
 printOn: aStream
 
 	super printOn: aStream.
 	self isComplete ifTrue: [ aStream nextPutAll: ' (', self runState, ' with status ', self exitStatus printString, ')' ]
 		ifFalse: [ aStream nextPutAll: ' (', self runState asString, ')' ]! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 11/8/2000 21:41'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 9/Nov/2000, 1:41:00 am (UTC)'!
 accessor
 	"Answer an OSProcessAccessor which may be used to obtain information about
 	the external OS process which I represent."
@@ -11061,7 +7331,7 @@ accessor
 	^ OSProcess thisOSProcess processAccessor
 ! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:38'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/Mar/2002, 10:38:00 am (UTC)'!
 initialStdErr
 	"The stderr stream at the time the child process is invoked. If the same as
 	stderr for the current Squeak process, it may change as a result of Squeak
@@ -11071,12 +7341,12 @@ initialStdErr
 
 	^ initialStdErr! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:38'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/Mar/2002, 10:38:00 am (UTC)'!
 initialStdErr: anExternalStream
 
 	initialStdErr _ anExternalStream! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:39'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/Mar/2002, 10:39:00 am (UTC)'!
 initialStdIn
 	"The stdin stream at the time the child process is invoked. If the same as
 	stdin for the current Squeak process, it may change as a result of Squeak
@@ -11086,12 +7356,12 @@ initialStdIn
 
 	^ initialStdIn! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:39'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/Mar/2002, 10:39:00 am (UTC)'!
 initialStdIn: anExternalStream
 
 	initialStdIn _ anExternalStream! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:39'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/Mar/2002, 10:39:00 am (UTC)'!
 initialStdOut
 	"The stdout stream at the time the child process is invoked. If the same as
 	stdout for the current Squeak process, it may change as a result of Squeak
@@ -11101,74 +7371,74 @@ initialStdOut
 
 	^ initialStdOut! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/1/2002 06:40'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/Mar/2002, 10:40:00 am (UTC)'!
 initialStdOut: anExternalStream
 
 	initialStdOut _ anExternalStream! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 1/25/2004 11:01'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Jan/2004, 3:01:00 pm (UTC)'!
 runState
 
 	^ runState ifNil: [self unknownRunState]
 ! !
 
-!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 3/18/2000 12:30'!
+!ExternalOSProcess methodsFor: 'accessing' stamp: 'dtl 18/Mar/2000, 4:30:00 pm (UTC)'!
 runState: aSymbol
 
 	runState _ aSymbol.
 	self changed: #runState
 ! !
 
-!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 3/1/2002 06:41'!
+!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 1/Mar/2002, 10:41:00 am (UTC)'!
 closeInitialStdErr
 
 	initialStdErr ifNotNil: [initialStdErr close]
 ! !
 
-!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 3/1/2002 06:42'!
+!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 1/Mar/2002, 10:42:00 am (UTC)'!
 closeInitialStdIn
 
 	initialStdIn ifNotNil: [initialStdIn close]
 ! !
 
-!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 3/1/2002 06:42'!
+!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 1/Mar/2002, 10:42:00 am (UTC)'!
 closeInitialStdOut
 
 	initialStdOut ifNotNil: [initialStdOut close]
 ! !
 
-!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 11/21/2006 14:04'!
+!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 21/Nov/2006, 6:04:00 pm (UTC)'!
 closeStreams
 
 	self closeInitialStdIn; closeInitialStdOut; closeInitialStdErr! !
 
-!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 10/6/2000 21:01'!
+!ExternalOSProcess methodsFor: 'initialize - release' stamp: 'dtl 7/Oct/2000, 1:01:00 am (UTC)'!
 initialize
 
 	self notYetRunning! !
 
-!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 3/4/2001 18:55'!
+!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 4/Mar/2001, 10:55:00 pm (UTC)'!
 complete
 	"Process has exited and has been reaped. It no longer exists in the external operating system."
 
 	self runState: #complete
 ! !
 
-!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 3/26/2000 15:23'!
+!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 26/Mar/2000, 7:23:00 pm (UTC)'!
 notYetRunning
 	"Process has not yet entered running state."
 
 	self runState: #notYetRunning
 ! !
 
-!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 3/26/2000 15:23'!
+!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 26/Mar/2000, 7:23:00 pm (UTC)'!
 running
 	"Process is actively running."
 
 	self runState: #running
 ! !
 
-!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 10/6/2000 20:59'!
+!ExternalOSProcess methodsFor: 'setting run state' stamp: 'dtl 7/Oct/2000, 12:59:00 am (UTC)'!
 unknownRunState
 	"Unable to determine the current run state of the process, possibly because
 	this is a stale reference to a process which no longer exists."
@@ -11176,34 +7446,34 @@ unknownRunState
 	self runState: #unknownRunState
 ! !
 
-!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 10/7/2000 14:45'!
+!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 7/Oct/2000, 6:45:00 pm (UTC)'!
 isAccessible
 
 	^ self accessor canAccessChildProcess: self! !
 
-!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 1/20/2001 11:40'!
+!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 20/Jan/2001, 3:40:00 pm (UTC)'!
 isComplete
 
 	^ self runState == #complete! !
 
-!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 1/20/2001 11:40'!
+!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 20/Jan/2001, 3:40:00 pm (UTC)'!
 isNotYetRunning
 
 	^ self runState == #notYetRunning! !
 
-!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 1/20/2001 11:40'!
+!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 20/Jan/2001, 3:40:00 pm (UTC)'!
 isRunning
 
 	^ self runState == #running! !
 
-!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 12/22/2001 18:32'!
+!ExternalOSProcess methodsFor: 'testing' stamp: 'dtl 22/Dec/2001, 10:32:00 pm (UTC)'!
 succeeded
 	"Answer true if my process completed successfully. Be optimistic here, and let
 	my subclasses implement the details."
 
 	^ self isComplete! !
 
-!ExternalOSProcess methodsFor: 'updating' stamp: 'dtl 2/27/2002 09:45'!
+!ExternalOSProcess methodsFor: 'updating' stamp: 'dtl 27/Feb/2002, 1:45:00 pm (UTC)'!
 update: aParameter
 	"Notify any dependents if my run state changes. My subclasses will do additional
 	updating when the run state changes."
@@ -11211,7 +7481,7 @@ update: aParameter
 	aParameter == #runState ifTrue: [self changed: #runState]
 ! !
 
-!ExternalOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 3/5/2005 12:02'!
+!ExternalOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 5/Mar/2005, 4:02:00 pm (UTC)'!
 concreteClass
 
 	"ExternalOSProcess concreteClass"
@@ -11225,7 +7495,7 @@ concreteClass
 
 ! !
 
-!ExternalOSProcess class methodsFor: 'instance creation' stamp: 'dtl 1/16/2001 05:36'!
+!ExternalOSProcess class methodsFor: 'instance creation' stamp: 'dtl 16/Jan/2001, 9:36:00 am (UTC)'!
 exec: programName
 	"Run a program in an external OS process, and answer an instance of myself
 	which represents the external process."
@@ -11235,12 +7505,12 @@ exec: programName
 	^ self concreteClass exec: programName
 ! !
 
-!ExternalOSProcess class methodsFor: 'shell' stamp: 'SeanDeNigris 12/27/2013 12:30'!
+!ExternalOSProcess class methodsFor: 'shell' stamp: 'SeanDeNigris 27/Dec/2013, 4:30:00 pm (UTC)'!
 shellFlags
 
 	^ '-c'.! !
 
-!ExternalMacOSProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:45'!
+!ExternalMacOSProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:45:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if, for the current platform, this class is responsible for representing
 	an OS process other than that in which the Squeak VM is currently running."
@@ -11248,7 +7518,7 @@ isResponsibleForThisPlatform
 	^ self isNonUnixMac
 ! !
 
-!ExternalOS2Process class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:47'!
+!ExternalOS2Process class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:47:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if, for the current platform, this class is responsible for representing
 	an OS process other than that in which the Squeak VM is currently running."
@@ -11256,7 +7526,7 @@ isResponsibleForThisPlatform
 	^ self isOS2
 ! !
 
-!ExternalRiscOSProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:48'!
+!ExternalRiscOSProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:48:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if, for the current platform, this class is responsible for representing
 	an OS process other than that in which the Squeak VM is currently running."
@@ -11264,7 +7534,7 @@ isResponsibleForThisPlatform
 	^ self isRiscOS
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'printing' stamp: 'dtl 8/23/2012 22:45'!
+!ExternalUnixOSProcess methodsFor: 'printing' stamp: 'dtl 24/Aug/2012, 2:45:00 am (UTC)'!
 printOn: aStream
 
 	self programName isNil
@@ -11285,7 +7555,7 @@ printOn: aStream
 			aStream nextPut: $)].
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'comparing' stamp: 'dtl 11/15/2013 10:31'!
+!ExternalUnixOSProcess methodsFor: 'comparing' stamp: 'dtl 15/Nov/2013, 2:31:00 pm (UTC)'!
 = processProxy
 	"True if this is a proxy that represents the same OS process as processProxy"
 
@@ -11293,23 +7563,23 @@ printOn: aStream
 			and: [pid = processProxy pid])
 				and: [ppid = processProxy ppid]! !
 
-!ExternalUnixOSProcess methodsFor: 'comparing' stamp: 'dtl 6/28/2010 22:26'!
+!ExternalUnixOSProcess methodsFor: 'comparing' stamp: 'dtl 29/Jun/2010, 2:26:00 am (UTC)'!
 hash
 
 	^ (pid ifNil: [self identityHash]) + (ppid ifNil: [self identityHash])
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:48'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 20/Jan/2001, 4:48:00 pm (UTC)'!
 arguments
 
 	^ arguments! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:49'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 20/Jan/2001, 4:49:00 pm (UTC)'!
 arguments: arrayOfArgumentStrings
 
 	arguments _ arrayOfArgumentStrings! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'NM 10/16/2021 15:59:09'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'NM 16/Oct/2021, 7:59:09 pm (UTC)'!
 exitCode
 	"Return the exit code as expected in POSIX systems.  A number between 0 and 255.
 	See notes in UnixProcessExitStatus. "
@@ -11317,74 +7587,74 @@ exitCode
 	
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:34'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/Jul/1999, 4:34:00 pm (UTC)'!
 exitStatus
 
 	^ exitStatus
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 10/22/1999 22:21'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 23/Oct/1999, 2:21:00 am (UTC)'!
 exitStatus: anInteger
 
 	exitStatus _ anInteger
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/11/2001 09:17'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 11/Mar/2001, 1:17:00 pm (UTC)'!
 initialEnvironment
 
 	^ initialEnvironment! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/21/2001 11:31'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 21/Jan/2001, 3:31:00 pm (UTC)'!
 initialEnvironment: aDictionary
 
 	initialEnvironment _ aDictionary! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:51'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/Jul/1999, 4:51:00 pm (UTC)'!
 pid
 
 	^ pid
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 10/22/1999 22:21'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 23/Oct/1999, 2:21:00 am (UTC)'!
 pid: aPid
 
 	pid _ aPid
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 7/3/1999 12:33'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/Jul/1999, 4:33:00 pm (UTC)'!
 ppid
 
 	^ ppid
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 10/22/1999 22:21'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 23/Oct/1999, 2:21:00 am (UTC)'!
 ppid: aPid
 
 	ppid _ aPid
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:51'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 20/Jan/2001, 4:51:00 pm (UTC)'!
 programName
 
 	^ programName! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 1/20/2001 12:51'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 20/Jan/2001, 4:51:00 pm (UTC)'!
 programName: fileName
 
 	programName _ fileName! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/31/2001 17:08'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 31/Mar/2001, 9:08:00 pm (UTC)'!
 pwd
 
 	pwd ifNil: [pwd _ self accessor primGetCurrentWorkingDirectory].
 	^ pwd! !
 
-!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 3/31/2001 17:08'!
+!ExternalUnixOSProcess methodsFor: 'accessing' stamp: 'dtl 31/Mar/2001, 9:08:00 pm (UTC)'!
 pwd: pathString
 
 	pwd _ pathString! !
 
-!ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 4/4/2006 21:16'!
+!ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 5/Apr/2006, 1:16:00 am (UTC)'!
 forkChild
 	"Start the external OS process. All instances variables except for pid  
 	should have been set. The pid will be set following creation of the new 
@@ -11403,14 +7673,14 @@ forkChild
 				with: initialStdErr)
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 2/11/2001 19:07'!
+!ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 11/Feb/2001, 11:07:00 pm (UTC)'!
 initialize
 
 	super initialize.
 	^ self setDefaults
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 3/31/2001 17:10'!
+!ExternalUnixOSProcess methodsFor: 'initialize - release' stamp: 'dtl 31/Mar/2001, 9:10:00 pm (UTC)'!
 setDefaults
 
 	| this |
@@ -11423,90 +7693,90 @@ setDefaults
 
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:40:00 pm (UTC)'!
 sigabrt
 	"Send a SIGABRT signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigabrt: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:40:00 pm (UTC)'!
 sigalrm
 	"Send a SIGALRM signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigalrm: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:40:00 pm (UTC)'!
 sigchld
 	"Send a SIGCHLD signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigchld: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:40:00 pm (UTC)'!
 sigcont
 	"Send a SIGCONT signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigcont: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:40:00 pm (UTC)'!
 sighup
 	"Send a SIGHUP signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sighup: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:40'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:40:00 pm (UTC)'!
 sigint
 	"Send a SIGINT signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigint: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:42:00 pm (UTC)'!
 sigkill
 	"Send a SIGKILL signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigkill: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:42:00 pm (UTC)'!
 sigpipe
 	"Send a SIGPIPE signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigpipe: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:42:00 pm (UTC)'!
 sigquit
 	"Send a SIGQUIT signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigquit: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:42'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:42:00 pm (UTC)'!
 sigstop
 	"Send a SIGSTOP signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigstop: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:43'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:43:00 pm (UTC)'!
 sigterm
 	"Send a SIGTERM signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigterm: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:43'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:43:00 pm (UTC)'!
 sigusr1
 	"Send a SIGUSR1 signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigusr1: self! !
 
-!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 12/5/2020 11:43'!
+!ExternalUnixOSProcess methodsFor: 'OS signal sending' stamp: 'dtl 5/Dec/2020, 3:43:00 pm (UTC)'!
 sigusr2
 	"Send a SIGUSR2 signal to the external process which I represent."
 
 	^ OSProcess thisOSProcess sigusr2: self! !
 
-!ExternalUnixOSProcess methodsFor: 'testing' stamp: 'dtl 12/22/2001 18:30'!
+!ExternalUnixOSProcess methodsFor: 'testing' stamp: 'dtl 22/Dec/2001, 10:30:00 pm (UTC)'!
 succeeded
 
 	^ self isComplete and: [self exitStatus == 0]! !
 
-!ExternalUnixOSProcess methodsFor: 'terminating child' stamp: 'dtl 12/5/2020 12:51'!
+!ExternalUnixOSProcess methodsFor: 'terminating child' stamp: 'dtl 5/Dec/2020, 4:51:00 pm (UTC)'!
 terminate
 	"Kill the child process that I represent. Set run state to unknown, expecting
 	that the child process watcher will update it soon. If this is a stale reference
@@ -11525,7 +7795,7 @@ terminate
 
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'updating' stamp: 'dtl 7/6/2006 10:06'!
+!ExternalUnixOSProcess methodsFor: 'updating' stamp: 'dtl 6/Jul/2006, 2:06:00 pm (UTC)'!
 update: aParameter 
 
 	| accessible |
@@ -11543,14 +7813,14 @@ update: aParameter
 	super update: aParameter
 ! !
 
-!ExternalUnixOSProcess methodsFor: 'evaluating' stamp: 'dtl 11/21/2006 14:09'!
+!ExternalUnixOSProcess methodsFor: 'evaluating' stamp: 'dtl 21/Nov/2006, 6:09:00 pm (UTC)'!
 value
 	"Start the external process"
 
 	self isNotYetRunning ifTrue: [self forkChild; closeStreams]
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 1/23/2013 20:21'!
+!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 24/Jan/2013, 12:21:00 am (UTC)'!
 bashShellPath
 	"A more full-featured shell from the Free Software Foundation"
 
@@ -11560,7 +7830,7 @@ bashShellPath
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
 
-!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 1/23/2013 20:30'!
+!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 24/Jan/2013, 12:30:00 am (UTC)'!
 defaultShellPath
 	"Default shell to run"
 
@@ -11570,7 +7840,7 @@ defaultShellPath
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
 
-!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 1/23/2013 20:21'!
+!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 24/Jan/2013, 12:21:00 am (UTC)'!
 remoteShellPath
 	"A remote shell processor. This may need to be edited for different systems."
 
@@ -11580,7 +7850,7 @@ remoteShellPath
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
 
-!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 1/23/2013 20:21'!
+!ExternalUnixOSProcess class methodsFor: 'shells' stamp: 'dtl 24/Jan/2013, 12:21:00 am (UTC)'!
 tkShellPath
 	"The wish command shell for Tk/Tcl. This tends to be installed in a wide variety
 	of places, so you may need to edit this method for your system."
@@ -11591,7 +7861,7 @@ tkShellPath
 		ifTrue: [^ path]
 		ifFalse: [self notify: path, ' not found']! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 7/12/2003 11:38'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 12/Jul/2003, 3:38:00 pm (UTC)'!
 command: aCommandString
 
 	"ExternalUnixOSProcess command: 'ls -l /etc'"
@@ -11600,7 +7870,7 @@ command: aCommandString
 		arguments: (Array with: '-c' with: aCommandString)
 		environment: nil! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 1/16/2001 05:33'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 16/Jan/2001, 9:33:00 am (UTC)'!
 exec: programName
 	"Run a program in an external OS process, and answer an instance of myself
 	which represents the external process."
@@ -11608,7 +7878,7 @@ exec: programName
 	^ self forkAndExec: programName
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/27/2002 15:25'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 27/Feb/2002, 7:25:00 pm (UTC)'!
 forkAndExec: executableFile
 
 	"ExternalUnixOSProcess forkAndExec: '/bin/ls'"
@@ -11619,7 +7889,7 @@ forkAndExec: executableFile
 		forkChild
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/27/2002 15:25'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 27/Feb/2002, 7:25:00 pm (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary 
 	"Run a program in an external OS process, and answer an instance of 
 	myself which represents the external process."
@@ -11634,7 +7904,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 		forkChild
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/27/2002 15:25'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 27/Feb/2002, 7:25:00 pm (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Run a program in an external OS process, and answer an instance of myself
 	which represents the external process."
@@ -11657,7 +7927,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	^ proc initialize forkChild
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/27/2002 15:25'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 27/Feb/2002, 7:25:00 pm (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams workingDir: pathString
 	"Run a program in an external OS process, and answer an instance of myself
 	which represents the external process."
@@ -11677,7 +7947,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	^ proc initialize forkChild
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/28/2002 10:15'!
+!ExternalUnixOSProcess class methodsFor: 'instance creation' stamp: 'dtl 28/Feb/2002, 2:15:00 pm (UTC)'!
 programName: executableFile arguments: arrayOfStrings initialEnvironment: stringDictionary
 	"Answer an instance not yet running."
 
@@ -11687,7 +7957,7 @@ programName: executableFile arguments: arrayOfStrings initialEnvironment: string
 		initialEnvironment: stringDictionary
 ! !
 
-!ExternalUnixOSProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:48'!
+!ExternalUnixOSProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:48:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if, for the current platform, this class is responsible for representing
 	an OS process other than that in which the Squeak VM is currently running."
@@ -11695,7 +7965,7 @@ isResponsibleForThisPlatform
 	^ self isUnix
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'printing' stamp: 'dtl 2/26/2002 10:42'!
+!ExternalWindowsOSProcess methodsFor: 'printing' stamp: 'dtl 26/Feb/2002, 2:42:00 pm (UTC)'!
 printOn: aStream
 
 	self commandLine isNil
@@ -11723,7 +7993,7 @@ printOn: aStream
 
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'comparing' stamp: 'dtl 11/15/2013 10:30'!
+!ExternalWindowsOSProcess methodsFor: 'comparing' stamp: 'dtl 15/Nov/2013, 2:30:00 pm (UTC)'!
 = processProxy
 	"True if this is a proxy that represents the same OS process as processProxy"
 
@@ -11731,13 +8001,13 @@ printOn: aStream
 			and: [pid = processProxy pid])
 				and: [ppid = processProxy ppid]! !
 
-!ExternalWindowsOSProcess methodsFor: 'comparing' stamp: 'dtl 6/28/2010 22:27'!
+!ExternalWindowsOSProcess methodsFor: 'comparing' stamp: 'dtl 29/Jun/2010, 2:27:00 am (UTC)'!
 hash
 
 	^ (pid ifNil: [self identityHash]) + (ppid ifNil: [self identityHash])
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'initialize - release' stamp: 'dtl 3/1/2002 07:44'!
+!ExternalWindowsOSProcess methodsFor: 'initialize - release' stamp: 'dtl 1/Mar/2002, 11:44:00 am (UTC)'!
 closeHandles
 	"Clean up after process exits."
 
@@ -11747,72 +8017,72 @@ closeHandles
 		handle _ nil]
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/26/2002 10:09'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 26/Feb/2002, 2:09:00 pm (UTC)'!
 commandLine
 
 	^ commandLine! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/26/2002 10:09'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 26/Feb/2002, 2:09:00 pm (UTC)'!
 commandLine: aCommandLineString
 
 	commandLine _ aCommandLineString! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 08:32'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 12:32:00 pm (UTC)'!
 exitStatus
 
 	^ exitStatus! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 08:33'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 12:33:00 pm (UTC)'!
 exitStatus: status
 
 	exitStatus _ status
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:24'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 11:24:00 am (UTC)'!
 handle
 	"A Windows HANDLE for this OS process, represented as a ByteArray. The
 	handle should be closed when the process exits."
 
 	^ handle! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:32'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 11:32:00 am (UTC)'!
 handle: aHandleObject
 	"A Windows HANDLE for this OS process, represented as a ByteArray. The
 	handle should be closed when the process exits."
 
 	handle _ aHandleObject! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:29'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 11:29:00 am (UTC)'!
 ppid
 
 	^ ppid
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:29'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 11:29:00 am (UTC)'!
 ppid: aProcessID
 
 	ppid _ aProcessID! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 10:28'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 28/Feb/2002, 2:28:00 pm (UTC)'!
 pwd
 	"Answer the current working directory string."
 
 	^ pwd! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 10:28'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 28/Feb/2002, 2:28:00 pm (UTC)'!
 pwd: pathString
 	"The current working directory string."
 
 	pwd _ pathString! !
 
-!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:09'!
+!ExternalWindowsOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 11:09:00 am (UTC)'!
 threads
 	"One or more threads of execution within the OS process"
 
 	^ threads ifNil: [threads _ OrderedCollection new]
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'setting run state' stamp: 'dtl 6/24/2006 08:41'!
+!ExternalWindowsOSProcess methodsFor: 'setting run state' stamp: 'dtl 24/Jun/2006, 12:41:00 pm (UTC)'!
 complete
 	"Process has exited and has been reaped. It no longer exists in the external operating system."
 
@@ -11821,7 +8091,7 @@ complete
 	super complete
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'updating' stamp: 'dtl 2/27/2002 09:45'!
+!ExternalWindowsOSProcess methodsFor: 'updating' stamp: 'dtl 27/Feb/2002, 1:45:00 pm (UTC)'!
 update: aParameter 
 
 	| accessible stat |
@@ -11837,7 +8107,7 @@ update: aParameter
 	super update: aParameter
 ! !
 
-!ExternalWindowsOSProcess methodsFor: 'evaluating' stamp: 'ThierryGoubier 7/27/2017 22:38'!
+!ExternalWindowsOSProcess methodsFor: 'evaluating' stamp: 'ThierryGoubier 28/Jul/2017, 2:38:00 am (UTC)'!
 value
 	"Start the external process"
 
@@ -11869,7 +8139,7 @@ value
 				self closeStreams]].
 ! !
 
-!ExternalWindowsOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/28/2002 10:56'!
+!ExternalWindowsOSProcess class methodsFor: 'instance creation' stamp: 'dtl 28/Feb/2002, 2:56:00 pm (UTC)'!
 command: aCommandString
 
 	"ExternalWindowsOSProcess command: 'SOL'"
@@ -11878,7 +8148,7 @@ command: aCommandString
 	^ (self commandNoEvaluate: aCommandString) value
 ! !
 
-!ExternalWindowsOSProcess class methodsFor: 'instance creation' stamp: 'dtl 2/28/2002 10:49'!
+!ExternalWindowsOSProcess class methodsFor: 'instance creation' stamp: 'dtl 28/Feb/2002, 2:49:00 pm (UTC)'!
 commandNoEvaluate: aCommandString
 	"Answer an instance not yet running."
 
@@ -11890,7 +8160,7 @@ commandNoEvaluate: aCommandString
 		notYetRunning
 ! !
 
-!ExternalWindowsOSProcess class methodsFor: 'instance creation' stamp: 'dtl 3/1/2002 07:02'!
+!ExternalWindowsOSProcess class methodsFor: 'instance creation' stamp: 'dtl 1/Mar/2002, 11:02:00 am (UTC)'!
 programName: executableFile arguments: arrayOfStrings initialEnvironment: stringDictionary
 	"This is for protocol compatibility with ExternalUnixOSProcess. For now, just reassemble
 	a command line string and ignore the environment argument."
@@ -11903,12 +8173,12 @@ programName: executableFile arguments: arrayOfStrings initialEnvironment: string
 	^ self commandNoEvaluate: commandLine contents
 ! !
 
-!ExternalWindowsOSProcess class methodsFor: 'shells' stamp: 'SeanDeNigris 12/27/2013 10:17'!
+!ExternalWindowsOSProcess class methodsFor: 'shells' stamp: 'SeanDeNigris 27/Dec/2013, 2:17:00 pm (UTC)'!
 defaultShellPath
 
 	^ 'C:\Windows\System32\cmd.exe'.! !
 
-!ExternalWindowsOSProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:50'!
+!ExternalWindowsOSProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:50:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if, for the current platform, this class is responsible for representing
 	an OS process other than that in which the Squeak VM is currently running."
@@ -11916,12 +8186,12 @@ isResponsibleForThisPlatform
 	^ self isWindows
 ! !
 
-!ExternalWindowsOSProcess class methodsFor: 'shell' stamp: 'SeanDeNigris 12/27/2013 12:31'!
+!ExternalWindowsOSProcess class methodsFor: 'shell' stamp: 'SeanDeNigris 27/Dec/2013, 4:31:00 pm (UTC)'!
 shellFlags
 
 	^ '/c'.! !
 
-!ThisOSProcess methodsFor: 'comparing' stamp: 'dtl 11/15/2013 10:30'!
+!ThisOSProcess methodsFor: 'comparing' stamp: 'dtl 15/Nov/2013, 2:30:00 pm (UTC)'!
 = processProxy
 	"True if this is a proxy that represents the same OS process as processProxy"
 
@@ -11929,7 +8199,7 @@ shellFlags
 			and: [pid = processProxy pid])
 		and: [sessionID = processProxy sessionID]! !
 
-!ThisOSProcess methodsFor: 'comparing' stamp: 'dtl 6/27/2010 22:38'!
+!ThisOSProcess methodsFor: 'comparing' stamp: 'dtl 28/Jun/2010, 2:38:00 am (UTC)'!
 hash
 
 	^ (pid ifNil: [self identityHash])
@@ -11937,7 +8207,7 @@ hash
 				ifNil: [0]
 				ifNotNil: [sessionID sum])! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 6/5/2015 20:13'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 6/Jun/2015, 12:13:00 am (UTC)'!
 activeChildren
 	"Answer child processes which are currently believed to be running."
 
@@ -11946,18 +8216,18 @@ activeChildren
 	^ accessProtect critical: [ childProcessList select: [ :p | p isComplete not ] ].
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 19:50'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 6/Feb/2015, 11:50:00 pm (UTC)'!
 allMyChildren
 
 	^ Dictionary withAll: (childProcessList collect: [ :e | e pid -> e ])! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 20:11'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 7/Feb/2015, 12:11:00 am (UTC)'!
 childPids
 
 	^ childProcessList collect: [ :p | p pid ]
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 1/20/2018 19:59:40'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 20/Jan/2018, 11:59:40 pm (UTC)'!
 discardExitedChildren
 	"Remove entries for completed child processed from dictionary.
 	nb Cuis does not have #select:thenDo:"
@@ -11968,7 +8238,7 @@ discardExitedChildren
 	^ childProcessList
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 20:14'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 7/Feb/2015, 12:14:00 am (UTC)'!
 exitedChildren
 	"Answer child processes which have exited and are no longer running."
 
@@ -11977,7 +8247,7 @@ exitedChildren
 	^ accessProtect critical: [ childProcessList select: [ :p | p isComplete ]].
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 20:03'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 7/Feb/2015, 12:03:00 am (UTC)'!
 pruneExitedChildrenAfter: size
 	"Limit the size of the child process registry. Select the last entries, and unregister
 	them if they are no longer active."
@@ -11989,7 +8259,7 @@ pruneExitedChildrenAfter: size
 			e isComplete ifTrue: [ self unregisterChildProcess: e ]]
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 20:54'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 7/Feb/2015, 12:54:00 am (UTC)'!
 registerChildProcess: anOSProcess
 	"Unregister anOSProcess, and trim the child process registry to prevent excessive
 	accumulation of exited children."
@@ -11999,7 +8269,7 @@ registerChildProcess: anOSProcess
 	^ anOSProcess
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/6/2015 19:49'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 6/Feb/2015, 11:49:00 pm (UTC)'!
 unregisterChildProcess: anOSProcess
 
 	accessProtect
@@ -12007,7 +8277,7 @@ unregisterChildProcess: anOSProcess
 	^ anOSProcess
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/25/2002 23:23'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 26/Feb/2002, 3:23:00 am (UTC)'!
 updateActiveChildren
 	"Test each active child for its completion status and update runState and exitStatus
 	accordingly. This method may be called when a semaphore is set indicating that
@@ -12019,7 +8289,7 @@ updateActiveChildren
 		[:child | child update: #runState]
 ! !
 
-!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 2/4/2015 23:38'!
+!ThisOSProcess methodsFor: 'child process management' stamp: 'dtl 5/Feb/2015, 3:38:00 am (UTC)'!
 updateAllMyChildren
 	"Test each child to make sure that it is still accessible. If the child is believed to be
 	running, check to see if it has exited, and update runState and exitStatus accordingly."
@@ -12032,7 +8302,7 @@ updateAllMyChildren
 		child isRunning ifTrue: [child update: #runState]]
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/5/2003 21:59'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 1:59:00 am (UTC)'!
 canConnectToXDisplay: xDisplayName
 	"Open and close a connection to displayName. It the connection was successfully
 	opened, answer true; otherwise false. This is intended to check for the ability
@@ -12046,7 +8316,7 @@ canConnectToXDisplay: xDisplayName
 	^ self processAccessor primCanConnectToXDisplay: xDisplayName
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/6/2003 06:35'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 10:35:00 am (UTC)'!
 closeXDisplay
 	"Become headless by closing the X session. All subsequent processing should involve
 	no further display interaction."
@@ -12059,14 +8329,14 @@ closeXDisplay
 	^ proc
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/5/2003 22:05'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 2:05:00 am (UTC)'!
 currentXDisplayName
 
 	"self thisOSProcess currentXDisplayName"
 
 	^ self processAccessor primGetXDisplayName! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/6/2003 06:35'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 10:35:00 am (UTC)'!
 decapitate
 	"Become headless by closing the X session. All subsequent processing should involve
 	no further display interaction."
@@ -12076,7 +8346,7 @@ decapitate
 	^ self closeXDisplay
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/6/2003 06:30'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 10:30:00 am (UTC)'!
 disconnectXDisplay
 	"Disconnect from the X server, but do not close the existing Squeak window. A new
 	display medium must be opened before further interaction with the display."
@@ -12089,7 +8359,7 @@ disconnectXDisplay
 	^ proc
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/5/2003 22:12'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 2:12:00 am (UTC)'!
 displayOnXServer: xDisplayName
 	"Check if it is possible to open a display on the X server identified by
 	xDisplayName. If so, close the current X display and reopen it on
@@ -12118,7 +8388,7 @@ displayOnXServer: xDisplayName
 			[^ 'cannot connect to display ', xDisplayName]
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 9/1/2003 13:15'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 1/Sep/2003, 5:15:00 pm (UTC)'!
 flushXDisplay
 	"Synchronize output to the X display."
 
@@ -12128,7 +8398,7 @@ flushXDisplay
 
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/24/2003 10:12'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 24/Aug/2003, 2:12:00 pm (UTC)'!
 isConnectedToXServer
 	"Answer true if VM is currently connected to an X server."
 
@@ -12138,7 +8408,7 @@ isConnectedToXServer
 
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/6/2003 06:36'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 10:36:00 am (UTC)'!
 openXDisplay
 	"Restore headful display opening the X session."
 
@@ -12150,7 +8420,7 @@ openXDisplay
 	^ proc
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/6/2003 06:34'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 10:34:00 am (UTC)'!
 recapitate
 	"Restore headful display opening the X session."
 
@@ -12159,7 +8429,7 @@ recapitate
 	^ self openXDisplay
 ! !
 
-!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 8/5/2003 22:16'!
+!ThisOSProcess methodsFor: 'display management' stamp: 'dtl 6/Aug/2003, 2:16:00 am (UTC)'!
 setXDisplayName: xDisplayName
 	"Set X display name for use by the next call to recapitate"
 
@@ -12170,7 +8440,7 @@ setXDisplayName: xDisplayName
 
 ! !
 
-!ThisOSProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:15'!
+!ThisOSProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:15:00 am (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in
 	the standard C library, except that aCommandString runs asynchronously
@@ -12179,7 +8449,7 @@ command: aCommandString
 
 	self subclassResponsibility! !
 
-!ThisOSProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:16'!
+!ThisOSProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:16:00 am (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Use my processAccessor to call vfork() and execve() and create a
 	new child task. Answer a proxy for the new task, an instance of
@@ -12187,7 +8457,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 
 	self subclassResponsibility! !
 
-!ThisOSProcess methodsFor: 'finalization' stamp: 'dtl 11/4/2000 15:49'!
+!ThisOSProcess methodsFor: 'finalization' stamp: 'dtl 4/Nov/2000, 7:49:00 pm (UTC)'!
 finalize
 
 	processAccessor
@@ -12196,12 +8466,12 @@ finalize
 			processAccessor finalize].
 	processAccessor _ nil! !
 
-!ThisOSProcess methodsFor: 'environment' stamp: 'dtl 10/18/2001 20:10'!
+!ThisOSProcess methodsFor: 'environment' stamp: 'dtl 19/Oct/2001, 12:10:00 am (UTC)'!
 getCwd
 
 	self subclassResponsibility! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:59:54'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 20/Jan/2018, 11:59:54 pm (UTC)'!
 handleFromAccessor: aByteArrayOrIOAccessor
 
 	UseIOHandle
@@ -12211,7 +8481,7 @@ handleFromAccessor: aByteArrayOrIOAccessor
 		ifFalse: [^ aByteArrayOrIOAccessor]
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 1/20/2018 19:57:15'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 20/Jan/2018, 11:57:15 pm (UTC)'!
 handleFromFileStream: aFileStream
 
 	UseIOHandle
@@ -12219,7 +8489,7 @@ handleFromFileStream: aFileStream
 		ifFalse: [^ aFileStream fileID]
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 8/19/2022 22:21'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 20/Aug/2022, 2:21:00 am (UTC)'!
 isStdErr: anIOHandle
 	"Answer true if anIOHandle represents stderr."
 
@@ -12230,7 +8500,7 @@ isStdErr: anIOHandle
 	^ anIOHandle = realHandle
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 8/19/2022 22:21'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 20/Aug/2022, 2:21:00 am (UTC)'!
 isStdIn: anIOHandle
 	"Answer true if anIOHandle represents stdin."
 
@@ -12241,7 +8511,7 @@ isStdIn: anIOHandle
 	^ anIOHandle = realHandle
 ! !
 
-!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 8/19/2022 22:21'!
+!ThisOSProcess methodsFor: 'private - IOHandle' stamp: 'dtl 20/Aug/2022, 2:21:00 am (UTC)'!
 isStdOut: anIOHandle
 	"Answer true if anIOHandle represents stdout."
 
@@ -12252,7 +8522,7 @@ isStdOut: anIOHandle
 	^ anIOHandle = realHandle
 ! !
 
-!ThisOSProcess methodsFor: 'initialize - release' stamp: 'dtl 7/26/2010 13:51'!
+!ThisOSProcess methodsFor: 'initialize - release' stamp: 'dtl 26/Jul/2010, 5:51:00 pm (UTC)'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is. executing."
@@ -12268,7 +8538,7 @@ initialize
 		ifTrue: [self resetChildProcessDictionary]
 ! !
 
-!ThisOSProcess methodsFor: 'initialize - release' stamp: 'dtl 2/4/2015 23:35'!
+!ThisOSProcess methodsFor: 'initialize - release' stamp: 'dtl 5/Feb/2015, 3:35:00 am (UTC)'!
 initializeAllMyChildren
 	"Use a Dictionary if process identifiers are unique. On Windows, the
 	process ID is not unique, so use an OrderedCollection instead."
@@ -12276,7 +8546,7 @@ initializeAllMyChildren
 	^ childProcessList _ OrderedCollection new
 ! !
 
-!ThisOSProcess methodsFor: 'platform identification' stamp: 'dtl 10/10/2001 21:24'!
+!ThisOSProcess methodsFor: 'platform identification' stamp: 'dtl 11/Oct/2001, 1:24:00 am (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -12284,21 +8554,21 @@ isResponsibleForThisPlatform
 
 	^ self subclassResponsibility! !
 
-!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 2/26/2002 08:37'!
+!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 26/Feb/2002, 12:37:00 pm (UTC)'!
 needsRefresh
 	"Answer true if the sessionID variable is out of date with respect to the running
 	OS Process. Subclasses should provide implementation, answer true as default."
 
 	^ true! !
 
-!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 2/26/2002 08:32'!
+!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 26/Feb/2002, 12:32:00 pm (UTC)'!
 refreshFromProcessAccessor
 	"Set my instance variables to reflect the state of the OS process in which this Smalltalk
 	virtual machine is executing."
 
 	self subclassResponsibility! !
 
-!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 2/27/2015 07:25'!
+!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 27/Feb/2015, 11:25:00 am (UTC)'!
 resetChildProcessDictionary
 	"Forget all the entries in the allMyChildren dictionary. This method may be called
 	when a new session is started, since the child processes of the previous session are
@@ -12307,13 +8577,13 @@ resetChildProcessDictionary
 	self allMyChildren do: [ :p | self unregisterChildProcess: p ]
 ! !
 
-!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 10/15/2001 21:27'!
+!ThisOSProcess methodsFor: 'updating' stamp: 'dtl 16/Oct/2001, 1:27:00 am (UTC)'!
 update: aParameter
 
 	aParameter == #invalidProcessAccessor ifTrue: [processAccessor _ nil].
 	^ super update: aParameter! !
 
-!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 13:30'!
+!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 28/Feb/2002, 5:30:00 pm (UTC)'!
 processAccessor
 
 	| a |
@@ -12325,27 +8595,27 @@ processAccessor
 				processAccessor addDependent: self]].
 	^ processAccessor! !
 
-!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 9/26/2005 20:04'!
+!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 27/Sep/2005, 12:04:00 am (UTC)'!
 sessionID
 
 	^ sessionID! !
 
-!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 9/25/2005 13:30'!
+!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Sep/2005, 5:30:00 pm (UTC)'!
 stdErr
 
 	^ stdErr! !
 
-!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 9/25/2005 13:30'!
+!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Sep/2005, 5:30:00 pm (UTC)'!
 stdIn
 
 	^ stdIn! !
 
-!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 9/25/2005 13:31'!
+!ThisOSProcess methodsFor: 'accessing' stamp: 'dtl 25/Sep/2005, 5:31:00 pm (UTC)'!
 stdOut
 
 	^ stdOut! !
 
-!ThisOSProcess methodsFor: 'private' stamp: 'dtl 8/20/2022 00:47'!
+!ThisOSProcess methodsFor: 'private' stamp: 'dtl 20/Aug/2022, 4:47:00 am (UTC)'!
 setStdErr
 	"If stdErr is nil, then set it. If not nil, check to see if it is has a valid connection to
 	stderr. If not valid, then replace it, otherwise answer the existing valid stream.
@@ -12363,7 +8633,7 @@ setStdErr
 	^ stdErr
 ! !
 
-!ThisOSProcess methodsFor: 'private' stamp: 'dtl 8/20/2022 00:48'!
+!ThisOSProcess methodsFor: 'private' stamp: 'dtl 20/Aug/2022, 4:48:00 am (UTC)'!
 setStdIn
 	"If stdIn is nil, then set it. If not nil, check to see if it is has a valid connection to
 	stdin. If not valid, then replace it, otherwise answer the existing valid stream.
@@ -12382,7 +8652,7 @@ setStdIn
 
 ! !
 
-!ThisOSProcess methodsFor: 'private' stamp: 'dtl 8/20/2022 00:48'!
+!ThisOSProcess methodsFor: 'private' stamp: 'dtl 20/Aug/2022, 4:48:00 am (UTC)'!
 setStdOut
 	"If stdOut is nil, then set it. If not nil, check to see if it is has a valid connection to
 	stdout. If not valid, then replace it, otherwise answer the existing valid stream.
@@ -12400,12 +8670,12 @@ setStdOut
 	^ stdOut
 ! !
 
-!ThisOSProcess methodsFor: 'testing' stamp: 'dtl 12/5/2020 11:36'!
+!ThisOSProcess methodsFor: 'testing' stamp: 'dtl 5/Dec/2020, 3:36:00 pm (UTC)'!
 isExternalProcess
 
 	^ false! !
 
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 6/25/2020 10:26'!
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 25/Jun/2020, 2:26:00 pm (UTC)'!
 shutDown: quitting
 	"Break dependency on my OSProcessAccessor. This is done explicitly at
 	shutDown time in order to prevent possible problems when an image is
@@ -12419,7 +8689,7 @@ shutDown: quitting
 				acc breakDependents ] ] ]
 ! !
 
-!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 2/6/2015 20:19'!
+!ThisOSProcess class methodsFor: 'system startup' stamp: 'dtl 7/Feb/2015, 12:19:00 am (UTC)'!
 startUp: resuming
 	"Initialize my singleton instance, and the singleton instance of my
 	OSProcessAccessor. On Unix, set the signal handler in my process
@@ -12437,7 +8707,7 @@ startUp: resuming
 		ifNotNil: [ aio startUp: resuming ].
 	resuming ifTrue: [ self initializeThisOSProcess ]! !
 
-!ThisOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 3/5/2005 12:08'!
+!ThisOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 5/Mar/2005, 4:08:00 pm (UTC)'!
 concreteClass
 
 	"ThisOSProcess concreteClass"
@@ -12451,7 +8721,7 @@ concreteClass
 
 ! !
 
-!ThisOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 6/28/2010 21:14'!
+!ThisOSProcess class methodsFor: 'concrete subclasses' stamp: 'dtl 29/Jun/2010, 1:14:00 am (UTC)'!
 concreteClassOrNil
 
 	"ThisOSProcess concreteClassOrNil"
@@ -12462,7 +8732,7 @@ concreteClassOrNil
 
 ! !
 
-!ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 2/18/2016 21:20'!
+!ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 19/Feb/2016, 1:20:00 am (UTC)'!
 initialize
 	"ThisOSProcess initialize"
 
@@ -12480,7 +8750,7 @@ initialize
 				with: ThisOSProcess name ]
 ! !
 
-!ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 8/25/2010 22:58'!
+!ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 26/Aug/2010, 2:58:00 am (UTC)'!
 initializeThisOSProcess
 	"Initialize the singleton instance, creating a new instance only if the
 	platform type has changed since shutdown (running on a different
@@ -12493,7 +8763,7 @@ initializeThisOSProcess
 				ifNotNil: [ThisInstance _ cls basicNew]].
 	ThisInstance initialize! !
 
-!ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 7/5/2010 11:56'!
+!ThisOSProcess class methodsFor: 'initialize-release' stamp: 'dtl 5/Jul/2010, 3:56:00 pm (UTC)'!
 initializeThisOSProcessWithNotifier
 	"Initialize the singleton instance, creating a new instance only if the
 	platform type has changed since shutdown (running on a different
@@ -12503,7 +8773,7 @@ initializeThisOSProcessWithNotifier
 		ifTrue: [ThisInstance _ self concreteClass basicNew].
 	ThisInstance initialize! !
 
-!ThisOSProcess class methodsFor: 'testing' stamp: 'dtl 8/18/2014 20:08'!
+!ThisOSProcess class methodsFor: 'testing' stamp: 'dtl 19/Aug/2014, 12:08:00 am (UTC)'!
 isHeadless
 	"Answer true if the image is known to be headless, otherwise assume
 	that a user interface is present."
@@ -12512,13 +8782,13 @@ isHeadless
 		ifTrue: [ ^Smalltalk perform: #isHeadless ].
 	^ false "assume that a UI is present"! !
 
-!ThisOSProcess class methodsFor: 'instance creation' stamp: 'dtl 11/5/2000 16:10'!
+!ThisOSProcess class methodsFor: 'instance creation' stamp: 'dtl 5/Nov/2000, 8:10:00 pm (UTC)'!
 new
 
 	self notify: self name, ': Only one instance of ThisOSProcess or any of its subclasses should exist in the image. Use #thisOSProcess to obtain the singleton instance.'.
 	self shouldNotImplement! !
 
-!ThisOSProcess class methodsFor: 'instance creation' stamp: 'dtl 10/1/2006 08:38'!
+!ThisOSProcess class methodsFor: 'instance creation' stamp: 'dtl 1/Oct/2006, 12:38:00 pm (UTC)'!
 thisOSProcess
 	"Answer a single instance of the class corresponding to the OS process in 
 	which this Smalltalk image is executing."
@@ -12527,7 +8797,7 @@ thisOSProcess
 
 	^ ThisInstance! !
 
-!MacProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
+!MacProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:18:00 am (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in
 	the standard C library, except that aCommandString runs asynchronously
@@ -12537,7 +8807,7 @@ command: aCommandString
 	self notYetImplemented
 ! !
 
-!MacProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
+!MacProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:18:00 am (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Use my processAccessor to call vfork() and execve() and create a
 	new child task. Answer a proxy for the new task, an instance of
@@ -12546,19 +8816,19 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	self notYetImplemented
 ! !
 
-!MacProcess methodsFor: 'environment' stamp: 'dtl 1/23/2013 21:10'!
+!MacProcess methodsFor: 'environment' stamp: 'dtl 24/Jan/2013, 1:10:00 am (UTC)'!
 getCwd
 	"Not yet implemented - answer a reasonable default."
 
 	^ OSProcess defaultPathString! !
 
-!MacProcess methodsFor: 'initialize - release' stamp: 'dtl 10/14/2001 14:03'!
+!MacProcess methodsFor: 'initialize - release' stamp: 'dtl 14/Oct/2001, 6:03:00 pm (UTC)'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is executing."
 ! !
 
-!MacProcess methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:46'!
+!MacProcess methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:46:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -12566,7 +8836,7 @@ isResponsibleForThisPlatform
 
 	^ self class isNonUnixMac! !
 
-!MacProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:46'!
+!MacProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:46:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for
 	the Squeak VM running on the current platform."
@@ -12574,7 +8844,7 @@ isResponsibleForThisPlatform
 	^ self isNonUnixMac
 ! !
 
-!OS2Process methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
+!OS2Process methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:18:00 am (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in
 	the standard C library, except that aCommandString runs asynchronously
@@ -12584,7 +8854,7 @@ command: aCommandString
 	self notYetImplemented
 ! !
 
-!OS2Process methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
+!OS2Process methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:18:00 am (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Use my processAccessor to call vfork() and execve() and create a
 	new child task. Answer a proxy for the new task, an instance of
@@ -12593,19 +8863,19 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	self notYetImplemented
 ! !
 
-!OS2Process methodsFor: 'environment' stamp: 'dtl 1/23/2013 21:09'!
+!OS2Process methodsFor: 'environment' stamp: 'dtl 24/Jan/2013, 1:09:00 am (UTC)'!
 getCwd
 	"Not yet implemented - answer a reasonable default."
 
 	^ OSProcess defaultPathString! !
 
-!OS2Process methodsFor: 'initialize - release' stamp: 'dtl 10/14/2001 14:03'!
+!OS2Process methodsFor: 'initialize - release' stamp: 'dtl 14/Oct/2001, 6:03:00 pm (UTC)'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is executing."
 ! !
 
-!OS2Process methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:47'!
+!OS2Process methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:47:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -12614,7 +8884,7 @@ isResponsibleForThisPlatform
 	^ self class isOS2
 ! !
 
-!OS2Process class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:47'!
+!OS2Process class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:47:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for
 	the Squeak VM running on the current platform."
@@ -12622,7 +8892,7 @@ isResponsibleForThisPlatform
 	^ self isOS2
 ! !
 
-!RiscOSProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
+!RiscOSProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:18:00 am (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in
 	the standard C library, except that aCommandString runs asynchronously
@@ -12632,7 +8902,7 @@ command: aCommandString
 	self notYetImplemented
 ! !
 
-!RiscOSProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:18'!
+!RiscOSProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:18:00 am (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Use my processAccessor to call vfork() and execve() and create a
 	new child task. Answer a proxy for the new task, an instance of
@@ -12641,19 +8911,19 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	self notYetImplemented
 ! !
 
-!RiscOSProcess methodsFor: 'environment' stamp: 'dtl 1/23/2013 21:10'!
+!RiscOSProcess methodsFor: 'environment' stamp: 'dtl 24/Jan/2013, 1:10:00 am (UTC)'!
 getCwd
 	"Not yet implemented - answer a reasonable default."
 
 	^ OSProcess defaultPathString! !
 
-!RiscOSProcess methodsFor: 'initialize - release' stamp: 'dtl 10/14/2001 14:04'!
+!RiscOSProcess methodsFor: 'initialize - release' stamp: 'dtl 14/Oct/2001, 6:04:00 pm (UTC)'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is executing."
 ! !
 
-!RiscOSProcess methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:48'!
+!RiscOSProcess methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:48:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -12662,7 +8932,7 @@ isResponsibleForThisPlatform
 	^ self class isRiscOS
 ! !
 
-!RiscOSProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:48'!
+!RiscOSProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:48:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for
 	the Squeak VM running on the current platform."
@@ -12670,7 +8940,7 @@ isResponsibleForThisPlatform
 	^ self isRiscOS
 ! !
 
-!RiscOSProcess class methodsFor: 'utility' stamp: 'dtl 3/11/2001 11:47'!
+!RiscOSProcess class methodsFor: 'utility' stamp: 'dtl 11/Mar/2001, 3:47:00 pm (UTC)'!
 makeVmIn: buildDirectoryPathName
 	"Rebuild the virtual machine and plugins in the buildDirectoryPathName
 	directory. If the build is successful, save the image and restart
@@ -12678,37 +8948,37 @@ makeVmIn: buildDirectoryPathName
 	either located in, or linked to, the buildDirectoryPathName directory."
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 7/Nov/2000, 1:09:00 pm (UTC)'!
 arguments
 
 	^ arguments
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:09'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 7/Nov/2000, 1:09:00 pm (UTC)'!
 environment
 
 	^ environment
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 7/Nov/2000, 1:10:00 pm (UTC)'!
 path
 
 	^ path _ self pathString
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 7/Nov/2000, 1:10:00 pm (UTC)'!
 path: aPathString
 
 	self environmentAt: #PATH put: aPathString.
 	path _ self pathString! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 10/18/2001 20:01'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 19/Oct/2001, 12:01:00 am (UTC)'!
 pid
 
 	^ pid _ self processAccessor primGetPid
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 7/Nov/2000, 1:10:00 pm (UTC)'!
 ppid
 	"Always refresh ppid from the processAccessor, because it is possible for a child
 	to be reparented when the parent exits. The child does not know about this, so
@@ -12717,13 +8987,13 @@ ppid
 	^ ppid _ processAccessor primGetPPid
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 11/7/2000 09:10'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 7/Nov/2000, 1:10:00 pm (UTC)'!
 programName
 
 	^ programName
 ! !
 
-!UnixProcess methodsFor: 'accessing' stamp: 'dtl 3/17/2007 22:54'!
+!UnixProcess methodsFor: 'accessing' stamp: 'dtl 18/Mar/2007, 2:54:00 am (UTC)'!
 pthread
 	"The identity of the pthread in which the interpreter executes.
 	Always refresh pthread from the processAccessor, because it is possible for a child
@@ -12733,7 +9003,7 @@ pthread
 	^ pthread _ processAccessor getThreadID
 ! !
 
-!UnixProcess methodsFor: 'printing' stamp: 'dtl 7/7/2010 07:37'!
+!UnixProcess methodsFor: 'printing' stamp: 'dtl 7/Jul/2010, 11:37:00 am (UTC)'!
 printOn: aStream
 	"In English, say 'a Unix' rather than 'an Unix'. Therefore do not use super printOn, which
 	treats $U as a vowel."
@@ -12745,7 +9015,7 @@ printOn: aStream
 			nextPutAll: self pid printString
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 12/18/2022 17:24'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 18/Dec/2022, 9:24:00 pm (UTC)'!
 argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	"Given anArrayOfNullTerminatedStrings, flatten the array into a string buffer,
 	leaving space at the beginning of the buffer for a list of C pointers. Answer
@@ -12780,7 +9050,7 @@ argsAsFlatArrayAndOffsets: anArrayOfNullTerminatedStrings
 	^ Array with: flatStringArray with: addresses
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 12/15/2023 20:28'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 16/Dec/2023, 12:28:00 am (UTC)'!
 envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	"Given anEnvironmentDictionary, flatten the dictionary into a string buffer,
 	leaving space at the beginning of the buffer for a list of C pointers. Answer
@@ -12814,7 +9084,7 @@ envAsFlatArrayAndOffsets: anEnvironmentDictionary
 	^ Array with: flatStringArray with: addresses
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 3/31/2001 14:16'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 31/Mar/2001, 6:16:00 pm (UTC)'!
 getArgumentList
 	"Answer the argument list using anOSProcessAccessor. For Unix, the first element of the list
 	would be the program name. This element will not be treated as an argument; rather, it is
@@ -12830,7 +9100,7 @@ getArgumentList
 
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 3/31/2001 14:14'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 31/Mar/2001, 6:14:00 pm (UTC)'!
 getEnvironmentDictionary
 	"Answer an environment dictionary using an OSProcessAccessor."
 
@@ -12847,7 +9117,7 @@ getEnvironmentDictionary
 
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 3/31/2001 14:16'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 31/Mar/2001, 6:16:00 pm (UTC)'!
 getProgramName
 	"Answer the name of the program which is being run by this OS process. Assume the
 	Unix convention where the first element of (char **)argv is the program name."
@@ -12855,21 +9125,21 @@ getProgramName
 	^ programName _ processAccessor primArgumentAt: 1
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 11/7/2000 09:26'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 7/Nov/2000, 1:26:00 pm (UTC)'!
 needsRefresh
 	"Answer true if the sessionID variable is out of date with respect to the running OS Process."
 
 	^ ((sessionID ~= (self processAccessor primGetSession)) | (pid ~= (self processAccessor primGetPid)))
 ! !
 
-!UnixProcess methodsFor: 'private' stamp: 'dtl 3/6/2001 21:46'!
+!UnixProcess methodsFor: 'private' stamp: 'dtl 7/Mar/2001, 1:46:00 am (UTC)'!
 pathString
 	"Answer the path string from the environment. Assume Unix convention in which the
 	path name is a colon delimited string stored in the PATH environment variable."
 
 	^ self environment at: #PATH ifAbsent: [nil]! !
 
-!UnixProcess methodsFor: 'environment' stamp: 'dtl 1/25/2013 19:00'!
+!UnixProcess methodsFor: 'environment' stamp: 'dtl 25/Jan/2013, 11:00:00 pm (UTC)'!
 chDir: pathString
 	"Change current working directory, and update $PWD if it exists in the environment.
 	Answer nil for success, or an error message."
@@ -12892,7 +9162,7 @@ chDir: pathString
 			[self inform: realPath, ': ', result.
 			^ result]! !
 
-!UnixProcess methodsFor: 'environment' stamp: 'dtl 3/6/2001 21:30'!
+!UnixProcess methodsFor: 'environment' stamp: 'dtl 7/Mar/2001, 1:30:00 am (UTC)'!
 environmentAt: aSymbol
 	"Answer an environment variable for the external OS process, and update the dictionary
 	in this Smalltalk object."
@@ -12900,7 +9170,7 @@ environmentAt: aSymbol
 	^ environment at: aSymbol asSymbol ifAbsent: []
 ! !
 
-!UnixProcess methodsFor: 'environment' stamp: 'dtl 3/6/2001 21:30'!
+!UnixProcess methodsFor: 'environment' stamp: 'dtl 7/Mar/2001, 1:30:00 am (UTC)'!
 environmentAt: aSymbol put: aString
 	"Set an environment variable for the external OS process, and update the dictionary in
 	this Smalltalk object."
@@ -12913,7 +9183,7 @@ environmentAt: aSymbol put: aString
 
 ! !
 
-!UnixProcess methodsFor: 'environment' stamp: 'dtl 3/22/2000 05:55'!
+!UnixProcess methodsFor: 'environment' stamp: 'dtl 22/Mar/2000, 9:55:00 am (UTC)'!
 getCwd
 	"Get current working directory. At image startup, this is equivalent to
 	evaluating environmentAt: #PWD"
@@ -12925,7 +9195,7 @@ getCwd
 
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 2/27/2002 15:24'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 27/Feb/2002, 7:24:00 pm (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library,
 	except that aCommandString runs asynchronously in a child process. The command is
@@ -12947,7 +9217,7 @@ command: aCommandString
 			^ proc]
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 1/20/2018 20:00:54'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 21/Jan/2018, 12:00:54 am (UTC)'!
 command: aCommandString input: aStreamOrString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library,
 	except that aCommandString runs asynchronously in a child process."
@@ -12974,7 +9244,7 @@ command: aCommandString input: aStreamOrString
 
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 2/27/2002 15:24'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 27/Feb/2002, 7:24:00 pm (UTC)'!
 waitForCommand: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library.
 	The active Smalltalk process waits for completion of the external command process. This just
@@ -12994,7 +9264,7 @@ waitForCommand: aCommandString
 	^ proc
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 1/20/2018 20:03:54'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 21/Jan/2018, 12:03:54 am (UTC)'!
 waitForCommandOutput: aCommandString 
 	"Run a command in a shell process. Similar to the system(3) call in the 
 	standard C library. The active Smalltalk process waits for completion of
@@ -13013,7 +9283,7 @@ waitForCommandOutput: aCommandString
 			^ '']
 ! !
 
-!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 1/20/2018 20:03:32'!
+!UnixProcess methodsFor: 'external command processing' stamp: 'dtl 21/Jan/2018, 12:03:32 am (UTC)'!
 waitForCommandOutputArray: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library.
 	The active Smalltalk process waits for completion of the external command process."
@@ -13033,7 +9303,7 @@ waitForCommandOutputArray: aCommandString
 			^ Array with: '' with: '' with: nil]
 ! !
 
-!UnixProcess methodsFor: 'finalization' stamp: 'dtl 2/4/2015 23:39'!
+!UnixProcess methodsFor: 'finalization' stamp: 'dtl 5/Feb/2015, 3:39:00 am (UTC)'!
 finalize
 	"Use this to release any external resources prior to reinitializing."
 
@@ -13061,7 +9331,7 @@ finalize
 			processAccessor _ nil]
 ! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 2/27/2002 15:24'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 27/Feb/2002, 7:24:00 pm (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams 
 
 	"Call Unix vfork() and execve() to create a child process, and answer the 
@@ -13073,7 +9343,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 		environment: stringDictionary
 		descriptors: arrayOf3Streams! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 2/27/2015 20:04'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 28/Feb/2015, 12:04:00 am (UTC)'!
 forkHeadlessSqueak
 	"Just like forkSqueak, except that the child Squeak continues headless."
 
@@ -13107,7 +9377,7 @@ forkHeadlessSqueak
 				^ child]]
 ! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 1/7/2001 12:59'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 7/Jan/2001, 4:59:00 pm (UTC)'!
 forkHeadlessSqueakAndDo: aBlock 
 	"Start a new instance of Squeak running in a child OS process, and  
 	execute aBlock in the child instance. The new instance is a clone of 
@@ -13132,7 +9402,7 @@ forkHeadlessSqueakAndDo: aBlock
 	^ childOrThisProc
 ! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 8/7/2003 07:17'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 7/Aug/2003, 11:17:00 am (UTC)'!
 forkHeadlessSqueakAndDoThenQuit: aBlock 
 	"Start a new instance of Squeak running in a child OS process, and 
 	execute aBlock in the child instance. The new instance is a clone of
@@ -13161,7 +9431,7 @@ forkHeadlessSqueakAndDoThenQuit: aBlock
 			Smalltalk quitPrimitive].
 	^ childOrThisProc! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 12/27/2000 16:47'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 27/Dec/2000, 8:47:00 pm (UTC)'!
 forkJob: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Call Unix vfork() and execve() to create a child process, and answer the child process.
 	Delegate this to the singleton OSProcess>>thisOSProcess."
@@ -13172,7 +9442,7 @@ forkJob: executableFile arguments: arrayOfStrings environment: stringDictionary 
 		descriptors: arrayOf3Streams
 ! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 2/27/2015 20:04'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 28/Feb/2015, 12:04:00 am (UTC)'!
 forkSqueak
 	"Fork a child and continue running this Squeak image in both the parent and the child.
 	Parent and child are distinguished by the pid returned by primForkSqueak.
@@ -13220,7 +9490,7 @@ forkSqueak
 				^ child]]
 ! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 10/8/2001 19:56'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 8/Oct/2001, 11:56:00 pm (UTC)'!
 forkSqueakAndDo: aBlock
 	"Start a new instance of Squeak running in a child OS process. The new instance is a
 	clone of this image except for the return value of this method. It does not reload the
@@ -13238,7 +9508,7 @@ forkSqueakAndDo: aBlock
 	(childOrThisProc == self) ifTrue: [aBlock value]. "Child process"
 	^ childOrThisProc! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 10/8/2001 19:56'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 8/Oct/2001, 11:56:00 pm (UTC)'!
 forkSqueakAndDoThenQuit: aBlock
 	"Start a new instance of Squeak running in a child OS process. The new instance is a
 	clone of this image except for the return value of this method. It does not reload the
@@ -13259,7 +9529,7 @@ forkSqueakAndDoThenQuit: aBlock
 			Smalltalk quitPrimitive]. "Child process"
 	^ childOrThisProc! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 12/18/2022 17:22'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 18/Dec/2022, 9:22:00 pm (UTC)'!
 processProxy: anExternalProcess forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Call Unix vfork() and execve() to create a child process, and answer the child process.
 	This method is expected to be called by class side methods. Prepare the arguments before
@@ -13334,7 +9604,7 @@ processProxy: anExternalProcess forkAndExec: executableFile arguments: arrayOfSt
 	^ anExternalProcess
 ! !
 
-!UnixProcess methodsFor: 'child process creation' stamp: 'dtl 1/21/2001 11:47'!
+!UnixProcess methodsFor: 'child process creation' stamp: 'lrnp 23/Nov/2025, 8:57:00 am (UTC)'!
 squeak
 	"Start a new instance of Squeak running in a child OS process. The new 
 	instance will restart from the image file, so it is a clone of this image 
@@ -13344,11 +9614,13 @@ squeak
 
 	^ self
 		forkJob: self programName
-		arguments: self arguments
+		arguments: (self arguments isEmpty
+			ifFalse: [self arguments]
+			ifTrue: [{Smalltalk imageName} "On Mac, .image was opened from Finder."])
 		environment: nil
 		descriptors: nil! !
 
-!UnixProcess methodsFor: 'initialize - release' stamp: 'dtl 7/6/2010 21:55'!
+!UnixProcess methodsFor: 'initialize - release' stamp: 'dtl 7/Jul/2010, 1:55:00 am (UTC)'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is executing."
@@ -13364,7 +9636,7 @@ initialize
 	processAccessor restartChildWatcherProcess
 ! !
 
-!UnixProcess methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:49'!
+!UnixProcess methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:49:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -13373,7 +9645,7 @@ isResponsibleForThisPlatform
 	^ self class isUnix
 ! !
 
-!UnixProcess methodsFor: 'VM atexit' stamp: 'dtl 2/6/2015 20:38'!
+!UnixProcess methodsFor: 'VM atexit' stamp: 'dtl 7/Feb/2015, 12:38:00 am (UTC)'!
 killCurrentChildrenAtExit
 	"Arrange for the currently active child processes to receive a SIGTERM
 	signal then the Squeak VM exits. Each invokation of this method overrides
@@ -13384,7 +9656,7 @@ killCurrentChildrenAtExit
 	self processAccessor killOnVmExit: self activeChildren withSignal: nil
 ! !
 
-!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 5/18/2009 21:07'!
+!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 19/May/2009, 1:07:00 am (UTC)'!
 redirect: aFileStream to: newFileStream
 
 	| oldfd newfd |
@@ -13394,21 +9666,21 @@ redirect: aFileStream to: newFileStream
 	^ self processAccessor primDup: newfd to: oldfd
 ! !
 
-!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 5/17/2009 23:12'!
+!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 18/May/2009, 3:12:00 am (UTC)'!
 redirectStdErrTo: fileStream
 	"Redirect the standard error stream to another output stream."
 
 	^ self redirect: self stdErr to: fileStream
 ! !
 
-!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 5/17/2009 23:12'!
+!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 18/May/2009, 3:12:00 am (UTC)'!
 redirectStdInTo: fileStream
 	"Redirect the standard input stream to another input stream."
 
 	^ self redirect: self stdIn to: fileStream
 ! !
 
-!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 5/17/2009 23:11'!
+!UnixProcess methodsFor: 'IO redirection' stamp: 'dtl 18/May/2009, 3:11:00 am (UTC)'!
 redirectStdOutTo: fileStream
 	"Redirect the standard output stream to another output stream."
 
@@ -13420,7 +9692,7 @@ redirectStdOutTo: fileStream
 	^ self redirect: self stdOut to: fileStream
 ! !
 
-!UnixProcess methodsFor: 'updating' stamp: 'dtl 7/4/2010 22:35'!
+!UnixProcess methodsFor: 'updating' stamp: 'dtl 5/Jul/2010, 2:35:00 am (UTC)'!
 refreshFromProcessAccessor
 	"Set my instance variables to reflect the state of the OS process in which this Smalltalk
 	virtual machine is executing."
@@ -13440,7 +9712,7 @@ refreshFromProcessAccessor
 		self updateAllMyChildren]
 ! !
 
-!UnixProcess methodsFor: 'updating' stamp: 'dtl 10/20/2001 09:05'!
+!UnixProcess methodsFor: 'updating' stamp: 'dtl 20/Oct/2001, 1:05:00 pm (UTC)'!
 update: aParameter
 	"Framework to update some or all of the instance variables based on external events,
 	such as receipt of a sigchd signal when a child process exits."
@@ -13458,7 +9730,7 @@ update: aParameter
 		^ self].
 	self error: 'Unexpected update parameter'! !
 
-!UnixProcess methodsFor: 'child process management' stamp: 'dtl 2/5/2015 20:06'!
+!UnixProcess methodsFor: 'child process management' stamp: 'dtl 6/Feb/2015, 12:06:00 am (UTC)'!
 registerChildProcess: anOSProcess
 
 	self processAccessor sigChldSemaphore.
@@ -13466,85 +9738,85 @@ registerChildProcess: anOSProcess
 	^ super registerChildProcess: anOSProcess
 ! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:49'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:49:00 pm (UTC)'!
 sigabrt: anExternalOSProcess
 	"Send a SIGABRT signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigabrtTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:49'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:49:00 pm (UTC)'!
 sigalrm: anExternalOSProcess
 	"Send a SIGALRM signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigalrmTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:48'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:48:00 pm (UTC)'!
 sigchld: anExternalOSProcess
 	"Send a SIGCHLD signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigchldTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:48'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:48:00 pm (UTC)'!
 sigcont: anExternalOSProcess
 	"Send a SIGCONT signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigcontTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:48'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:48:00 pm (UTC)'!
 sighup: anExternalOSProcess
 	"Send a SIGHUP signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSighupTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:48'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:48:00 pm (UTC)'!
 sigint: anExternalOSProcess
 	"Send a SIGINT signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigintTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:48'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:48:00 pm (UTC)'!
 sigkill: anExternalOSProcess
 	"Send a SIGKILL signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigkillTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:48'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:48:00 pm (UTC)'!
 sigpipe: anExternalOSProcess
 	"Send a SIGPIPE signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigpipeTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:49'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:49:00 pm (UTC)'!
 sigquit: anExternalOSProcess
 	"Send a SIGQUIT signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigquitTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:50'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:50:00 pm (UTC)'!
 sigstop: anExternalOSProcess
 	"Send a SIGSTOP signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigstopTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:50'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:50:00 pm (UTC)'!
 sigterm: anExternalOSProcess
 	"Send a SIGTERM signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigtermTo: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:50'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:50:00 pm (UTC)'!
 sigusr1: anExternalOSProcess
 	"Send a SIGUSR1 signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigusr1To: anExternalOSProcess pid! !
 
-!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 7/6/2000 16:51'!
+!UnixProcess methodsFor: 'OS signal sending' stamp: 'dtl 6/Jul/2000, 8:51:00 pm (UTC)'!
 sigusr2: anExternalOSProcess
 	"Send a SIGUSR2 signal to the external process represented by anExternalOSProcess."
 
 	^ self processAccessor primSendSigusr2To: anExternalOSProcess pid! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 3/10/2001 09:52'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 10/Mar/2001, 1:52:00 pm (UTC)'!
 arguments
 
 	"UnixProcess arguments"
@@ -13552,7 +9824,7 @@ arguments
 	^ self thisOSProcess arguments
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 12/27/2000 17:18'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 27/Dec/2000, 9:18:00 pm (UTC)'!
 env
 	"Note: The #environment selector has special meaning for classes, so use #env."
 
@@ -13561,14 +9833,14 @@ env
 	^ self thisOSProcess environment
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 12/27/2000 17:16'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 27/Dec/2000, 9:16:00 pm (UTC)'!
 path
 	"UnixProcess path"
 
 	^ self thisOSProcess path
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 3/10/2001 09:53'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 10/Mar/2001, 1:53:00 pm (UTC)'!
 programName
 
 	"UnixProcess programName"
@@ -13576,7 +9848,7 @@ programName
 	^ self thisOSProcess programName
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 3/17/2002 13:38'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 17/Mar/2002, 5:38:00 pm (UTC)'!
 restartVirtualMachine
 	"Fork a new instance and quit this one. This moves the running VM into a new
 	OS process, and starts a new X display for the new process. It does not reload the
@@ -13597,7 +9869,7 @@ restartVirtualMachine
 					Smalltalk quitPrimitive]].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 3/10/2001 09:53'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 10/Mar/2001, 1:53:00 pm (UTC)'!
 sessionID
 
 	"UnixProcess sessionID"
@@ -13605,7 +9877,7 @@ sessionID
 	^ self thisOSProcess sessionID
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 7/13/2003 14:47'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 13/Jul/2003, 6:47:00 pm (UTC)'!
 startSwiki: aSwiki onPort: num loggingTo: aFileName
 	"Start a swiki in a headless Squeak image."
 
@@ -13624,28 +9896,28 @@ startSwiki: aSwiki onPort: num loggingTo: aFileName
 		[self notify: 'PWS not installed in this image']
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 12/27/2000 17:12'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 27/Dec/2000, 9:12:00 pm (UTC)'!
 stdErr
 	"UnixProcess stdErr"
 
 	^ self thisOSProcess stdErr
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 12/27/2000 17:11'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 27/Dec/2000, 9:11:00 pm (UTC)'!
 stdIn
 	"UnixProcess stdIn"
 
 	^ self thisOSProcess stdIn
 ! !
 
-!UnixProcess class methodsFor: 'utility' stamp: 'dtl 12/27/2000 17:11'!
+!UnixProcess class methodsFor: 'utility' stamp: 'dtl 27/Dec/2000, 9:11:00 pm (UTC)'!
 stdOut
 	"UnixProcess stdOut"
 
 	^ self thisOSProcess stdOut
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 2/24/2013 10:26'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 24/Feb/2013, 2:26:00 pm (UTC)'!
 backgroundProcessInHeadlessSqueak
 	"Demonstrate running a ''batch job'' in a low priority background Squeak,
 	with output written to an OSPipe. This Squeak image reads data from the
@@ -13690,7 +9962,7 @@ backgroundProcessInHeadlessSqueak
 	(Delay forSeconds: 5) wait] repeat]
 		forkAt: Processor userBackgroundPriority! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/16/2018 00:32'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 16/Jan/2018, 4:32:00 am (UTC)'!
 catAFile
 	"Copy contents of a file to standard output. This demonstrates reassigning stdin to an open FileStream."
 
@@ -13706,7 +9978,7 @@ catAFile
 	proc ifNil: [self noAccessorAvailable].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/16/2018 00:32'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 16/Jan/2018, 4:32:00 am (UTC)'!
 catFromFileToFiles
 	"Copy contents of a file to another file, with any error messages going 
 	to a third file."
@@ -13731,7 +10003,7 @@ catFromFileToFiles
 	proc ifNil: [self noAccessorAvailable].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 11/14/2000 00:07'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 14/Nov/2000, 4:07:00 am (UTC)'!
 clientServerDemo
 	"Start a new headless instance of Squeak running in a child OS process. The new
 	instance is a nearly identical copy of its parent, resuming execution at the same
@@ -13749,7 +10021,7 @@ clientServerDemo
 
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/7/2001 12:55'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/Jan/2001, 4:55:00 pm (UTC)'!
 clientServerDemo2
 	"Start a new instance of Squeak running in a child OS process. The new 
 	instance is a nearly identical copy of its parent, resuming execution at
@@ -13819,7 +10091,7 @@ clientServerDemo2
 		' bytes received (' , (bytesReceived * 1000 // t) printString , ' bytes/sec)'; cr.
 	^ bytesReceived! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 9/9/2000 16:00'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 9/Sep/2000, 8:00:00 pm (UTC)'!
 cloneSqueak
 	"Start a new instance of Squeak running in a child OS process. The new instance is a
 	nearly identical copy of its parent, resuming execution at the same point as the
@@ -13833,7 +10105,7 @@ cloneSqueak
 	^ proc
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:31'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 12/Jul/2000, 8:31:00 am (UTC)'!
 eightLeafSqueakTree
 	"Clone this squeak three times, resulting in a total of (2 raisedTo: 3) nearly identical
 	squeaks. Have a look at the pidArray inspectors and to the debug messages on stdout
@@ -13866,7 +10138,7 @@ eightLeafSqueakTree
 	this stdOut nextPutAll: debugString.
 	^ pidArray! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 05:11'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 12/Jul/2000, 9:11:00 am (UTC)'!
 headlessChild
 	"Start a new instance of Squeak running in a child OS process. The new
 	instance is a nearly identical copy of its parent, resuming execution at the
@@ -13886,7 +10158,7 @@ headlessChild
 
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:34'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 12/Jul/2000, 8:34:00 am (UTC)'!
 listDirectory
 	"Execute a simple command, sending output to standard output."
 
@@ -13901,7 +10173,7 @@ listDirectory
 	proc ifNil: [self noAccessorAvailable].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:35'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 12/Jul/2000, 8:35:00 am (UTC)'!
 spawnTenHeadlessChildren
 	"Spawn ten Squeak children, each of which writes a message to standard 
 	output, then exits. Answer an array of pid values for the child 
@@ -13926,7 +10198,7 @@ spawnTenHeadlessChildren
 			children at: e put: (self forkHeadlessSqueakAndDoThenQuit: childBlock)].
 	^ children! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:38'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 12/Jul/2000, 8:38:00 am (UTC)'!
 squeakSqueak
 	"Start a new instance of Squeak running in a child OS process. The new instance
 	will restart from the image file, so it is a clone of this image as it existed at the
@@ -13941,7 +10213,7 @@ squeakSqueak
 	^ proc
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 7/12/2000 04:41'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 12/Jul/2000, 8:41:00 am (UTC)'!
 testEnvSet
 	"Set up a new environment for a child process. Exec a shell to show the 
 	environment variables on the terminal standard output. Note that many 
@@ -13963,7 +10235,7 @@ testEnvSet
 	proc ifNil: [self noAccessorAvailable].
 	^ proc! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 2/11/2001 14:03'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 11/Feb/2001, 6:03:00 pm (UTC)'!
 testPipe
 	"Create an OS pipe, write some text to it, and read the text back from the 
 	other end of the pipe."
@@ -13982,7 +10254,7 @@ testPipe
 	p reader close.
 	^ r! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 2/24/2001 16:28'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 24/Feb/2001, 8:28:00 pm (UTC)'!
 testPipeLine
 	"Create two OS pipes, and a child OS process with its input connected to 
 	one pipe and its  output connected to the other pipe. Write some text to
@@ -14025,7 +10297,7 @@ testPipeLine
 	^ result
 ! !
 
-!UnixProcess class methodsFor: 'examples' stamp: 'dtl 1/15/2018 22:09:27'!
+!UnixProcess class methodsFor: 'examples' stamp: 'dtl 16/Jan/2018, 2:09:27 am (UTC)'!
 testRunCommand
 	"Run the command 'ls -l /etc /etc/noSuchFile'. The output of the 
 	command will be in the file '/tmp/deleteMe.out', and the error output
@@ -14055,7 +10327,7 @@ testRunCommand
 	err close.
 	^ proc! !
 
-!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 8/5/2003 22:10'!
+!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 6/Aug/2003, 2:10:00 am (UTC)'!
 canConnectToXDisplay: xDisplayName
 	"Deprecated. See ThisOSProcess>canConnectToXDisplay:"
 
@@ -14064,7 +10336,7 @@ canConnectToXDisplay: xDisplayName
 	^ self thisOSProcess canConnectToXDisplay: xDisplayName
 ! !
 
-!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 8/5/2003 22:10'!
+!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 6/Aug/2003, 2:10:00 am (UTC)'!
 currentXDisplayName
 	"Deprecated. See ThisOSProcess>>currentXDisplayName"
 
@@ -14073,7 +10345,7 @@ currentXDisplayName
 	^ self thisOSProcess currentXDisplayName
 ! !
 
-!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 8/5/2003 22:09'!
+!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 6/Aug/2003, 2:09:00 am (UTC)'!
 decapitate
 	"Deprecated. See ThisOSProcess>>decapitate"
 
@@ -14081,7 +10353,7 @@ decapitate
 
 	^ OSProcess thisOSProcess decapitate! !
 
-!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 8/5/2003 22:18'!
+!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 6/Aug/2003, 2:18:00 am (UTC)'!
 displayOnXServer: xDisplayName
 	"Deprecated. See ThisOSProcess>>displayOnXServer"
 
@@ -14093,7 +10365,7 @@ displayOnXServer: xDisplayName
 
 	^ OSProcess thisOSProcess displayOnXServer: xDisplayName! !
 
-!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 8/5/2003 22:15'!
+!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 6/Aug/2003, 2:15:00 am (UTC)'!
 recapitate
 	"Deprecated. See ThisOSProcess>>recapitate"
 
@@ -14101,7 +10373,7 @@ recapitate
 
 	^ OSProcess thisOSProcess recapitate! !
 
-!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 8/5/2003 22:18'!
+!UnixProcess class methodsFor: 'X display - deprecated' stamp: 'dtl 6/Aug/2003, 2:18:00 am (UTC)'!
 setXDisplayName: xDisplayName
 	"Deprecated. See ThisOSProcess>>setXDisplayName"
 
@@ -14112,7 +10384,7 @@ setXDisplayName: xDisplayName
 
 ! !
 
-!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 12/27/2000 16:57'!
+!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 27/Dec/2000, 8:57:00 pm (UTC)'!
 forkHeadlessSqueakAndDo: aBlock 
 	"Start a new instance of Squeak running in a child OS process, and  
 	execute aBlock in the child instance. The new instance is a clone of 
@@ -14130,7 +10402,7 @@ forkHeadlessSqueakAndDo: aBlock
 
 ! !
 
-!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 12/27/2000 17:00'!
+!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 27/Dec/2000, 9:00:00 pm (UTC)'!
 forkHeadlessSqueakAndDoThenQuit: aBlock 
 	"Start a new instance of Squeak running in a child OS process, and 
 	execute aBlock in the child instance. The new instance is a clone of
@@ -14147,7 +10419,7 @@ forkHeadlessSqueakAndDoThenQuit: aBlock
 	^ self thisOSProcess forkHeadlessSqueakAndDoThenQuit: aBlock
 ! !
 
-!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 12/27/2000 16:48'!
+!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 27/Dec/2000, 8:48:00 pm (UTC)'!
 forkJob: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams 
 	"Call Unix vfork() and execve() to create a child process, and answer the 
 	child process. Delegate this to the singleton OSProcess>>thisOSProcess."
@@ -14158,7 +10430,7 @@ forkJob: executableFile arguments: arrayOfStrings environment: stringDictionary 
 		environment: stringDictionary
 		descriptors: arrayOf3Streams! !
 
-!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 7/5/2000 07:19'!
+!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 5/Jul/2000, 11:19:00 am (UTC)'!
 forkSqueak
 	"Start a new instance of Squeak running in a child OS process. The new instance is a
 	clone of this image except for the return value of this method. It does not reload the
@@ -14173,7 +10445,7 @@ forkSqueak
 	^ self thisOSProcess forkSqueak.
 ! !
 
-!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 10/8/2001 20:40'!
+!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 9/Oct/2001, 12:40:00 am (UTC)'!
 forkSqueakAndDo: aBlock
 	"Start a new instance of Squeak running in a child OS process. The new instance is a
 	clone of this image except for the return value of this method. It does not reload the
@@ -14189,7 +10461,7 @@ forkSqueakAndDo: aBlock
 	^ self thisOSProcess forkSqueakAndDo: aBlock
 ! !
 
-!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 10/8/2001 20:41'!
+!UnixProcess class methodsFor: 'child process creation' stamp: 'dtl 9/Oct/2001, 12:41:00 am (UTC)'!
 forkSqueakAndDoThenQuit: aBlock
 	"Start a new instance of Squeak running in a child OS process. The new instance is a
 	clone of this image except for the return value of this method. It does not reload the
@@ -14205,7 +10477,7 @@ forkSqueakAndDoThenQuit: aBlock
 	^ self thisOSProcess forkSqueakAndDoThenQuit: aBlock
 ! !
 
-!UnixProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:49'!
+!UnixProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:49:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for
 	the Squeak VM running on the current platform."
@@ -14213,7 +10485,7 @@ isResponsibleForThisPlatform
 	^ self isUnix
 ! !
 
-!UnixProcess class methodsFor: 'utility - VM building' stamp: 'dtl 10/19/2001 13:31'!
+!UnixProcess class methodsFor: 'utility - VM building' stamp: 'dtl 19/Oct/2001, 5:31:00 pm (UTC)'!
 makeVmIn: buildDirectoryPathName
 	"Rebuild the virtual machine and plugins in the buildDirectoryPathName
 	directory. If the build is successful, save the image and restart using the
@@ -14227,7 +10499,7 @@ makeVmIn: buildDirectoryPathName
 
 ! !
 
-!UnixProcess class methodsFor: 'utility - VM building' stamp: 'dtl 10/19/2001 11:41'!
+!UnixProcess class methodsFor: 'utility - VM building' stamp: 'dtl 19/Oct/2001, 3:41:00 pm (UTC)'!
 makeVmIn: buildDirectoryPathName interactive: aBoolean
 	"Rebuild the virtual machine and plugins in the buildDirectoryPathName
 	directory. If the build is successful, save the image and restart using the
@@ -14256,7 +10528,7 @@ makeVmIn: buildDirectoryPathName interactive: aBoolean
 	^ result
 ! !
 
-!UnixProcess class methodsFor: 'unit tests' stamp: 'dtl 3/5/2005 14:19'!
+!UnixProcess class methodsFor: 'unit tests' stamp: 'dtl 5/Mar/2005, 6:19:00 pm (UTC)'!
 runTests
 	"Run a few tests to see if things are working correctly on Unix/Linux. 
 	Output is on stdout, stderr, and the Squeak Transcript. One of the tests 
@@ -14404,7 +10676,7 @@ runTests
 	^ result
 ! !
 
-!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 7/23/2010 07:50'!
+!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 23/Jul/2010, 11:50:00 am (UTC)'!
 saveImageInBackground
 	"Save image in a background OS process."
 
@@ -14413,7 +10685,7 @@ saveImageInBackground
 	^ self saveImageInBackground: self uniqueNameForSavedImage nice: false
 ! !
 
-!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 1/20/2018 20:24:18'!
+!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 21/Jan/2018, 12:24:18 am (UTC)'!
 saveImageInBackground: savedImageName nice: niceFlag
 	"When Squeak is used as a server it is sometimes desirable to periodically
 	save image snapshots. This method forks a headless Squeak to perform a
@@ -14444,7 +10716,7 @@ saveImageInBackground: savedImageName nice: niceFlag
 			snapshot: true andQuit: true]
 ! !
 
-!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 7/23/2010 07:50'!
+!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 23/Jul/2010, 11:50:00 am (UTC)'!
 saveImageInBackgroundNicely
 	"Save image in a background OS process with lowered scheduling priority."
 
@@ -14453,7 +10725,7 @@ saveImageInBackgroundNicely
 	^ self saveImageInBackground: self uniqueNameForSavedImage nice: true
 ! !
 
-!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 11/8/2005 11:39'!
+!UnixProcess class methodsFor: 'utility - image save' stamp: 'dtl 8/Nov/2005, 3:39:00 pm (UTC)'!
 uniqueNameForSavedImage
 	"A time stamped image name that will sort in date order in a directory listing"
 
@@ -14475,7 +10747,7 @@ uniqueNameForSavedImage
 		(second size < 2 ifTrue: ['0', second] ifFalse: [second])
 ! !
 
-!UnixProcess class methodsFor: 'external command processing' stamp: 'dtl 1/18/2001 23:14'!
+!UnixProcess class methodsFor: 'external command processing' stamp: 'dtl 19/Jan/2001, 3:14:00 am (UTC)'!
 waitForCommandOutput: aCommandString 
 	"Run a command in a shell process. Similar to the system(3) call in the 
 	standard C library. The active Smalltalk process waits for completion of
@@ -14487,7 +10759,7 @@ waitForCommandOutput: aCommandString
 	^ self thisOSProcess waitForCommandOutput: aCommandString
 ! !
 
-!UnixProcess class methodsFor: 'external command processing' stamp: 'dtl 1/18/2001 23:14'!
+!UnixProcess class methodsFor: 'external command processing' stamp: 'dtl 19/Jan/2001, 3:14:00 am (UTC)'!
 waitForCommandOutputArray: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library.
 	The active Smalltalk process waits for completion of the external command process."
@@ -14496,26 +10768,26 @@ waitForCommandOutputArray: aCommandString
 
 	^ self thisOSProcess waitForCommandOutputArray: aCommandString! !
 
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 22:02'!
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 23/Feb/2002, 2:02:00 am (UTC)'!
 environment
 
 	^ environment
 ! !
 
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:15'!
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 28/Feb/2002, 11:15:00 am (UTC)'!
 mainThread
 	"The main thread for this OS process. The handle for this thread is a
 	pseudo-handle, and cannot be used to close the main thread."
 
 	^ mainThread ifNil: [mainThread _ processAccessor getMainThread]! !
 
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/22/2002 16:43'!
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 22/Feb/2002, 8:43:00 pm (UTC)'!
 pid
 
 	^ pid _ self processAccessor primGetPid
 ! !
 
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 07:26'!
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 28/Feb/2002, 11:26:00 am (UTC)'!
 processHandle
 	"The handle for this OS process. This is a pseudo-handle, a constant provided
 	by Windows to represent the process. Note that the main thread handle is also
@@ -14524,7 +10796,7 @@ processHandle
 	^ processHandle ifNil: [processHandle _ self processAccessor primGetPidHandle]
 ! !
 
-!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 2/28/2002 08:04'!
+!WindowsProcess methodsFor: 'accessing' stamp: 'dtl 28/Feb/2002, 12:04:00 pm (UTC)'!
 threads
 	"One or more threads of execution within the OS process. The main
 	thread for the process is held by the mainThread variable and is not
@@ -14534,14 +10806,14 @@ threads
 	^ threads ifNil: [threads _ OrderedCollection new]
 ! !
 
-!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 2/26/2002 16:08'!
+!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 26/Feb/2002, 8:08:00 pm (UTC)'!
 activeHandles
 	"Answer an Array of handles for all children that are believed to be running."
 
 	^ (self activeChildren collect: [:c | c handle]) asArray
 ! !
 
-!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 2/5/2015 20:06'!
+!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 6/Feb/2015, 12:06:00 am (UTC)'!
 registerChildProcess: anOSProcess
 	"Register the external process and set an exit handler thread to signal when
 	the process exits."
@@ -14551,7 +10823,7 @@ registerChildProcess: anOSProcess
 	^ anOSProcess
 ! !
 
-!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 1/13/2007 09:49'!
+!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 13/Jan/2007, 1:49:00 pm (UTC)'!
 restartChildWatcherThread
 	"Set an exit handler thread to signal when the process exits."
 
@@ -14559,14 +10831,14 @@ restartChildWatcherThread
 	^ self processAccessor restartChildWatcherThread: self activeHandles
 ! !
 
-!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 2/28/2002 08:17'!
+!WindowsProcess methodsFor: 'child process management' stamp: 'dtl 28/Feb/2002, 12:17:00 pm (UTC)'!
 updateActiveChildren
 
 	super updateActiveChildren.
 	self restartChildWatcherThread
 ! !
 
-!WindowsProcess methodsFor: 'console' stamp: 'dtl 9/7/2002 20:57'!
+!WindowsProcess methodsFor: 'console' stamp: 'dtl 8/Sep/2002, 12:57:00 am (UTC)'!
 closeConsole
 	"Close the console. The standard input, output and error streams will no longer be available."
 
@@ -14576,7 +10848,7 @@ closeConsole
 	self refreshFromProcessAccessor
 ! !
 
-!WindowsProcess methodsFor: 'console' stamp: 'dtl 9/7/2002 20:57'!
+!WindowsProcess methodsFor: 'console' stamp: 'dtl 8/Sep/2002, 12:57:00 am (UTC)'!
 openConsole
 	"Open a console. This makes the standard input, output and error streams available."
 
@@ -14586,7 +10858,7 @@ openConsole
 	self refreshFromProcessAccessor
 ! !
 
-!WindowsProcess methodsFor: 'child process creation' stamp: 'dtl 2/28/2002 14:48'!
+!WindowsProcess methodsFor: 'child process creation' stamp: 'dtl 28/Feb/2002, 6:48:00 pm (UTC)'!
 command: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in
 	the standard C library, except that aCommandString runs asynchronously
@@ -14598,7 +10870,7 @@ command: aCommandString
 	^ ExternalWindowsOSProcess command: aCommandString
 ! !
 
-!WindowsProcess methodsFor: 'child process creation' stamp: 'dtl 10/18/2001 20:19'!
+!WindowsProcess methodsFor: 'child process creation' stamp: 'dtl 19/Oct/2001, 12:19:00 am (UTC)'!
 forkAndExec: executableFile arguments: arrayOfStrings environment: stringDictionary descriptors: arrayOf3Streams
 	"Use my processAccessor to call vfork() and execve() and create a
 	new child task. Answer a proxy for the new task, an instance of
@@ -14607,7 +10879,7 @@ forkAndExec: executableFile arguments: arrayOfStrings environment: stringDiction
 	self notYetImplemented
 ! !
 
-!WindowsProcess methodsFor: 'child process creation' stamp: 'dtl 11/24/2008 17:47'!
+!WindowsProcess methodsFor: 'child process creation' stamp: 'dtl 24/Nov/2008, 9:47:00 pm (UTC)'!
 waitForCommand: aCommandString
 	"Run a command in a shell process. Similar to the system(3) call in the standard C library.
 	The active Smalltalk process waits for completion of the external command process. This just
@@ -14622,7 +10894,7 @@ waitForCommand: aCommandString
 	^ proc
 ! !
 
-!WindowsProcess methodsFor: 'environment' stamp: 'DamienCassou 5/3/2012 11:53'!
+!WindowsProcess methodsFor: 'environment' stamp: 'DamienCassou 3/May/2012, 3:53:00 pm (UTC)'!
 environmentAt: aSymbol
 	"Answer an environment variable for the external OS process, and update the dictionary
 	in this Smalltalk object."
@@ -14630,7 +10902,7 @@ environmentAt: aSymbol
 	^ environment at: aSymbol asSymbol ifAbsent: []
 ! !
 
-!WindowsProcess methodsFor: 'environment' stamp: 'DamienCassou 5/3/2012 11:53'!
+!WindowsProcess methodsFor: 'environment' stamp: 'DamienCassou 3/May/2012, 3:53:00 pm (UTC)'!
 environmentAt: aSymbol put: aString
 	"Set an environment variable for the external OS process, and update the dictionary in
 	this Smalltalk object."
@@ -14643,7 +10915,7 @@ environmentAt: aSymbol put: aString
 
 ! !
 
-!WindowsProcess methodsFor: 'environment' stamp: 'dtl 1/24/2013 19:23'!
+!WindowsProcess methodsFor: 'environment' stamp: 'dtl 24/Jan/2013, 11:23:00 pm (UTC)'!
 getCwd
 	"Get current working directory. If this cannot be obtained from the
 	environment, answer a reasonable default."
@@ -14656,7 +10928,7 @@ getCwd
 
 ! !
 
-!WindowsProcess methodsFor: 'environment' stamp: 'dtl 9/25/2005 05:11'!
+!WindowsProcess methodsFor: 'environment' stamp: 'dtl 25/Sep/2005, 9:11:00 am (UTC)'!
 path
 	"Newer versions of Windows mixed case"
 
@@ -14666,7 +10938,7 @@ path
 				at: #Path
 				ifAbsent: ['']]! !
 
-!WindowsProcess methodsFor: 'private' stamp: 'dtl 2/22/2002 22:00'!
+!WindowsProcess methodsFor: 'private' stamp: 'dtl 23/Feb/2002, 2:00:00 am (UTC)'!
 getEnvironmentDictionary
 	"Answer an environment dictionary using an OSProcessAccessor."
 
@@ -14684,7 +10956,7 @@ getEnvironmentDictionary
 			^ env]
 ! !
 
-!WindowsProcess methodsFor: 'private' stamp: 'dtl 9/7/2002 20:55'!
+!WindowsProcess methodsFor: 'private' stamp: 'dtl 8/Sep/2002, 12:55:00 am (UTC)'!
 setStdErr
 	"Reset to nil if the console has been closed"
 
@@ -14693,7 +10965,7 @@ setStdErr
 		ifFalse: [super setStdErr]
 ! !
 
-!WindowsProcess methodsFor: 'private' stamp: 'dtl 9/7/2002 20:55'!
+!WindowsProcess methodsFor: 'private' stamp: 'dtl 8/Sep/2002, 12:55:00 am (UTC)'!
 setStdIn
 	"Reset to nil if the console has been closed"
 
@@ -14702,7 +10974,7 @@ setStdIn
 		ifFalse: [super setStdIn]
 ! !
 
-!WindowsProcess methodsFor: 'private' stamp: 'dtl 9/7/2002 20:55'!
+!WindowsProcess methodsFor: 'private' stamp: 'dtl 8/Sep/2002, 12:55:00 am (UTC)'!
 setStdOut
 	"Reset to nil if the console has been closed"
 
@@ -14711,7 +10983,7 @@ setStdOut
 		ifFalse: [super setStdOut]
 ! !
 
-!WindowsProcess methodsFor: 'initialize - release' stamp: 'dtl 7/9/2021 18:36'!
+!WindowsProcess methodsFor: 'initialize - release' stamp: 'dtl 9/Jul/2021, 10:36:00 pm (UTC)'!
 initialize
 	"Set my instance variables to reflect the state of the OS process in which 
 	this Smalltalk virtual machine is executing. On Windows, we cannot rely
@@ -14730,7 +11002,7 @@ initialize
 	self refreshFromProcessAccessor
 ! !
 
-!WindowsProcess methodsFor: 'initialize - release' stamp: 'dtl 2/28/2002 07:16'!
+!WindowsProcess methodsFor: 'initialize - release' stamp: 'dtl 28/Feb/2002, 11:16:00 am (UTC)'!
 resetThreads
 	"If any cleanup is required, do it here."
 
@@ -14738,7 +11010,7 @@ resetThreads
 	mainThread _ nil
 ! !
 
-!WindowsProcess methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:50'!
+!WindowsProcess methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:50:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true is this is an instance of the class which is responsible for representing
 	the OS process for the Squeak VM running on the current platform. A false answer is
@@ -14747,7 +11019,7 @@ isResponsibleForThisPlatform
 	^ self class isWindows
 ! !
 
-!WindowsProcess methodsFor: 'updating' stamp: 'dtl 9/7/2002 20:47'!
+!WindowsProcess methodsFor: 'updating' stamp: 'dtl 8/Sep/2002, 12:47:00 am (UTC)'!
 refreshFromProcessAccessor
 	"Set my instance variables to reflect the state of the OS process in which this Smalltalk
 	virtual machine is executing."
@@ -14760,7 +11032,7 @@ refreshFromProcessAccessor
 	environment _ self getEnvironmentDictionary
 ! !
 
-!WindowsProcess methodsFor: 'updating' stamp: 'dtl 2/25/2002 08:29'!
+!WindowsProcess methodsFor: 'updating' stamp: 'dtl 25/Feb/2002, 12:29:00 pm (UTC)'!
 update: aParameter
 	"Framework to update some or all of the instance variables based on external events,
 	such as receipt of a sigchd signal when a child process exits."
@@ -14778,7 +11050,7 @@ update: aParameter
 		^ self].
 	self error: 'Unexpected update parameter'! !
 
-!WindowsProcess class methodsFor: 'platform identification' stamp: 'dtl 8/30/2003 17:50'!
+!WindowsProcess class methodsFor: 'platform identification' stamp: 'dtl 30/Aug/2003, 9:50:00 pm (UTC)'!
 isResponsibleForThisPlatform
 	"Answer true if this class is responsible for representing the OS process for
 	the Squeak VM running on the current platform."
@@ -14786,7 +11058,7 @@ isResponsibleForThisPlatform
 	^ self isWindows
 ! !
 
-!UnixProcessExitStatus methodsFor: 'printing' stamp: 'dtl 8/22/2012 23:18'!
+!UnixProcessExitStatus methodsFor: 'printing' stamp: 'dtl 23/Aug/2012, 3:18:00 am (UTC)'!
 printOn: aStream
 
 	self isExited
@@ -14799,7 +11071,7 @@ printOn: aStream
 		ifTrue: [aStream nextPutAll: 'stopped due to signal ';
 				nextPutAll: self statusIfStopped].! !
 
-!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 8/22/2012 23:10'!
+!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 23/Aug/2012, 3:10:00 am (UTC)'!
 exitStatus
 	self isExited ifTrue: [^self statusIfExited].
 	self isSignaled ifTrue: [^self statusIfSignaled].
@@ -14807,7 +11079,7 @@ exitStatus
 	self notify: 'cannot decode exit status ', intValue asString.
 	^intValue! !
 
-!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 8/22/2012 23:11'!
+!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 23/Aug/2012, 3:11:00 am (UTC)'!
 statusIfExited
 	"
 	/* If WIFEXITED(STATUS), the low-order 8 bits of the status.  */
@@ -14815,7 +11087,7 @@ statusIfExited
 	"
 	^(intValue bitAnd: 16rFF00) >> 8! !
 
-!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 8/22/2012 23:11'!
+!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 23/Aug/2012, 3:11:00 am (UTC)'!
 statusIfSignaled
 	"
 	/* If WIFSIGNALED(STATUS), the terminating signal.  */
@@ -14823,7 +11095,7 @@ statusIfSignaled
 	"
 	^intValue bitAnd: 16r7F! !
 
-!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 8/22/2012 22:28'!
+!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 23/Aug/2012, 2:28:00 am (UTC)'!
 statusIfStopped
 	"
 	/* If WIFSTOPPED(STATUS), the signal that stopped the child.  */
@@ -14831,15 +11103,15 @@ statusIfStopped
 	"
 	^self statusIfExited! !
 
-!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 8/22/2012 23:11'!
+!UnixProcessExitStatus methodsFor: 'accessing' stamp: 'dtl 23/Aug/2012, 3:11:00 am (UTC)'!
 value
 	^intValue! !
 
-!UnixProcessExitStatus methodsFor: 'initialize-release' stamp: 'dtl 8/22/2012 23:10'!
+!UnixProcessExitStatus methodsFor: 'initialize-release' stamp: 'dtl 23/Aug/2012, 3:10:00 am (UTC)'!
 for: anInteger
 	intValue _ anInteger! !
 
-!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 8/22/2012 22:32'!
+!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 23/Aug/2012, 2:32:00 am (UTC)'!
 isExited
 	"
 	/* Nonzero if STATUS indicates normal termination.  */
@@ -14849,7 +11121,7 @@ isExited
 
 ! !
 
-!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 8/22/2012 23:11'!
+!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 23/Aug/2012, 3:11:00 am (UTC)'!
 isSignaled
 	"
 	/* Nonzero if STATUS indicates termination by a signal.  */
@@ -14860,7 +11132,7 @@ isSignaled
 
 ! !
 
-!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 8/22/2012 23:11'!
+!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 23/Aug/2012, 3:11:00 am (UTC)'!
 isStopped
 	"
 	/* Nonzero if STATUS indicates the child is stopped.  */
@@ -14870,24 +11142,24 @@ isStopped
 
 ! !
 
-!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 8/22/2012 23:31'!
+!UnixProcessExitStatus methodsFor: 'testing' stamp: 'dtl 23/Aug/2012, 3:31:00 am (UTC)'!
 isSuccess
 	^self exitStatus = 0! !
 
-!UnixProcessExitStatus class methodsFor: 'instance creation' stamp: 'dtl 8/22/2012 21:24'!
+!UnixProcessExitStatus class methodsFor: 'instance creation' stamp: 'dtl 23/Aug/2012, 1:24:00 am (UTC)'!
 for: integerValue
 
 	^self new for: integerValue
 ! !
 
-!WindowsThread methodsFor: 'printing' stamp: 'dtl 2/27/2002 12:02'!
+!WindowsThread methodsFor: 'printing' stamp: 'dtl 27/Feb/2002, 4:02:00 pm (UTC)'!
 printOn: aStream
 
 	super printOn: aStream.
 	aStream nextPutAll: ' (', self threadID printString, ', ', self runState, ')'
 ! !
 
-!WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 2/25/2002 07:38'!
+!WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 25/Feb/2002, 11:38:00 am (UTC)'!
 closeHandle
 	"Clean up after thread exits."
 
@@ -14895,12 +11167,12 @@ closeHandle
 	handle _ nil
 ! !
 
-!WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 2/25/2002 07:03'!
+!WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 25/Feb/2002, 11:03:00 am (UTC)'!
 initialize
 
 	self runState! !
 
-!WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 2/27/2002 11:35'!
+!WindowsThread methodsFor: 'initialize - release' stamp: 'dtl 27/Feb/2002, 3:35:00 pm (UTC)'!
 terminate
 	"Force an exit. No cleanup is performed. Use with caution for a thread which
 	is (for example) manipulating a mutex."
@@ -14910,21 +11182,21 @@ terminate
 		self complete]
 ! !
 
-!WindowsThread methodsFor: 'setting run state' stamp: 'dtl 2/26/2002 10:45'!
+!WindowsThread methodsFor: 'setting run state' stamp: 'dtl 26/Feb/2002, 2:45:00 pm (UTC)'!
 complete
 	"Thread has exited."
 
 	self closeHandle; runState: #complete
 ! !
 
-!WindowsThread methodsFor: 'setting run state' stamp: 'dtl 2/25/2002 06:36'!
+!WindowsThread methodsFor: 'setting run state' stamp: 'dtl 25/Feb/2002, 10:36:00 am (UTC)'!
 running
 	"Thread is scheduled to run."
 
 	self runState: #running
 ! !
 
-!WindowsThread methodsFor: 'setting run state' stamp: 'dtl 2/25/2002 06:36'!
+!WindowsThread methodsFor: 'setting run state' stamp: 'dtl 25/Feb/2002, 10:36:00 am (UTC)'!
 unknownRunState
 	"Unable to determine the current run state of the thread, possibly because
 	this is a stale reference to a thread which no longer exists."
@@ -14932,61 +11204,61 @@ unknownRunState
 	self runState: #unknownRunState
 ! !
 
-!WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 06:39'!
+!WindowsThread methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 10:39:00 am (UTC)'!
 handle
 	"A Windows HANDLE represented as a ByteArray."
 
 	^ handle! !
 
-!WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 06:38'!
+!WindowsThread methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 10:38:00 am (UTC)'!
 handle: aHandleObject
 	"A Windows HANDLE represented as a ByteArray."
 
 	handle _ aHandleObject! !
 
-!WindowsThread methodsFor: 'accessing' stamp: 'dtl 1/25/2004 11:01'!
+!WindowsThread methodsFor: 'accessing' stamp: 'dtl 25/Jan/2004, 3:01:00 pm (UTC)'!
 runState
 
 	^ runState ifNil: [self unknownRunState]
 ! !
 
-!WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 07:02'!
+!WindowsThread methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 11:02:00 am (UTC)'!
 runState: aSymbol
 
 	runState _ aSymbol
 ! !
 
-!WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 06:40'!
+!WindowsThread methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 10:40:00 am (UTC)'!
 threadID
 	"A unique identifier for the thread."
 
 	^ threadID
 ! !
 
-!WindowsThread methodsFor: 'accessing' stamp: 'dtl 2/25/2002 06:40'!
+!WindowsThread methodsFor: 'accessing' stamp: 'dtl 25/Feb/2002, 10:40:00 am (UTC)'!
 threadID: anInteger
 	"A unique identifier for the thread."
 
 	threadID _ anInteger
 ! !
 
-!WindowsThread methodsFor: 'testing' stamp: 'dtl 2/25/2002 06:37'!
+!WindowsThread methodsFor: 'testing' stamp: 'dtl 25/Feb/2002, 10:37:00 am (UTC)'!
 isComplete
 
 	^ self runState == #complete! !
 
-!WindowsThread methodsFor: 'testing' stamp: 'dtl 2/25/2002 06:37'!
+!WindowsThread methodsFor: 'testing' stamp: 'dtl 25/Feb/2002, 10:37:00 am (UTC)'!
 isRunning
 
 	^ self runState == #running! !
 
-!WindowsThread class methodsFor: 'instance creation' stamp: 'dtl 2/25/2002 07:00'!
+!WindowsThread class methodsFor: 'instance creation' stamp: 'dtl 25/Feb/2002, 11:00:00 am (UTC)'!
 threadID: anInteger handle: aHandleObject
 
 	^ super new threadID: anInteger; handle: aHandleObject; initialize
 ! !
 
-!WindowsThread class methodsFor: 'instance creation' stamp: 'dtl 2/26/2002 07:17'!
+!WindowsThread class methodsFor: 'instance creation' stamp: 'dtl 26/Feb/2002, 11:17:00 am (UTC)'!
 threadID: anInteger handle: aHandleObject running: trueOrFalse
 
 	| thread |
@@ -14995,204 +11267,3937 @@ threadID: anInteger handle: aHandleObject running: trueOrFalse
 	^ thread
 ! !
 
-!AioEventHandlerExample methodsFor: 'initialize-release' stamp: 'dtl 9/4/2003 06:20'!
-close
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'accessing' stamp: 'dtl 30/Apr/2006, 5:47:00 pm (UTC)'!
+delay
+	"Answer the value of delay"
 
-	self handler close.
-	self handler removeDependent: self
-! !
+	^ delay! !
 
-!AioEventHandlerExample methodsFor: 'updating' stamp: 'dtl 2/24/2013 10:22'!
-getAvailableData
-	"Obtain all available data from ioStream. For a FileStream, keep reading until
-	a line terminator is reached. This allows use with a FileStream that has not been
-	set for nonblocking input."
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'remote image commands' stamp: 'dtl 15/Dec/2013, 7:50:00 pm (UTC)'!
+doRemote: remoteBlock doLocal: localBlock
+	"Evaluate remoteBlock in a remote Squeak image. While the remote Squeak is
+	still running, evaluate localBlock. When done, terminate the remote Squeak
+	image and answer the result of evaluating localBlock."
 
-	| ws c buffer n |
-	buffer _ String new: 4000.
-	(self ioStream isKindOf: FileStream)
+	"self new
+		doRemote: [OSProcess thisOSProcess stdOut nextPutAll: 'hello from child Squeak';
+						nextPut: Character lf]
+		doLocal: [(Delay forSeconds: 1) wait.
+						OSProcess thisOSProcess stdOut nextPutAll: 'hello from parent Squeak';
+					nextPut: Character lf]"
+
+	| result |
+	self shouldnt: [remoteProcess _ OSProcess thisOSProcess forkHeadlessSqueak]
+		raise: Warning.
+	self assert: remoteProcess notNil. "Fail if fork did not succeed"
+	(remoteProcess == OSProcess thisOSProcess)
 		ifTrue:
-			[ws _ WriteStream on: String new.
-			[c _ ioStream next.
-			(c == Character lf)
-				ifTrue: [ws nextPut: Character cr]
-				ifFalse: [ws nextPut: c].
-			(c ~= Character lf) and: [c ~= Character cr]] whileTrue.
-			^ ws contents]
+			["remote child Squeak"
+			remoteBlock value]
 		ifFalse:
-			[ioStream dataAvailable
-				ifTrue:
-					[n _ ioStream receiveDataInto: buffer.
-					^ buffer copyFrom: 1 to: n]
-				ifFalse:
-					[^ '']]
+			["parent Squeak"
+			[[remoteProcess isRunning] whileFalse: [self delay wait].
+			self delay wait.
+			result _ localBlock value]
+				ensure:	[remoteProcess terminate.
+					[remoteProcess isComplete] whileFalse: [self delay wait].
+					self delay wait.
+					result]].
+	^ result
 ! !
 
-!AioEventHandlerExample methodsFor: 'updating' stamp: 'dtl 7/5/2003 18:23'!
-update: anObject
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'remote image commands' stamp: 'dtl 30/Apr/2006, 5:47:00 pm (UTC)'!
+quitImage
 
-	(anObject isKindOf: AioEventHandler)
-		ifTrue: [Transcript show: self getAvailableData]
+	fileStream close.
+	OSProcess snapshot: false andQuit: true
 ! !
 
-!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:40'!
-handler
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'failures' stamp: 'eem 27/Mar/2014, 3:28:00 pm (UTC)'!
+expectedFailures
+	^UnixOSProcessAccessor basicNew safeToForkSqueak
+		ifTrue: [#()]
+		ifFalse: [#(	testCooperatingProcesses01
+					testCooperatingProcesses02
+					testCooperatingProcesses03
+					testCooperatingProcesses04
+					testCooperatingProcesses05
+					testFailFileLockOnLockedFile
+					testFailLockOnLockedOverlappedRegion
+					testFailLockOnLockedRegion
+					testFailLockOnLockedSupersetRegion
+					testFailRegionLockOnLockedFile
+					testLockEntireFileForWrite01
+					testLockEntireFileForWrite02
+					testLockEntireFileForWrite03
+					testLockEntireFileForWrite04
+					testLockEntireFileForWrite05
+					testLockEntireFileForWrite06
+					testLockRegionForRead01
+					testLockRegionForRead02
+					testLockRegionForWrite01
+					testLockRegionForWrite02
+					testLockRegionForWrite03
+					testLockRegionForWrite04
+					testLockRegionForWrite05
+					testLockRegionForWrite06
+					testLockRegionForWrite07
+					testLockRegionForWrite08
+					testNoFailLockOnAdjacentLockedRegions
+					testNoFailLockOnDifferentLockedRegion)]! !
 
-	^ handler! !
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'initialize' stamp: 'dtl 17/Dec/2016, 9:54:00 pm (UTC)'!
+initialize
 
-!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:40'!
-handler: anAioHandler
+	initialCompatibilitySetting
+		ifNil: [initialCompatibilitySetting _ OSProcess accessor emulateWin32FileLocking]! !
 
-	handler _ anAioHandler! !
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 16/Jan/2018, 1:55:39 am (UTC)'!
+setUp
 
-!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:57'!
-ioStream
-
-	^ ioStream! !
-
-!AioEventHandlerExample methodsFor: 'accessing' stamp: 'dtl 7/5/2003 09:57'!
-ioStream: aFileStream
-
-	ioStream _ aFileStream! !
-
-!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 9/4/2003 06:22'!
-osPipeExample
-	"Demonstrate an asynchronous read hander on an OS pipe. Output will
-	be displayed on the Transcript."
-
-	"self osPipeExample"
-
-	| pipe aio |
-	(Smalltalk hasClassNamed: #OSProcess)
-		ifFalse:
-			[self notify: 'this example requires OSProcess']
-		ifTrue:
-			[pipe _ (Smalltalk at: #OSPipe) new.
-			aio _ super new handler: (AioEventHandler for: pipe reader); ioStream: pipe reader.
-			aio handler addDependent: aio.
-			(1 to: 10) do:
-				[:i |
-				pipe nextPutAll: 'this is line ', i asString; cr.
-				(Delay forMilliseconds: 500) wait].
-			^ aio handler close]
+	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
+		ifTrue: [self perform: #timeout: with: 30].
+	delay _ Delay forMilliseconds: 150.
+	accessor _ ThisOSProcess accessor.
+	OSProcess deleteFileNamed: 'junkfile'.
+	fileStream _ OSProcess fileNamed: 'junkfile'.
+	1000 timesRepeat: (fileStream nextPutAll: 'hello world ').
 ! !
 
-!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 9/4/2003 06:22'!
-showTtyOnTranscript: ttyName
-	"Enter lines on /dev/tty, and watch them show up on the Transcript. Normally,
-	/dev/tty corresponds to standard input for the Squeak process, so if you have
-	a serial port connected to something that generates data, try this example with
-	/dev/whatever to demonstrate asych input on a serial port.
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'running' stamp: 'dtl 17/Dec/2016, 9:55:00 pm (UTC)'!
+tearDown
 
-	Warning: This method does not set the file stream for nonblocking input, so
-	it can block the Squeak VM. The #getAvailableData attempts to work around this,
-	but save your image before testing with another serial interfaces."
-
-	"self showTtyOnTranscript: '/dev/tty'"
-
-	| inputStream handler example |
-	inputStream _ FileStream readOnlyFileNamed: '/dev/tty'.
-	handler _ AioEventHandler for: inputStream
-				exceptions: true
-				readEvents: true
-				writeEvents: false.
-	example _ super new handler: handler; ioStream: inputStream.
-	handler addDependent: example.
-	Transcript cr; show: ''.
-	self notify: 'Enter lines on ', ttyName, ', watch the Transcript, and select "Proceed" when done'.
-	^ example handler close
+	| d |
+	OSProcessAccessor emulateWin32FileLocking: initialCompatibilitySetting.
+	d _ Delay forMilliseconds: 50.
+	fileStream close.
+	remoteProcess ifNotNil:
+		[remoteProcess terminate.
+		[remoteProcess isComplete] whileFalse: [d wait].
+		remoteProcess _ nil]
 ! !
 
-!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 9/4/2003 06:23'!
-standardInputExample
-	"Enter lines on stdin, and watch them show up on the Transcript."
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 17/Dec/2016, 8:30:00 pm (UTC)'!
+testCooperatingProcesses01
+	"Two cooperating Squeak processes using file region locking to coordinate their
+	writes to a shared file."
 
-	"self standardInputExample"
+	"(self selector: #testCooperatingProcesses01) run"
 
-	| aio stdin |
-	(Smalltalk hasClassNamed: #OSProcess)
-		ifFalse:
-			[self notify: 'this example requires OSProcess']
-		ifTrue:
-			[Transcript cr; show: ''.
-			stdin _ (Smalltalk at: #OSProcess) thisOSProcess stdIn.
-			aio _ super new handler: (AioEventHandler for: stdin); ioStream: stdin.
-			aio handler addDependent: aio.
-			self notify: 'Enter lines on standard input, watch the Transcript, and select "Proceed" when done'.
-			^ aio handler close]
+	| result |
+	result _ self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			fileStream position: 100.
+			fileStream nextPutAll: 'THIS '; flush.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			delay wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 108.
+			fileStream nextPutAll: 'A '; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			delay wait.
+			self quitImage]
+		doLocal:
+			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
+			fileStream position: 105.
+			fileStream nextPutAll: 'is '; flush.
+			accessor unlockFile: fileStream from: 104 to: 120.
+			delay wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 110.
+			fileStream nextPutAll: 'test '; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			delay wait].
+	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
+	fileStream position: 100.
+	result _ fileStream next: 14.
+	accessor unlockFile: fileStream from: 100 to: 140.
+	self assert: result = 'THIS is A test'
 ! !
 
-!AioEventHandlerExample class methodsFor: 'examples' stamp: 'dtl 9/4/2003 06:24'!
-tcpSocketExample
-	"Loosely based on OldSocket>>remoteTestServerTCP. Output is displayed on the Transcript."
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 17/Dec/2016, 8:31:00 pm (UTC)'!
+testCooperatingProcesses02
+	"Two cooperating Squeak processes using file region locking to coordinate their
+	writes to a shared file."
 
-	"self tcpSocketExample"
+	"(self selector: #testCooperatingProcesses02) run"
 
-	| port serverTcpSocket serverName clientTcpSocket handler example useOldStyleSockets |
+	| result |
+	result _ self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			fileStream position: 100.
+			fileStream nextPutAll: 'THIS 11111111111111111111111'; flush.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			delay wait; wait; wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 108.
+			fileStream nextPutAll: 'A 3333333333333333333333333'; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			self quitImage]
+		doLocal:
+			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
+			fileStream position: 105.
+			fileStream nextPutAll: 'IS 2222222222222222222222222'; flush.
+			accessor unlockFile: fileStream from: 104 to: 120.
+			delay wait; wait; wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 110.
+			fileStream nextPutAll: 'TEST 4444444444444444444444'; flush.
+			accessor unlockFile: fileStream from: 108 to: 120].
+	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
+	fileStream position: 100.
+	result _ fileStream next: 17.
+	accessor unlockFile: fileStream from: 100 to: 140.
+	self assert: result = 'THIS IS A TEST 44'
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 17/Dec/2016, 8:32:00 pm (UTC)'!
+testCooperatingProcesses03
+	"Two cooperating Squeak processes using file region locking to coordinate their
+	writes to a shared file."
+
+	"(self selector: #testCooperatingProcesses03) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			fileStream position: 100.
+			fileStream nextPutAll: 'THIS 11111111111111111111111'; flush.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			delay wait; wait; wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 108.
+			fileStream nextPutAll: 'A 3333333333333333333333333'; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			self quitImage]
+		doLocal:
+			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
+			fileStream position: 105.
+			fileStream nextPutAll: 'IS 2222222222222222222222222'; flush.
+			accessor unlockFile: fileStream from: 104 to: 120.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 110.
+			fileStream nextPutAll: 'TEST 4444444444444444444444'; flush.
+			accessor unlockFile: fileStream from: 108 to: 120].
+	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
+	fileStream position: 100.
+	result _ fileStream next: 17.
+	accessor unlockFile: fileStream from: 100 to: 140.
+	self assert: result = 'THIS IS 22TEST 44'
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 17/Dec/2016, 8:32:00 pm (UTC)'!
+testCooperatingProcesses04
+	"Two cooperating Squeak processes using file region locking to coordinate their
+	writes to a shared file."
+
+	"(self selector: #testCooperatingProcesses04) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			delay wait.
+			fileStream position: 100.
+			fileStream nextPutAll: 'THIS 11111111111111111111111'; flush.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			delay wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			delay wait.
+			fileStream position: 108.
+			fileStream nextPutAll: 'A 3333333333333333333333333'; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			delay wait.
+			self quitImage]
+		doLocal:
+			[self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
+			delay wait.
+			fileStream position: 105.
+			fileStream nextPutAll: 'IS 2222222222222222222222222'; flush.
+			accessor unlockFile: fileStream from: 104 to: 120.
+			delay wait.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			fileStream position: 110.
+			fileStream nextPutAll: 'TEST 4444444444444444444444; flush'.
+			accessor unlockFile: fileStream from: 108 to: 120].
+	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
+	fileStream position: 100.
+	result _ fileStream next: 17.
+	accessor unlockFile: fileStream from: 100 to: 140.
+	self assert: result = 'THIS IS A TEST 44'
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 17/Dec/2016, 10:05:00 pm (UTC)'!
+testCooperatingProcesses05
+	"Two cooperating Squeak processes using file region locking to coordinate their
+	writes to a shared file."
+
+	"(self selector: #testCooperatingProcesses05) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[OSProcess thisOSProcess stdOut nextPutAll: 'starting remote squeak requesting lock on 100 to 120';
+				nextPut: Character lf.
+			(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock acquired on 100 to 120'; nextPut: Character lf; flush.
+			fileStream position: 100.
+			fileStream nextPutAll: 'THIS '; flush.
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak releasing lock on 100 to 120'; nextPut: Character lf; flush.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock released on 100 to 120'; nextPut: Character lf; flush.
+			delay wait.
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak requesting lock on 108 to: 120'; nextPut: Character lf; flush.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock acquired on 108 to: 120'; nextPut: Character lf; flush.
+			fileStream position: 108.
+			fileStream nextPutAll: 'A '; flush.
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak releasing lock on 108 to: 120'; nextPut: Character lf; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			OSProcess thisOSProcess stdOut nextPutAll: 'remote squeak lock released on 108 to: 120'; nextPut: Character lf; flush.
+			delay wait.
+			self quitImage]
+		doLocal:
+			[OSProcess thisOSProcess stdOut nextPutAll: 'starting local squeak requesting lock on 104 to: 120';
+				nextPut: Character lf.
+			self assert: (self tryUntil: [(accessor lockFile: fileStream from: 104 to: 120) notNil]).
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock acquired on 104 to: 120'; nextPut: Character lf; flush.
+			fileStream position: 105.
+			fileStream nextPutAll: 'IS '; flush.
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak releasing lock on 104 to: 120'; nextPut: Character lf; flush.
+			accessor unlockFile: fileStream from: 104 to: 120.
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock released on 104 to: 120'; nextPut: Character lf; flush.
+			delay wait.
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak requesting lock on 108 to: 120'; nextPut: Character lf; flush.
+			self tryUntil: [(accessor lockFile: fileStream from: 108 to: 120) notNil].
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock acquired on 108 to: 120'; nextPut: Character lf; flush.
+			fileStream position: 110.
+			fileStream nextPutAll: 'TEST '; flush.
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak releasing lock on 108 to: 120'; nextPut: Character lf; flush.
+			accessor unlockFile: fileStream from: 108 to: 120.
+			OSProcess thisOSProcess stdOut nextPutAll: 'local squeak lock released on 108 to: 120'; nextPut: Character lf; flush.
+			delay wait].
+	self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil].
+	fileStream position: 100.
+	result _ fileStream next: 14.
+	accessor unlockFile: fileStream from: 100 to: 140.
+	self assert: result = 'THIS IS A TEST'
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 8/May/2006, 2:44:00 am (UTC)'!
+testLockEntireFileForWrite01
+	"Local lock request should succeed"
+
+	"(self selector: #testLockEntireFileForWrite01) run"
+
+	| result |
+	result _ self
+		doRemote: [nil]
+		doLocal: [accessor lockFile: fileStream].
+	self delay wait; wait.
+	self assert: (result isKindOf: OSFileLock).
+	result _ accessor unlockFile: fileStream.
+	self assert: (result isKindOf: OSFileLock)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:40:00 pm (UTC)'!
+testLockEntireFileForWrite02
+	"Local lock request should fail"
+
+	"(self selector: #testLockEntireFileForWrite02) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[accessor lockFile: fileStream]
+		doLocal: [accessor lockFile: fileStream].
+	self delay wait; wait.
+	self assert: result isNil.
+	"Region is in the cache as a result of the (failed) lock request. This is legitimate
+	because the lock exists in some other image, so we want to mark it as locked
+	locally. However, it is not quite correct because the remote lock may pertain to
+	a different but overlapping region. Nevertheless, this seems like reasonable
+	behavior."
+	result _ accessor unlockFile: fileStream.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 8/May/2006, 2:45:00 am (UTC)'!
+testLockEntireFileForWrite03
+	"Local lock request should succeed"
+
+	"(self selector: #testLockEntireFileForWrite03) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[accessor lockFile: fileStream.
+			accessor unlockFile: fileStream]
+		doLocal:
+			[accessor lockFile: fileStream].
+	self delay wait; wait.
+	self assert: (result isKindOf: OSFileLock).
+	result _ accessor unlockFile: fileStream.
+	self assert: (result isKindOf: OSFileLock)! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:48:00 pm (UTC)'!
+testLockEntireFileForWrite04
+	"Local lock should be available"
+
+	"(self selector: #testLockEntireFileForWrite04) run"
+
+	| result |
+	result _ self
+		doRemote: [nil]
+		doLocal: [accessor isLockableFile: fileStream].
+	self delay wait; wait.
+	self should: result.
+	"No lock on the region, so the unlock should fail."
+	result _ accessor unlockFile: fileStream.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:50:00 pm (UTC)'!
+testLockEntireFileForWrite05
+	"Local lock should be available"
+
+	"(self selector: #testLockEntireFileForWrite05) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[accessor lockFile: fileStream]
+		doLocal: [accessor isLockableFile: fileStream].
+	self delay wait; wait.
+	self shouldnt: result.
+	"No local lock in the cache for this file, so the unlock call will appear to fail.
+	Actually, it will have passed the unlock request through to the operating system,
+	and it will actually unlock the file."
+	result _ accessor unlockFile: fileStream.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:49:00 pm (UTC)'!
+testLockEntireFileForWrite06
+	"Local lock should be available"
+
+	"(self selector: #testLockEntireFileForWrite06) run"
+
+	| result |
+	result _ self
+		doRemote:
+			[accessor lockFile: fileStream.
+			accessor unlockFile: fileStream]
+		doLocal:
+			[accessor isLockableFile: fileStream].
+	self delay wait; wait.
+	self should: result.
+	"No local lock in the cache for this file, so the unlock call will appear to fail.
+	Actually, it will have passed the unlock request through to the operating system,
+	but it will have no effect because the file was never locked."
+	result _ accessor unlockFile: fileStream.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 8/May/2006, 2:46:00 am (UTC)'!
+testLockRegionForRead01
+	"Read lock, the local lock request should succeed"
+
+	"(self selector: #testLockRegionForRead01) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false]
+		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false].
+	self delay wait; wait.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:53:00 pm (UTC)'!
+testLockRegionForRead02
+	"Read lock, the local lock request should fail when requesting a write lock"
+
+	"(self selector: #testLockRegionForRead02) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: false].
+	self delay wait; wait.
+	self assert: result isNil.
+	result _ accessor unlockFile: fileStream from: 100 to: 199.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 8/May/2006, 2:46:00 am (UTC)'!
+testLockRegionForWrite01
+	"Local lock request should succeed"
+
+	"(self selector: #testLockRegionForWrite01) run"
+
+	| result |
+	result _ self
+		doRemote: [nil]
+		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true].
+	self delay wait; wait.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	result _ accessor unlockFile: fileStream from: 100 to: 199.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 30/Apr/2006, 5:47:00 pm (UTC)'!
+testLockRegionForWrite02
+	"Write lock, the local lock request should fail"
+
+	"(self selector: #testLockRegionForWrite02) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true].
+	self delay wait; wait.
+	self assert: result isNil.
+	"Lock is not in the local cache, so unlock will appear to fail. Actually, the region
+	will be unlocked."
+	accessor unlockFile: fileStream from: 100 to: 199.
+	self assert: result isNil.
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:55:00 pm (UTC)'!
+testLockRegionForWrite03
+	"Write lock, nonoverlapping regions, the lock check should succeed"
+
+	"(self selector: #testLockRegionForWrite03) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor isLockableFile: fileStream from: 200 to: 299 exclusive: true].
+	self delay wait; wait.
+	self assert: result.
+	result _ accessor unlockFile: fileStream from: 200 to: 299.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:53:00 pm (UTC)'!
+testLockRegionForWrite04
+	"Write lock, overlapping regions, the local lock request should fail"
+
+	"(self selector: #testLockRegionForWrite04) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor lockFile: fileStream from: 150 to: 249 exclusive: true].
+	self delay wait; wait.
+	self assert: result isNil.
+	result _ accessor unlockFile: fileStream from: 150 to: 249.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 8/May/2006, 2:47:00 am (UTC)'!
+testLockRegionForWrite05
+	"Write lock, nonoverlapping regions, the local lock request should succeed"
+
+	"(self selector: #testLockRegionForWrite05) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor lockFile: fileStream from: 200 to: 299 exclusive: true].
+	self delay wait; wait.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (200 to: 299)).
+	result _ accessor unlockFile: fileStream from: 200 to: 299.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (200 to: 299))! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:53:00 pm (UTC)'!
+testLockRegionForWrite06
+	"Write lock, overlapping regions, the local lock request should fail"
+
+	"(self selector: #testLockRegionForWrite06) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor lockFile: fileStream from: 199 to: 199 exclusive: true].
+	self delay wait; wait.
+	self assert: result isNil.
+	result _ accessor unlockFile: fileStream from: 199 to: 199.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:55:00 pm (UTC)'!
+testLockRegionForWrite07
+	"Write lock, overlapping regions, the lock check should fail"
+
+	"(self selector: #testLockRegionForWrite07) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor isLockableFile: fileStream from: 100 to: 199 exclusive: true].
+	self delay wait; wait.
+	self deny: result.
+	result _ accessor unlockFile: fileStream from: 100 to: 199.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 13/May/2006, 1:55:00 pm (UTC)'!
+testLockRegionForWrite08
+	"Write lock, overlapping regions, the lock check should fail"
+
+	"(self selector: #testLockRegionForWrite08) run"
+
+	| result |
+	result _ self
+		doRemote: [accessor lockFile: fileStream from: 100 to: 199 exclusive: true]
+		doLocal: [accessor isLockableFile: fileStream from: 150 to: 299 exclusive: true].
+	self delay wait; wait.
+	self deny: result.
+	result _ accessor unlockFile: fileStream from: 150 to: 299.
+	self assert: (self isValidUnlockResult: result)
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 7/May/2006, 4:56:00 pm (UTC)'!
+testWin32LockEmulation01
+	"Make sure the cache does what is expected, and that it can be disabled
+	Expect non-exclusive read locks to to succeed."
+
+	"(self selector: #testWin32LockEmulation01) run"
+
+	| result |
+	accessor class emulateWin32FileLocking: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: false.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: false.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 7/May/2006, 4:56:00 pm (UTC)'!
+testWin32LockEmulation02
+	"Make sure the cache does what is expected, and that it can be disabled.
+	Expect exclusive read-write locks to be protected by the cache."
+
+	"(self selector: #testWin32LockEmulation02) run"
+
+	| result |
+	accessor class emulateWin32FileLocking: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: result isNil.
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 16/Jan/2018, 1:55:55 am (UTC)'!
+testWin32LockEmulation03
+	"Make sure the cache does what is expected, and that it can be disabled.
+	Expect the cache to protect the file even if we open a second stream"
+
+	"(self selector: #testWin32LockEmulation03) run"
+
+	| result stream2 |
+	accessor class emulateWin32FileLocking: true.
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	stream2 _ OSProcess fileNamed: 'junkfile'.
+	[result _ accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
+	self assert: result isNil]
+		ensure: [stream2 close].
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'testing' stamp: 'dtl 16/Jan/2018, 1:56:22 am (UTC)'!
+testWin32LockEmulation04
+	"Make sure the cache does what is expected, and that it can be disabled.
+	Expect the cache to allow a lock after the stream has been closed (since the OS will have freed its lock)"
+
+	"(self selector: #testWin32LockEmulation04) run"
+
+	| result stream2 |
+	accessor class emulateWin32FileLocking: true.
+	stream2 _ OSProcess fileNamed: 'junkfile'.
+	[result _ accessor lockFile: stream2 from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))]
+		ensure: [stream2 close].
+	result _ accessor lockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199)).
+	result _ accessor unlockFile: fileStream from: 100 to: 199 exclusive: true.
+	self assert: (result isKindOf: OSFileRegionLock).
+	self assert: (result interval = (100 to: 199))! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 11/May/2006, 11:22:00 am (UTC)'!
+testLockFileIfFail
+
+	"(self selector: #testLockFileIfFail) run"
+
+	| fail |
+	fail _ false.
+	accessor lockFile: fileStream ifFail: [fail _ true].
+	self shouldnt: fail.
+	fileStream close.
+	accessor lockFile: fileStream ifFail: [fail _ true].
+	self should: fail
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 28/Nov/2010, 11:05:00 pm (UTC)'!
+testLockFileRegionIfFail
+
+	"(self selector: #testLockFileRegionIfFail) run"
+
+	| fail |
+	fail _ false.
+	accessor
+		lockFile: fileStream from: 100 to: 199 exclusive: true
+		ifFail: [fail _ true].
+	self shouldnt: fail.
+	fileStream close.
+	accessor
+		lockFile: fileStream from: 100 to: 199 exclusive: true
+		ifFail: [fail _ true].
+	self should: fail.
+	accessor
+		lockFile: fileStream from: 100 to: 199
+		ifFail: [fail _ true].
+	self should: fail
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 11/May/2006, 11:24:00 am (UTC)'!
+testUnlockFileIfFail
+
+	"(self selector: #testUnlockFileIfFail) run"
+
+	| fail |
+	fail _ false.
+	accessor lockFile: fileStream ifFail: [fail _ true].
+	self shouldnt: fail.
+	accessor unlockFile: fileStream ifFail: [fail _ true].
+	self shouldnt: fail.
+	fileStream close.
+	accessor unlockFile: fileStream ifFail: [fail _ true].
+	self should: fail
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'fail blocks' stamp: 'dtl 28/Nov/2010, 11:11:00 pm (UTC)'!
+testUnlockFileRegionIfFail
+
+	"(self selector: #testUnlockFileRegionIfFail) run"
+
+	| fail |
+	fail _ false.
+	accessor
+		lockFile: fileStream from: 100 to: 199 exclusive: true
+		ifFail: [fail _ true].
+	self shouldnt: fail.
+	accessor
+		unlockFile: fileStream from: 100 to: 199 exclusive: true
+		ifFail: [fail _ true].
+	self shouldnt: fail.
+	fileStream close.
+	accessor
+		unlockFile: fileStream from: 100 to: 199 exclusive: true
+		ifFail: [fail _ true].
+	self should: fail.
+	accessor
+		unlockFile: fileStream from: 100 to: 199
+		ifFail: [fail _ true].
+	self should: fail
+
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'private' stamp: 'dtl 30/Apr/2006, 5:47:00 pm (UTC)'!
+tryUntil: aBlock
+	"Repeat until block evaluates true, but do not get in an infinite loop if a primitive is failing"
+
+	| result |
+	10 timesRepeat:
+		[result _ aBlock value.
+		result ifTrue: [^ result].
+		delay wait].
+	^ result
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 13/May/2006, 1:36:00 pm (UTC)'!
+isValidUnlockResult: result
+
+	self subclassResponsibility
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 10/May/2006, 11:04:00 am (UTC)'!
+testLockPreviouslyLockedFile
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 10/May/2006, 11:10:00 am (UTC)'!
+testLockPreviouslyLockedFileRegion
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 10:53:00 am (UTC)'!
+testUnlockPreviouslyLockedFile
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 10:54:00 am (UTC)'!
+testUnlockPreviouslyLockedFileRegion
+
+	self subclassResponsibility! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 7:55:00 pm (UTC)'!
+testFailFileLockOnLockedFile
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail."
+
+	"(self selector: #testFailFileLockOnLockedFile) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 8:00:00 pm (UTC)'!
+testFailLockOnLockedOverlappedRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. Locked regions overlap by one character."
+
+	"(self selector: #testFailLockOnLockedOverlappedRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 104) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 104.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 7:51:00 pm (UTC)'!
+testFailLockOnLockedRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail."
+
+	"(self selector: #testFailLockOnLockedRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 120) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 120.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 100
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 8:01:00 pm (UTC)'!
+testFailLockOnLockedSupersetRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. Fail when requesting a lock on a subset of the locked region."
+
+	"(self selector: #testFailLockOnLockedSupersetRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 140) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 140.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 8:02:00 pm (UTC)'!
+testFailRegionLockOnLockedFile
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a file, the region lock attempt in parent
+	Squeak will fail."
+
+	"(self selector: #testFailRegionLockOnLockedFile) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream.
+			self quitImage]
+		doLocal:
+			[self should: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 100
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 100 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error
+				description: '#lockFile failed because child Squeak now holds a lock']
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 8:03:00 pm (UTC)'!
+testNoFailLockOnAdjacentLockedRegions
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. No failure occurs when the regions are adjacent but do not overlap."
+
+	"(self selector: #testNoFailLockOnAdjacentLockedRegions) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 100 to: 103) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 100 to: 103.
+			self quitImage]
+		doLocal:
+			[self shouldnt: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error]
+! !
+
+!AbstractUnixProcessFileLockingTestCase methodsFor: 'tests - exclusive locking' stamp: 'dtl 30/Aug/2009, 8:03:00 pm (UTC)'!
+testNoFailLockOnDifferentLockedRegion
+	"Two cooperating Squeak processes using mandatory file locking. When
+	child Squeak takes a lock on a region, lock attempt in parent Squeak will
+	fail. No failure occurs if the regions are different and do not overlap."
+
+	"(self selector: #testNoFailLockOnDifferentLockedRegion) run"
+
+	self
+		doRemote:
+			[(self tryUntil: [(accessor lockFile: fileStream from: 50 to: 80) notNil]) ifNil: [self quitImage].
+			delay wait; wait; wait.
+			accessor unlockFile: fileStream from: 50 to: 80.
+			self quitImage]
+		doLocal:
+			[self shouldnt: [
+				10 timesRepeat: [ "lock and unlock until failure due to child taking the lock"
+					accessor lockFile: fileStream
+							from: 104
+							to: 120
+							exclusive: true
+							ifFail: [self error: '#lockFile failed because child Squeak now holds a lock'].
+					accessor unlockFile: fileStream from: 104 to: 120. "release lock to allow child to acquire it"
+					delay wait]]
+				raise: Error]
+! !
+
+!AbstractUnixProcessFileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 30/Apr/2006, 5:49:00 pm (UTC)'!
+isAbstract
+	"Override to true if a TestCase subclass is Abstract and should not have
+	TestCase instances built from it"
+
+	^ true! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'running' stamp: 'dtl 30/Apr/2006, 6:05:00 pm (UTC)'!
+setUp
+
+	"Set system to use Unix file locking semantics. The tearDown method is expected to restore the setting."
+
+	OSProcessAccessor emulateWin32FileLocking: false.
+	^ super setUp
+! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 13/May/2006, 1:38:00 pm (UTC)'!
+isValidUnlockResult: result
+	"With no lock cache, the unlock requests will succeed even though there
+	is no lock to be removed."	
+
+	^ result isKindOf: OSFileLock
+! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:12:00 am (UTC)'!
+testLockPreviouslyLockedFile
+	"Locking a previously locked file is permitted"
+
+	"(self selector: #testLockPreviouslyLockedFile) run"
+
+	accessor lockFile: fileStream.
+	self should: (accessor isLockableFile: fileStream).
+	self should: ((accessor lockFile: fileStream) isKindOf: OSFileLock).
+	accessor unlockFile: fileStream! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:12:00 am (UTC)'!
+testLockPreviouslyLockedFileRegion
+	"Locking a previously locked file region is permitted"
+
+	"(self selector: #testLockPreviouslyLockedFileRegion) run"
+
+	accessor
+		lockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true.
+	self should: (accessor
+		isLockableFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true).
+	self should: ((accessor
+		lockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true)
+		isKindOf: OSFileLock).
+	accessor unlockFile: fileStream! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:07:00 am (UTC)'!
+testUnlockPreviouslyLockedFile
+	"The unlock operation will succeed even if no lock is in effect"
+
+	"(self selector: #testUnlockPreviouslyLockedFile) run"
+
+	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock).
+	accessor lockFile: fileStream.
+	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock)
+! !
+
+!UnixProcessUnixFileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:07:00 am (UTC)'!
+testUnlockPreviouslyLockedFileRegion
+	"The unlock operation will succeed even if no lock is in effect"
+
+	"(self selector: #testUnlockPreviouslyLockedFileRegion) run"
+
+	self should: ((accessor
+		unlockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true) isKindOf: OSFileLock).
+	accessor
+		lockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true.
+	self should: ((accessor
+		unlockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true) isKindOf: OSFileLock)
+! !
+
+!UnixProcessUnixFileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 13/Jan/2007, 7:40:00 pm (UTC)'!
+isAbstract
+	"Override to true if a TestCase subclass is Abstract and should not have
+	TestCase instances built from it"
+
+	^self name = #TestCase
+! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'running' stamp: 'dtl 30/Apr/2006, 6:06:00 pm (UTC)'!
+setUp
+
+	"Set system to use Windows file locking semantics. The tearDown method is expected to restore the setting."
+
+	OSProcessAccessor emulateWin32FileLocking: true.
+	^ super setUp
+! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 13/May/2006, 1:47:00 pm (UTC)'!
+isValidUnlockResult: result
+	"With a lock cache, the unlock requests will fail when if there
+	is no lock to be removed."	
+
+	^ result == nil
+! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:13:00 am (UTC)'!
+testLockPreviouslyLockedFile
+	"A previously locked file cannot be locked."
+
+	"(self selector: #testLockPreviouslyLockedFile) run"
+
+	accessor lockFile: fileStream.
+	self shouldnt: (accessor isLockableFile: fileStream).
+	self should: (accessor lockFile: fileStream) isNil.
+	accessor unlockFile: fileStream! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:13:00 am (UTC)'!
+testLockPreviouslyLockedFileRegion
+	"A previously locked file region cannot be locked."
+
+	"(self selector: #testLockPreviouslyLockedFileRegion) run"
+
+	accessor
+		lockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true.
+	self shouldnt: (accessor
+		isLockableFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true).
+	self should: ((accessor
+		lockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true) isNil).
+	accessor unlockFile: fileStream! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 11/May/2006, 11:08:00 am (UTC)'!
+testUnlockPreviouslyLockedFile
+	"The unlock operation will fail if lock is in effect"
+
+	"(self selector: #testUnlockPreviouslyLockedFile) run"
+
+	self shouldnt: ((accessor unlockFile: fileStream) isKindOf: OSFileLock).
+	accessor lockFile: fileStream.
+	self should: ((accessor unlockFile: fileStream) isKindOf: OSFileLock).
+	self shouldnt: ((accessor unlockFile: fileStream) isKindOf: OSFileLock)
+! !
+
+!UnixProcessWin32FileLockingTestCase methodsFor: 'tests - platform specific' stamp: 'dtl 12/May/2006, 11:48:00 am (UTC)'!
+testUnlockPreviouslyLockedFileRegion
+	"The unlock operation will fail if a lock is in effect"
+
+	"(self selector: #testUnlockPreviouslyLockedFileRegion) run"
+
+	self shouldnt: ((accessor
+		unlockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true) isKindOf: OSFileLock).
+	accessor
+		lockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true.
+	self should: ((accessor
+		unlockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true) isKindOf: OSFileLock).
+	self shouldnt: ((accessor
+		unlockFile: fileStream
+		from: 100
+		to: 199
+		exclusive: true) isKindOf: OSFileLock)
+! !
+
+!UnixProcessWin32FileLockingTestCase class methodsFor: 'testing' stamp: 'dtl 13/Jan/2007, 7:40:00 pm (UTC)'!
+isAbstract
+	"Override to true if a TestCase subclass is Abstract and should not have
+	TestCase instances built from it"
+
+	^self name = #TestCase
+! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 20/Aug/2022, 3:26:00 am (UTC)'!
+testEnableHandleAndDisable
+
+	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult aioDisableResult |
+	eventHandler _ AioEventHandler new.
+	anOpenFile _ OSProcess fileNamed: 'delete.me'.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
+	sema _ Semaphore new.
+	[semaIndex _ Smalltalk registerExternalObject: sema.
+	[aioEnableResult _ eventHandler
+			aioEnable: fileHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+	self assert: semaIndex == aioEnableResult.
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: true
+		readEvents: true
+		writeEvents: true.
+	self assert: aioHandleResult == 2r0111. "return bitmask, all three bits set"
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: true
+		readEvents: false
+		writeEvents: true.
+	self assert: aioHandleResult == 2r0101.
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: false
+		writeEvents: true.
+	self assert: aioHandleResult == 2r0100.
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: true
+		readEvents: false
+		writeEvents: false.
+	self assert: aioHandleResult == 2r0001.
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: false
+		writeEvents: false.
+	self assert: aioHandleResult == 2r0000.
+	aioDisableResult _ eventHandler aioDisable: fileHandle.
+	self assert: aioDisableResult == fileHandle]
+		ensure:
+			[Smalltalk unregisterExternalObject: sema.
+			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]].
+	anOpenFile close.
+	OSProcess deleteFileNamed: 'delete.me'.
+! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 20/Aug/2022, 3:26:00 am (UTC)'!
+testFileReadableEvent
+
+	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
+	fileName _ 'DeleteThisTemporaryFile'.
+
+	eventHandler _ AioEventHandler new.
+	OSProcess deleteFileNamed: fileName.
+	[anOpenFile _ OSProcess fileNamed: fileName.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	[aioEnableResult _ eventHandler
+			aioEnable: fileHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+	self assert: semaIndex == aioEnableResult.
+
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self assert: aioHandleResult == 2r010.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin reading data based on having received this initial signal."
+	sema wait. "consume the signal"
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self deny: sema isSignaled. "Nothing has happened to indicate more data available."
+
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self assert: aioHandleResult == 2r010.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin reading data based on having received this initial signal."
+	sema wait. "consume the signal"
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self deny: sema isSignaled. "Nothing has happened to indicate more data available."
+
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self assert: aioHandleResult == 2r010.
+	anOpenFile nextPutAll: 'write some stuff to the file'; flush.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin reading data based on having received this initial signal."
+	sema wait. "consume the signal"
+
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self assert: aioHandleResult == 2r010.
+	anOpenFile upToEnd.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but readable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin reading data based on having received this initial signal."
+	sema wait. "consume the signal"
+
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self deny: sema isSignaled. "handler has not been reset"]
+		ensure:
+			[[anOpenFile close] on: Error do: [].
+			Smalltalk unregisterExternalObject: sema.
+			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 20/Aug/2022, 3:26:00 am (UTC)'!
+testFileWritableEvent
+
+	| eventHandler anOpenFile fileHandle aioHandleResult sema semaIndex aioEnableResult fileName |
+	fileName _ 'DeleteThisTemporaryFile'.
+
+	eventHandler _ AioEventHandler new.
+	OSProcess deleteFileNamed: fileName.
+	[anOpenFile _ OSProcess fileNamed: fileName.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	[aioEnableResult _ eventHandler
+			aioEnable: fileHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+	self assert: semaIndex == aioEnableResult.
+
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: false
+		writeEvents: true.
+	self assert: aioHandleResult == 2r0100.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin writing data based on having received this initial signal."
+	sema wait. "consume the signal"
+	self deny: sema isSignaled.
+
+	"Reset handler"
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: false
+		writeEvents: true.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin writing data based on having received this initial signal."
+	sema wait. "consume the signal"
+	self deny: sema isSignaled.
+
+	"Reset handler"
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: false
+		writeEvents: true.
+	anOpenFile upToEnd.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin writing data based on having received this initial signal."
+	sema wait. "consume the signal"
+	self deny: sema isSignaled.
+
+	"Reset handler"
+	aioHandleResult _ eventHandler
+		aioHandle: fileHandle
+		exceptionEvents: false
+		readEvents: false
+		writeEvents: true.
+	anOpenFile nextPutAll: 'write some stuff to the file'; flush.
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self assert: sema isSignaled. "File is empty but writable. A signal is sent once,
+	presumably in the interest of priming the pump. A listening process would
+	begin writing data based on having received this initial signal."
+	sema wait. "consume the signal"
+	self deny: sema isSignaled.
+
+	(Delay forMilliseconds: 20) wait. "Allow signals to be handled"
+	self deny: sema isSignaled. "handler has not been reset"]
+		ensure:
+			[[anOpenFile close] on: Error do: [].
+			Smalltalk unregisterExternalObject: sema.
+			(fileHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: fileHandle]]! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 20/Aug/2022, 3:26:00 am (UTC)'!
+testHandleForFile
+
+	| eventHandler anOpenFile fileHandle |
+	eventHandler _ AioEventHandler new.
+	anOpenFile _ OSProcess fileNamed: 'delete.me'.
+	fileHandle _ eventHandler descriptorForFile: anOpenFile.
+	anOpenFile close.
+	OSProcess deleteFileNamed: 'delete.me'.
+	self assert: fileHandle notNil.
+	self assert: (fileHandle isKindOf: Integer)
+! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 20/Aug/2022, 3:28:00 am (UTC)'!
+testHandleForSocket
+
+	| eventHandler socket socketHandle |
+	eventHandler _ AioEventHandler new.
+	socket _ Socket newTCP.
+	socketHandle _ eventHandler desriptorForSocket: socket.
+	self assert: socketHandle notNil.
+	self assert: (socketHandle isKindOf: Integer).
+	self assert: (socketHandle ~= 0) "0 is stdin on unix, unlikely to be used on other platforms"
+! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 9/Jul/2005, 8:41:00 pm (UTC)'!
+testPrimAioModuleName
+
+	| eventHandler moduleName |
+	eventHandler _ AioEventHandler new.
+	moduleName _ eventHandler primAioModuleName.
+	self assert: ('AioPlugin*' match: moduleName)
+! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 9/Jul/2005, 8:42:00 pm (UTC)'!
+testPrimAioModuleVersionString
+
+	| eventHandler versionString |
+	eventHandler _ AioEventHandler new.
+	versionString _ eventHandler primAioModuleName.
+	self assert: (versionString isKindOf: String)
+! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 19/Dec/2022, 12:15:00 am (UTC)'!
+testSocketExceptionEvent
+	"Close the client socket to generate an event on the server socket"
+
+	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
 	port _ 8086.
 	serverName _ '127.0.0.1'.
-
-	"The networking code was updated for Squeak 3.6. This checks for which version to use."
-	useOldStyleSockets _ Socket respondsTo: #initializeNetworkIfFail:.
-
-	Transcript show: 'initializing network ... '.
-
-	useOldStyleSockets
-		ifTrue:
-			[Socket initializeNetworkIfFail: [^Transcript show:'failed']]
-		ifFalse:
-			[[Socket initializeNetwork]
-				on: Error
-				do: [:ex | ^Transcript show:'failed']].
-	Transcript show:'ok';cr.
+	Socket initializeNetwork.
 
 	"Create the server (reader) socket"
 	serverTcpSocket _ Socket newTCP.
 	serverTcpSocket listenOn: port.
-	[Transcript show: 'server endpoint created on port ', port asString; cr.
-	useOldStyleSockets
-		ifTrue:
-			[serverTcpSocket waitForConnectionUntil: Socket standardDeadline]
-		ifFalse:
-			[serverTcpSocket waitForConnectionFor: 10]] fork.
-	(Delay forMilliseconds: 1000) wait.
 
 	"Create the client (writer) socket"
 	clientTcpSocket _ Socket newTCP.
 	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
-	useOldStyleSockets
-		ifTrue:
-			[clientTcpSocket waitForConnectionUntil: Socket standardDeadline]
-		ifFalse:
-			[clientTcpSocket waitForConnectionFor: 10].
-	Transcript show: 'client endpoint connected to ', serverName, ' port ', port asString; cr.
 
-	"Set up a read event handler on the server socket"
-	handler _ AioEventHandler for: serverTcpSocket
-				exceptions: true
-				readEvents: true
-				writeEvents: false.
-	example _ super new handler: handler; ioStream: serverTcpSocket.
-	handler addDependent: example.
-	Transcript show: 'event handler started'; cr.
+	"Esstablish socket connection"
+	[serverTcpSocket waitForConnectionFor: 10] fork.
+	clientTcpSocket waitForConnectionFor: 10.
 
-	"Send a few lines of data to the client socket, waiting briefly between lines.
-	The event handler will watch the server socket, and copy data to the Transcript
-	each time a new line of data is available to the server."
-	(1 to: 10) do:
+	["Set up a read event handler on the server socket"
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
+
+	"An aio handler may already have been established for the socket
+	by the SocketPlugin. The following request disables any existing handling
+	in order to prevent a warning message on the console stderr."
+	eventHandler aioDisable: socketHandle.
+
+	"Now set our own handler."
+	[eventHandler
+			aioEnable: socketHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: true
+		readEvents: false
+		writeEvents: false.
+	self deny: sema isSignaled.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	self deny: sema isSignaled.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	self deny: sema isSignaled.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	clientTcpSocket close.
+	(Delay forMilliseconds: 200) wait.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	(Delay forMilliseconds: 200) wait.
+"	self assert: sema isSignaled.	FIXME: no error generated; need to find a way to generate an error -dtl"
+	self deny: sema isSignaled.
+	serverTcpSocket close]
+		ensure:
+			[Smalltalk unregisterExternalObject: sema.
+			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 19/Dec/2022, 12:15:00 am (UTC)'!
+testSocketExceptionEvent2
+	"Close the client socket to generate an event on the server socket"
+
+	| port serverTcpSocket sema semaIndex socketHandle eventHandler |
+	port _ 8086.
+	Socket initializeNetwork.
+
+	"Create the server (reader) socket"
+	serverTcpSocket _ Socket newTCP.
+	serverTcpSocket listenOn: port.
+
+	["Set up an exception event handler on the server socket"
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
+
+	"An aio handler may already have been established for the socket
+	by the SocketPlugin. The following request disables any existing handling
+	in order to prevent a warning message on the console stderr."
+	eventHandler aioDisable: socketHandle.
+
+	"Now set our own handler."
+	[eventHandler
+			aioEnable: socketHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: true
+		readEvents: false
+		writeEvents: true.
+	self deny: sema isSignaled.
+	[serverTcpSocket
+		primSocket: serverTcpSocket socketHandle
+		sendData: 'a string to send' asByteArray
+		startIndex: 1
+		count: 10] on: Error do: [self halt].
+	serverTcpSocket
+		receiveSomeDataInto: (String new: 1000)
+		startingAt: 1.
+
+"	self assert: sema isSignaled.	FIXME: no error generated; need to find a way to generate an error -dtl"
+	self deny: sema isSignaled.
+
+	serverTcpSocket close]
+		ensure:
+			[Smalltalk unregisterExternalObject: sema.
+			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 19/Dec/2022, 12:16:00 am (UTC)'!
+testSocketReadableEvent
+
+	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
+	port _ 8086.
+	serverName _ '127.0.0.1'.
+	Socket initializeNetwork.
+
+	"Create the server (reader) socket"
+	serverTcpSocket _ Socket newTCP.
+	serverTcpSocket listenOn: port.
+
+	"Create the client (writer) socket"
+	clientTcpSocket _ Socket newTCP.
+	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
+
+	"Establish socket connection"
+	[serverTcpSocket waitForConnectionFor: 10] fork.
+	clientTcpSocket waitForConnectionFor: 10.
+
+	["Set up a read event handler on the server socket"
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
+
+	"An aio handler may already have been established for the socket
+	by the SocketPlugin. The following request disables any existing handling
+	in order to prevent a warning message on the console stderr."
+	eventHandler aioDisable: socketHandle.
+
+	"Now set our own handler."
+	[eventHandler
+			aioEnable: socketHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self deny: sema isSignaled.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	self assert: sema isSignaled.
+	sema wait. "consume the signal"
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self deny: sema isSignaled.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	self assert: sema isSignaled.
+	sema wait. "consume the signal"
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	self deny: sema isSignaled.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	self assert: sema isSignaled.
+	sema wait. "consume the signal"
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+
+	clientTcpSocket close.
+	serverTcpSocket close]
+		ensure:
+			[Smalltalk unregisterExternalObject: sema.
+			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 19/Dec/2022, 12:16:00 am (UTC)'!
+testSocketReadableEventWithMaskNotSet
+	"Same as testSocketReadableEvent, except that the mask bit for read events is not set,
+	so we expect to not receive the event notification. This is just a check to ensure that
+	the event mask is working."
+
+	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
+	port _ 8086.
+	serverName _ '127.0.0.1'.
+	Socket initializeNetwork.
+
+	"Create the server (reader) socket"
+	serverTcpSocket _ Socket newTCP.
+	serverTcpSocket listenOn: port.
+
+	"Create the client (writer) socket"
+	clientTcpSocket _ Socket newTCP.
+	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
+
+	"Establish socket connection"
+	[serverTcpSocket waitForConnectionFor: 10] fork.
+	clientTcpSocket waitForConnectionFor: 10.
+
+	["Set up a read event handler on the server socket"
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
+
+	"An aio handler may already have been established for the socket
+	by the SocketPlugin. The following request disables any existing handling
+	in order to prevent a warning message on the console stderr."
+	eventHandler aioDisable: socketHandle.
+
+	"Now set our own handler."
+	[eventHandler
+			aioEnable: socketHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: true
+		readEvents: false	"Read event bit not set"
+		writeEvents: false.
+	self deny: sema isSignaled.
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	self deny: sema isSignaled. "This time we should not receive a signal"
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	clientTcpSocket close.
+	serverTcpSocket close]
+		ensure:
+			[Smalltalk unregisterExternalObject: sema.
+			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
+
+!AioEventHandlerTestCase methodsFor: 'tests' stamp: 'dtl 19/Dec/2022, 12:17:00 am (UTC)'!
+testSuspendAioForSocketReadableEvent
+
+	| port serverName serverTcpSocket clientTcpSocket sema semaIndex socketHandle eventHandler receivedData |
+	port _ 8086.
+	serverName _ '127.0.0.1'.
+	Socket initializeNetwork.
+
+	"Create the server (reader) socket"
+	serverTcpSocket _ Socket newTCP.
+	serverTcpSocket listenOn: port.
+
+	"Create the client (writer) socket"
+	clientTcpSocket _ Socket newTCP.
+	clientTcpSocket connectTo: (NetNameResolver addressFromString: serverName) port: port.
+
+	"Establish socket connection"
+	[serverTcpSocket waitForConnectionFor: 10] fork.
+	clientTcpSocket waitForConnectionFor: 10.
+
+	["Set up a read event handler on the server socket"
+	sema _ Semaphore new.
+	semaIndex _ Smalltalk registerExternalObject: sema.
+	eventHandler _ AioEventHandler new.
+	socketHandle _ eventHandler desriptorForSocket: serverTcpSocket.
+
+	"An aio handler may already have been established for the socket
+	by the SocketPlugin. The following request disables any existing handling
+	in order to prevent a warning message on the console stderr."
+	eventHandler aioDisable: socketHandle.
+
+	"Now set our own handler."
+	[eventHandler
+			aioEnable: socketHandle
+			forSemaphore: semaIndex
+			externalObject: true]
+		on: Warning
+		do: ["Suppress warning dialog. Unit test will fail next assert."].
+
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+
+	self deny: sema isSignaled.
+
+	"Handler generates a signal"
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	self assert: sema isSignaled.
+	sema wait.
+	self deny: sema isSignaled.
+
+	"Handler has not been reset, so no signal this time"
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	self deny: sema isSignaled.
+
+	"Reset the handler"
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+
+	"Handler generates a signal"
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	self assert: sema isSignaled.
+	sema wait.
+	self deny: sema isSignaled.
+
+	"Reset the handler"
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+	"But temporarily disable it"
+	eventHandler aioSuspend: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+
+	"Handler suspended, so no signal this time"
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	self deny: sema isSignaled.
+
+	"Reset the handler"
+	eventHandler
+		aioHandle: socketHandle
+		exceptionEvents: false
+		readEvents: true
+		writeEvents: false.
+
+	"Handler generates a signal"
+	clientTcpSocket sendData: 'some data to send to the socket' asByteArray.
+	(Delay forMilliseconds: 200) wait.
+	receivedData _ serverTcpSocket receiveAvailableData.
+	self assert: 'some data to send to the socket' = receivedData.
+	self assert: sema isSignaled.
+	sema wait.
+	self deny: sema isSignaled.
+
+	clientTcpSocket close.
+	serverTcpSocket close]
+		ensure:
+			[Smalltalk unregisterExternalObject: sema.
+			(socketHandle isKindOf: Integer) ifTrue: [eventHandler aioDisable: socketHandle]]! !
+
+!OSPipeTestCase methodsFor: 'private' stamp: 'dtl 28/Nov/2010, 6:05:00 pm (UTC)'!
+primTestEndOfFileFlag: aSqFileStruct
+	"Answer whether the file represented by aSqFileStruct is at end of file, as determined
+	by a call to feof(). This is different from StandardFileStream>>primAtEnd: which answers
+	true if the file pointer is at the end of the file, but which does not call feof() to
+	determine that an end of file condition has occurred. The difference is significant
+	if aSqFileStruct represents a pipe or a device file, which may not be positionable
+	in the sense of a conventional disk file."
+
+	<primitive: 'primitiveTestEndOfFileFlag' module: 'UnixOSProcessPlugin'>
+	^ nil! !
+
+!OSPipeTestCase methodsFor: 'private' stamp: 'dtl 4/Jun/2006, 8:03:00 pm (UTC)'!
+readFromAndClose: aPipe writingTo: aStream
+
+	| s |
+	[aPipe atEndOfFile] whileFalse:
+		[s _ aPipe next: 10000.
+		aStream nextPutAll: s asString.
+		(Delay forMilliseconds: 100) wait].
+	(aPipe respondsTo: #reader) ifTrue: [aPipe reader close].
+	^ aStream
+! !
+
+!OSPipeTestCase methodsFor: 'private' stamp: 'dtl 25/Mar/2006, 10:29:00 pm (UTC)'!
+writeStuffOnThenClose: aPipe
+
+	^ [(1 to: 10) do:
 		[:i |
-		clientTcpSocket sendData: 'this is line ', i asString, Character cr asString.
-		(Delay forMilliseconds: 500) wait].
+		[aPipe nextPutAll: 'this is line ', i printString; cr]
+			on: Error
+			do: ["Ignore error. Test case will still fail, and throwing an error in this
+				process would cause a debugger to be scheduled inconveniently."].
+		(Delay forMilliseconds: 50) wait].
+	(aPipe respondsTo: #writer)
+		ifTrue: [[aPipe writer close]
+					on: Error
+					do: ["Ignore error to avoid a debugger"]]
+		ifFalse: [[aPipe close]
+					on: Error
+					do: ["Ignore error to avoid a debugger"]]]
+		forkAt: Processor userBackgroundPriority! !
 
-	clientTcpSocket closeAndDestroy.
-	Transcript show: 'client endpoint closed'; cr.
-	serverTcpSocket closeAndDestroy.
-	Transcript show: 'server endpoint closed'; cr.
-	example close.
-	Transcript show: 'event handler stopped'; cr.
-	^ Array with: example with: serverTcpSocket with: clientTcpSocket! !
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 12/Apr/2014, 8:07:00 pm (UTC)'!
+testBlocking
 
-!StandardFileStream methodsFor: '*OSProcess-Base' stamp: 'dtl 6/5/2006 06:59'!
+	"(OSPipeTestCase selector: #testBlocking) run"
+
+	| p |
+	p _ OSPipe blockingPipe.
+	(1 to: 10) do: [:i | p nextPutAll: 'this is line ', i printString; cr].
+	p flush. "protect against buggy clib that may never flush output"
+	self should: ['this is line 1*' match: (p next: 15)].
+	self should: ['this is line 2*' match: (p next: 15)].
+	self should: ['this is line 3*' match: (p next: 15)].
+	self should: ['this is line 4*' match: (p next: 15)].
+	self should: ['this is line 5*' match: (p next: 15)].
+	self should: ['this is line 6*' match: (p next: 15)].
+	self should: ['this is line 7*' match: (p next: 15)].
+	self should: ['this is line 8*' match: (p next: 15)].
+	self should: ['this is line 9*' match: (p next: 15)].
+	p writer close.
+	self shouldnt: p atEnd.
+	self should: ['this is line 10*' match: (p next: 16)].
+	self should: p atEnd.
+	p close
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 6/Jun/2015, 1:27:00 pm (UTC)'!
+testBlockingBufferedPipe
+
+	"(OSPipeTestCase selector: #testBlockingBufferedPipe) run"
+
+	| p |
+	p _ ExternalPipe bufferedBlockingPipe.
+	[(1 to: 10) do: [:i | p nextPutAll: 'this is line ', i printString; cr; flush].
+	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
+	self should: ['this is line 1*' match: (p next: 15)].
+	self should: ['this is line 2*' match: (p next: 15)].
+	self should: ['this is line 3*' match: (p next: 15)].
+	self should: ['this is line 4*' match: (p next: 15)].
+	self should: ['this is line 5*' match: (p next: 15)].
+	self should: ['this is line 6*' match: (p next: 15)].
+	self should: ['this is line 7*' match: (p next: 15)].
+	self should: ['this is line 8*' match: (p next: 15)].
+	self should: ['this is line 9*' match: (p next: 15)].
+	p writer close.
+	self shouldnt: p atEnd.
+	self should: ['this is line 10*' match: (p next: 16)].
+	self should: p atEnd]
+		ensure: [p close]
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 16/Dec/2022, 11:55:00 pm (UTC)'!
+testBlockingPeek
+
+	"(OSPipeTestCase selector: #testBlockingPeek) run"
+
+	| p |
+	p _ OSPipe blockingPipe.
+	p nextPutAll: 'abc'.
+	p flush. "protect against buggy clib that may never flush output"
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
+	self deny: p atEnd.
+	self assert: (p next = $c).
+	self deny: p atEnd.
+	p closeWriter.
+	self assert: p atEnd.
+	p close
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 16/Dec/2022, 11:56:00 pm (UTC)'!
+testBlockingPeekBufferedPipe
+
+	"(OSPipeTestCase selector: #testBlockingPeekBufferedPipe) run"
+
+	| p |
+	p _ ExternalPipe bufferedBlockingPipe.
+	[p nextPutAll: 'abc'; flush.
+	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
+	self deny: p atEnd.
+	self assert: (p next = $c).
+	self deny: p atEnd.
+	p closeWriter.
+	self assert: p atEnd]
+		ensure: [p close]
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 18/May/2006, 3:36:00 am (UTC)'!
+testBufferedUpToEnd
+
+	"(OSPipeTestCase selector: #testBufferedUpToEnd) debug"
+
+	| s p r1 r2 |
+	s _ 'some data to put through the pipe'.
+	p _ OSPipe new.
+	self primTestEndOfFileFlag: p reader fileID. "check that OSPP is updated"
+	self assert: p setBufferedReader.
+	[p nextPutAll: s.
+	p closeWriter.
+	r1 _ p upToEnd. "#atEnd does not detect EOF on a pipe"
+	self assert: r1 isEmpty.
+	r2 _ p upToEndOfFile. "detects EOF correctly, gets remaining data"
+	self assert: r2 = s]
+		ensure: [p close]
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 19/Apr/2026, 7:02:00 pm (UTC)'!
+testIsAtEndOfFile
+
+	"(OSPipeTestCase selector: #testIsAtEndOfFile) debug"
+
+	| p |
+	p _ OSPipe new.
+	self primTestEndOfFileFlag: p reader fileID. "check that OSPP is updated"
+	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
+	self deny: p reader atEnd.
+	self deny: p atEnd.
+	self assert: (p reader basicNext == nil).
+	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
+	self deny: p reader atEnd.
+	self deny: p atEnd.
+	p writer nextPut: $X; flush.
+	self assert: (p reader basicNext = $X).
+	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
+	self deny: p reader atEnd.
+	self deny: p atEnd.
+	self assert: (p reader basicNext == nil).
+	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
+	self deny: p reader atEnd.
+	self deny: p atEnd.
+
+	p writer close.
+	self deny: (OSProcess accessor isAtEndOfFile: p reader fileID).
+	self deny: p atEndOfFile. "no read yet, so flag has not been set"
+	self deny: p reader atEnd description: 'Failure here is likely caused by stdio hacks in sqFileAtEnd() support code. Don''t do that.'.
+	self assert: p atEnd. "writer closed and read gives nil"
+
+	self assert: (p reader basicNext == nil). "read operation should set flag"
+	self assert: (OSProcess accessor isAtEndOfFile: p reader fileID).
+	self assert: p reader atEnd.
+	self assert: p reader atEndOfFile.
+	self assert: p atEnd.
+	p close
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 6/Jun/2015, 1:23:00 pm (UTC)'!
+testIsAtEndOfFile2
+
+	"(OSPipeTestCase selector: #testIsAtEndOfFile2) debug"
+
+	| p s |
+	p _ OSPipe new.
+	[p nextPutAll: 'hello'; flush.
+	s _ p next: 100.
+	self assert: s = 'hello'.
+	self deny: p atEndOfFile.
+	p closeWriter.
+	self deny: p atEndOfFile.
+	s _ p next: 100.
+	self assert: s = ''.
+	self assert: p atEndOfFile]
+		ensure: [p close]
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 25/Mar/2006, 5:44:00 pm (UTC)'!
+testNonBlocking
+
+	"(OSPipeTestCase selector: #testNonBlocking) run"
+
+	| p ws str |
+	p _ OSPipe nonBlockingPipe.
+	self writeStuffOnThenClose: p.
+	ws _ self readFromAndClose: p writingTo: (WriteStream on: String new).
+	str _ (ws contents last: 16).
+	self should: ['this is line 10*' match: str].
+	p close
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 3/Apr/2006, 1:40:00 am (UTC)'!
+testNonBlockingBufferedPipe
+
+	"(OSPipeTestCase selector: #testNonBlockingBufferedPipe) run"
+
+	| p ws str |
+	p _ ExternalPipe bufferedNonBlockingPipe.
+	[self writeStuffOnThenClose: p.
+	self assert: (p peek == nil).
+	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
+	ws _ self readFromAndClose: p writingTo: (WriteStream on: String new).
+	str _ (ws contents last: 16).
+	self should: ['this is line 10*' match: str]]
+		ensure: [p close]
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 16/Dec/2022, 11:57:00 pm (UTC)'!
+testNonBlockingPeek
+
+	"(OSPipeTestCase selector: #testNonBlockingPeek) run"
+
+	| p |
+	p _ OSPipe nonBlockingPipe.
+	p nextPutAll: 'abc'; flush.
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
+	self deny: p atEnd.
+	self assert: (p next = $c).
+	self deny: p atEnd.
+	p closeWriter.
+	self assert: p atEnd.
+	p close
+! !
+
+!OSPipeTestCase methodsFor: 'tests' stamp: 'dtl 16/Dec/2022, 11:58:00 pm (UTC)'!
+testNonBlockingPeekBufferedPipe
+
+	"(OSPipeTestCase selector: #testNonBlockingPeekBufferedPipe) run"
+
+	| p |
+	p _ ExternalPipe bufferedNonBlockingPipe.
+	[p nextPutAll: 'abc'; flush.
+	self assert: (p peek = nil).
+	(Delay forMilliseconds: 100) wait. "allow pipe reads to complete"
+	self assert: (p peek = $a).
+	self assert: (p next = $a).
+	self assert: (p peek = $b).
+	self assert: (p next = $b).
+	self assert: (p peek = $c).
+	self deny: p atEnd.
+	self assert: (p next = $c).
+	self deny: p atEnd.
+	p closeWriter.
+	self assert: p atEnd]
+		ensure: [p close]
+! !
+
+!ResettableBufferStreamTest methodsFor: 'tests' stamp: 'dtl 23/Jul/2023, 3:15:00 pm (UTC)'!
+testReadWrite
+	"Basic read and write behavior"
+
+	"(ResettableBufferStreamTest selector: #testReadWrite) debug"
+
+	| strm |
+	strm _ ResettableBufferStream with: 'some characters'.
+	self assert: 15 equals: strm position.
+	self assert: 15 equals: strm size.
+	self assert: 'some characters' equals: strm contents.
+	strm nextPutAll: ' XXX'.
+	self assert: 19 equals: strm position.
+	self assert: 19 equals: strm size.
+	self assert: 'some characters XXX' equals: strm contents.
+	self assert: '' equals: strm upToEnd.
+	strm position: 10.
+	self assert: 'cters XXX' equals: strm upToEnd.
+
+
+! !
+
+!ResettableBufferStreamTest methodsFor: 'tests' stamp: 'dtl 23/Jul/2023, 3:51:00 pm (UTC)'!
+testRemovePreviouslyRead
+	"Basic read and write behavior"
+
+	"(ResettableBufferStreamTest selector: #testRemovePreviouslyRead) debug"
+
+	| strm |
+	strm _ ResettableBufferStream with: 'some characters'.
+	self assert: 15 equals: strm position.
+	self assert: 15 equals: strm size.
+	self assert: 'some characters' equals: strm contents.
+	strm reset.
+	strm removePreviouslyRead.
+	self assert: 0 equals: strm position.
+	self assert: 15 equals: strm size.
+	self assert: 'some characters' equals: strm contents.
+	strm reset; next: 5.
+	strm removePreviouslyRead.
+	self assert: 0 equals: strm position.
+	self assert: 10 equals: strm size.
+	self assert: 'characters' equals: strm contents.
+	self assert: 'characters' equals: strm upToEnd.
+	self assert: 10 equals: strm position.
+	strm removePreviouslyRead.
+	self assert: 0 equals: strm position.
+	self assert: 0 equals: strm size.
+	self assert: '' equals: strm contents.
+	self assert: '' equals: strm upToEnd.
+	self assert: 0 equals: strm position.
+	strm nextPutAll: 'XXX'.
+	strm reset.
+	self assert: 'XXX' equals: strm contents.
+	self assert: 'XXX' equals: strm upToEnd.
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 1/Jan/2024, 2:33:00 pm (UTC)'!
+contentsOfFile: path
+	| fs contents |
+	fs _ OSProcess oldFileNamed: path.
+	contents _ fs contentsOfEntireFile.
+	fs close.
+	^ contents
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 1/Mar/2002, 10:02:00 pm (UTC)'!
+runAll
+
+	"UnixProcessAccessorTestCase new runAll"
+
+	| result suite |
+	suite _ TestSuite new.
+	suite addTest: (UnixProcessAccessorTestCase selector: #testSessionIdentifier).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testCanAccessSystem).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testMakePipeHandles).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testUnixFileNumber).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testFileProtectionMask).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testFileStat).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testIsExecutable).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testIsExecutableForUserInGroup).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testIsReadable).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testIsReadableForUserInGroup).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testIsWritable).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testIsWritableForUserInGroup).
+
+	suite addTest: (UnixProcessAccessorTestCase selector: #runExternalProcessAccess).
+	suite addTest: (UnixProcessAccessorTestCase selector: #runForkAndExec).
+
+	result _ suite run.
+	self should: [result defects size == 0].
+	^ result
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 3/Aug/2003, 10:02:00 pm (UTC)'!
+runExternalProcessAccess
+
+	"UnixProcessAccessorTestCase new runExternalProcessAccess"
+
+	| result suite |
+	suite _ TestSuite new.
+	suite addTest: (UnixProcessAccessorTestCase selector: #testCanAccessSystem).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testChDir).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAt).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testEnvironmentAtPut).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimUnsetEnv).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testGetStdInHandle).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testGetStdOutHandle).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testGetStdErrHandle).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimArgumentAt).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetPid).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetGid).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetEGid).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetPid).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetPPid).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetUid).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetSession).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testRealpath).
+
+	result _ suite run.
+	self should: [result defects size == 0].
+	^ result
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 6/Oct/2001, 3:37:00 pm (UTC)'!
+runForkAndExec
+	"Most of this must be tested from class UnixProcess"
+
+	"UnixProcessAccessorTestCase new runForkAndExec"
+
+	| result suite |
+	suite _ TestSuite new.
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimGetChildExitStatus).
+	suite addTest: (UnixProcessAccessorTestCase selector: #testPrimForkAndExec).
+	result _ suite run.
+	self should: [result defects size == 0].
+	^ result
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'running' stamp: 'dtl 6/Oct/2001, 12:29:00 pm (UTC)'!
+setUp
+
+	accessor _ ThisOSProcess accessor! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/Oct/2001, 12:36:00 pm (UTC)'!
+testCanAccessSystem
+
+	"(UnixProcessAccessorTestCase selector: #testCanAccessSystem) run"
+
+	self assert: accessor canAccessSystem! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 26/Dec/2023, 11:19:00 pm (UTC)'!
+testDupTo
+	"Perform a dup2() call to assign IO to a new file stream"
+
+	"(UnixProcessAccessorTestCase selector: #testDupTo) run"
+
+	| f1 f2 fd1 fd2 result contents1 contents2 |
+	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
+	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
+	f1 _ OSProcess newFileNamed: '/tmp/delete-1.me'.
+	f2 _ OSProcess newFileNamed: '/tmp/delete-2.me'.
+	fd1 _ OSProcess accessor primUnixFileNumber: f1 fileID.
+	fd2 _ OSProcess accessor primUnixFileNumber: f2 fileID.
+	result _ OSProcess accessor primDup: fd1 to: fd2.
+	"f1 and f2 now both refer to the same IO stream"
+	self assert: result = fd2.
+	f2 nextPutAll: 'write something to the original f2 file stream that will appear in duped f1 instead'; flush.
+	f1 reset.
+	contents1 _ f1 upToEnd.
+	"Note, the f1 file stream is not aware that we have changed the underlying file descriptor.
+	In earlier versions of Squeak and/or Linux stdio runtimes, the contents of f1 matched
+	that of f2, and in more recent versions the f1 content appear empty even though the
+	underlying file has been written due to the dup2() call. The difference is not important
+	for purposes of this test, so the assertions below are commented out. dtl Dec 2023"
+	"self deny: contents1 isEmpty.
+	self assert: ('write something*' match: contents1)."
+	f2 reset.
+	contents2 _ f2 upToEnd.
+	self deny: contents2 isEmpty.
+	self assert: ('write something*' match: contents2).
+	f1 close.
+	f2 close.
+	"check the contents of the actual files"
+	contents1 _ (OSProcess fileNamed: '/tmp/delete-1.me') contentsOfEntireFile.
+	self assert: ('write something*' match: contents1).
+	contents2 _ (OSProcess fileNamed: '/tmp/delete-2.me') contentsOfEntireFile.
+	self assert: contents2 isEmpty.
+	OSProcess deleteFileNamed: '/tmp/delete-1.me'.	
+	OSProcess deleteFileNamed: '/tmp/delete-2.me'.	
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/Oct/2001, 3:59:00 pm (UTC)'!
+testFileProtectionMask
+
+	"(UnixProcessAccessorTestCase selector: #testFileProtectionMask) run"
+
+	| mask |
+	mask _ accessor fileProtectionMask: '/bin/rm'.
+	self assert: (mask isKindOf: Array).
+	self assert: (mask size == 4)
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/Oct/2001, 4:06:00 pm (UTC)'!
+testFileStat
+
+	"(UnixProcessAccessorTestCase selector: #testFileStat) run"
+
+	| stat |
+	stat _ accessor fileStat: '/bin/rm'.
+	self assert: (stat isKindOf: Array).
+	self assert: (stat size == 3).
+	self assert: ((stat at: 1) isKindOf: Integer).
+	self assert: ((stat at: 2) isKindOf: Integer).
+	self assert: ((stat at: 3) isKindOf: Array).
+	self assert: ((stat at: 3) size == 4)
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/Oct/2001, 4:08:00 pm (UTC)'!
+testIsExecutable
+
+	"(UnixProcessAccessorTestCase selector: #testIsExecutable) run"
+
+	self should: [accessor isExecutable: '/bin/sh'].
+	self shouldnt: [accessor isExecutable: '/etc/hosts']
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 24/Jan/2013, 1:35:00 am (UTC)'!
+testIsExecutableForUserInGroup
+
+	"(UnixProcessAccessorTestCase selector: #testIsExecutableForUserInGroup) run"
+
+	self shouldnt: [OSProcess waitForCommand: 'touch /tmp/delete.me']
+		raise: Warning.
+	OSProcess waitForCommand: 'chmod 550 /tmp/delete.me'.
+	"explicitly set file group because OS X may have set it to something other than current gid"
+	OSProcess waitForCommand: 'chgrp ', accessor primGetGid asString, ' /tmp/delete.me'.
+	self should: [accessor isExecutable: '/bin/sh'
+					forUser: accessor primGetUid
+					inGroup: accessor primGetGid].
+	self shouldnt: [accessor isExecutable: '/etc/hosts'
+					forUser: accessor primGetUid
+					inGroup: accessor primGetGid].
+	self should: [accessor isExecutable: '/tmp/delete.me'
+					forUser: accessor primGetUid
+					inGroup: 99999].
+	self should: [accessor isExecutable: '/tmp/delete.me'
+					forUser: 99999
+					inGroup: accessor primGetGid].
+	self shouldnt: [accessor isExecutable: '/tmp/delete.me'
+					forUser: 99999
+					inGroup: 99999].
+	OSProcess deleteFileNamed: '/tmp/delete.me'
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 20/Oct/2001, 3:39:00 pm (UTC)'!
+testIsReadable
+
+	"(UnixProcessAccessorTestCase selector: #testIsReadable) run"
+
+	self should: [accessor isReadable: '/bin/sh'].
+	OSProcess waitForCommand: 'touch /tmp/delete.me'.
+	OSProcess waitForCommand: 'chmod 440 /tmp/delete.me'.
+	(Delay forMilliseconds: 200) wait.
+	self should: [accessor isReadable: '/tmp/delete.me'].
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 24/Jan/2013, 1:35:00 am (UTC)'!
+testIsReadableForUserInGroup
+
+	"(UnixProcessAccessorTestCase selector: #testIsReadableForUserInGroup) run"
+
+	self shouldnt: [OSProcess waitForCommand: 'touch /tmp/delete.me']
+		raise: Warning.
+	OSProcess waitForCommand: 'chmod 550 /tmp/delete.me'.
+	"explicitly set file group because OS X may have set it to something other than current gid"
+	OSProcess waitForCommand: 'chgrp ', accessor primGetGid asString, ' /tmp/delete.me'.
+	self should: [accessor isReadable: '/bin/sh'
+					forUser: accessor primGetUid
+					inGroup: accessor primGetGid].
+	self should: [accessor isReadable: '/tmp/delete.me'
+					forUser: accessor primGetUid
+					inGroup: 99999].
+	self should: [accessor isReadable: '/tmp/delete.me'
+					forUser: 99999
+					inGroup: accessor primGetGid].
+	self shouldnt: [accessor isReadable: '/tmp/delete.me'
+					forUser: 99999
+					inGroup: 99999].
+	OSProcess deleteFileNamed: '/tmp/delete.me'
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 20/Oct/2001, 3:38:00 pm (UTC)'!
+testIsWritable
+
+	"(UnixProcessAccessorTestCase selector: #testIsWritable) run"
+
+	self shouldnt: [accessor isWritable: '/bin/sh'].
+	OSProcess waitForCommand: 'touch /tmp/delete.me'.
+	OSProcess waitForCommand: 'chmod 770 /tmp/delete.me'.
+	(Delay forMilliseconds: 200) wait.
+	self should: [accessor isWritable: '/tmp/delete.me'].
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 24/Jan/2013, 1:35:00 am (UTC)'!
+testIsWritableForUserInGroup
+
+	"(UnixProcessAccessorTestCase selector: #testIsWritableForUserInGroup) run"
+
+	self shouldnt: [OSProcess waitForCommand: 'touch /tmp/delete.me']
+		raise: Warning.
+	OSProcess waitForCommand: 'chmod 770 /tmp/delete.me'.
+	"explicitly set file group because OS X may have set it to something other than current gid"
+	OSProcess waitForCommand: 'chgrp ', accessor primGetGid asString, ' /tmp/delete.me'.
+	self shouldnt: [accessor isWritable: '/bin/sh'
+					forUser: accessor primGetUid
+					inGroup: accessor primGetGid].
+	self should: [accessor isWritable: '/tmp/delete.me'
+					forUser: accessor primGetUid
+					inGroup: 99999].
+	self should: [accessor isWritable: '/tmp/delete.me'
+					forUser: 99999
+					inGroup: accessor primGetGid].
+	self shouldnt: [accessor isWritable: '/tmp/delete.me'
+					forUser: 99999
+					inGroup: 99999].
+	OSProcess deleteFileNamed: '/tmp/delete.me'
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 6/Oct/2001, 3:48:00 pm (UTC)'!
+testMakePipeHandles
+
+	"(UnixProcessAccessorTestCase selector: #testMakePipeHandles) run"
+
+	| p |
+	p _ OSPipe new.
+	self assert: p reader closed not.
+	self assert: p writer closed not.
+	p close! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 31/Dec/2023, 3:58:00 pm (UTC)'!
+testRedirectStdOutTo
+	"Perform a dup2() call on the standard output descriptor to assign it
+	to a new file stream"
+
+	"(UnixProcessAccessorTestCase selector: #testRedirectStdOutTo) run"
+
+	| out aFileStream contents outFd saveFd newFileNo saveFs |
+	out _ OSProcess thisOSProcess stdOut.
+	"save file number to allow cleanup at end of test"
+	OSProcess deleteFileNamed: '/tmp/delete.2.me'.	
+	saveFs _ OSProcess newFileNamed: '/tmp/delete.2.me'.
+	outFd _ OSProcess accessor primUnixFileNumber: out fileID.
+	saveFd _ OSProcess accessor primUnixFileNumber: saveFs fileID.
+	OSProcess accessor primDup: outFd to: saveFd.
+	"Original stdout file descriptor is saved as safeFd, to be restored at end of test"
+
+	OSProcess deleteFileNamed: '/tmp/delete.me'.	
+	aFileStream _ OSProcess newFileNamed: '/tmp/delete.me'.
+	"nb - #contentsOfEntireFile closes the file, do not use"
+	aFileStream reset.
+	self assert: aFileStream upToEnd isEmpty.
+	"note - do not close aFileStream as this affects actual stdout"
+	out nextPutAll: 'foo'; flush.
+	aFileStream reset.
+	self assert: aFileStream upToEnd isEmpty.
+	OSProcess thisOSProcess redirectStdOutTo: aFileStream.
+	out nextPutAll: 'foo'; flush.
+	contents _ self contentsOfFile: '/tmp/delete.me'.
+	self deny: contents isEmpty.
+	self assert: contents = 'foo'. "assume noone else is using stdout right now"
+	"ensure the we can still find the real stdout"
+	self deny: OSProcess thisOSProcess stdOut closed.
+	OSProcess thisOSProcess stdOut nextPutAll: 'bar'; flush.
+	contents _ self contentsOfFile: '/tmp/delete.me'.
+	self deny: contents isEmpty.
+	self assert: (contents endsWith: 'bar').
+	"Restore the original file number. The stdOut stream is cached in ThisOSProcess
+	(and should probably be recalculated following a dup2(), so find the real handle
+	with getStdOutHandle."
+	newFileNo _ OSProcess accessor primUnixFileNumber: OSProcess accessor getStdOutHandle.
+	OSProcess accessor primDup: saveFd to: newFileNo.
+	OSProcess thisOSProcess stdOut lf; nextPutAll: 'UnixProcessAccessorTestCase>>testRedirectStdOutTo - this should appear on original console stdout'; lf.
+	saveFs close.
+	aFileStream close.	
+	OSProcess deleteFileNamed: '/tmp/delete.me'.	
+	OSProcess deleteFileNamed: '/tmp/delete.2.me'.	
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 20/Jan/2021, 1:32:00 am (UTC)'!
+testSessionIdentifier
+	"This is an indirect way to make sure that the primitive for obtaining the session ID does
+	not get out of kilter with respect to the method for obtaining session ID from an existing
+	open file. The dangerous failure mode is if the SQFile data stucture format changes and
+	OSProcess does not get updated to reflect the change.
+
+	As of approximately Squeak 3.8 and beyond, the session id has been moved to the
+	first slot of the data structure. Deducing the session ID from an open file will not
+	work for a Squeak VM beyond that point, and will not work for any 64 bit VM.
+	OSPP version 4.0 or higher obtains session ID from the interpreter, so this is no
+	longer an issue. Skip this test for OSPP 4.0 and higher."
+
+	"(UnixProcessAccessorTestCase selector: #testSessionIdentifier) debug"
+
+	| installedOSPPMajorVersion |
+	self should: [accessor getSessionIdentifier isKindOf: ByteArray].
+	installedOSPPMajorVersion _ Integer readFrom:
+		(OSProcess accessor osppModuleVersionString ifNil: ['-1']) readStream.
+	(installedOSPPMajorVersion >= 4)
+		ifTrue: ["ignore this test"]
+		ifFalse: [self should:
+			[accessor getSessionIdentifierFromSourcesFile = accessor getSessionIdentifier]]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'eem 27/Mar/2014, 3:32:00 pm (UTC)'!
+testSignalNumbers
+	"Signal numbers as reported by UnixOSProcessPlugin. Note that some signal definitions
+	are architecture dependent, with specific number assignments differing between e.g. Intel
+	and Sparc. Intel architecture is assumed for this test."
+
+	"NOTE OSPP prior to version 4.4.12 had several incorrect signal number assignments.
+	Check the version level of OSPP by evaluating this expression:
+
+		OSProcess accessor primOSProcessPluginModuleVersionString"
+
+	self assert: OSProcess accessor primSigHupNumber = 1.
+	self assert: OSProcess accessor primSigIntNumber = 2.
+	self assert: OSProcess accessor primSigKillNumber = 9.
+	self assert: OSProcess accessor primSigPipeNumber = 13.
+	self assert: OSProcess accessor primSigQuitNumber = 3.
+	self assert: OSProcess accessor primSigTermNumber = 15.
+	OSProcess platformName caseOf:
+		{ ['unix']		->
+			[self assert: OSProcess accessor primSigUsr1Number = 10.
+			 self assert: OSProcess accessor primSigUsr2Number = 12.
+			 self assert: OSProcess accessor primSigChldNumber = 17.].
+		   ['Mac OS']	->
+			[self assert: OSProcess accessor primSigUsr1Number = 30.
+			 self assert: OSProcess accessor primSigUsr2Number = 31.
+			 self assert: OSProcess accessor primSigChldNumber = 20.]}
+	
+	
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'testing' stamp: 'dtl 16/Jan/2018, 1:59:06 am (UTC)'!
+testUnixFileNumber
+	"For purposes of this test, assume that stdin and stderr have not been
+	directed."
+
+	"(UnixProcessAccessorTestCase selector: #testUnixFileNumber) run"
+
+	| err errFileNo errHandle in inFileNo inHandle aFileStream fFileNo fHandle |
+	err _ OSProcess thisOSProcess stdErr.
+	errHandle _ err fileID.
+	errFileNo _ OSProcess accessor unixFileNumber: errHandle.
+	self assert: errFileNo == 2.
+	in _ OSProcess thisOSProcess stdIn.
+	inHandle _ in fileID.
+	inFileNo _ OSProcess accessor unixFileNumber: inHandle.
+	self assert: inFileNo == 0.
+	aFileStream _ OSProcess fileNamed: '/tmp/delete.me'.
+	fHandle _ aFileStream fileID.
+	fFileNo _ OSProcess accessor unixFileNumber: fHandle.
+	self assert: fFileNo notNil.
+	self assert: fFileNo > 2.
+	aFileStream close
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:57:58 am (UTC)'!
+testIsLockableFile
+
+	"(UnixProcessAccessorTestCase selector: #testIsLockableFile) debug"
+
+	| fs result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+
+	result _ OSProcess accessor isLockableFile: fs.
+	self should: result.
+
+	result _ OSProcess accessor lockFile: fs.
+	self should: (result isKindOf: OSFileLock).
+	result _ OSProcess accessor isLockableFile: fs.
+	self should: result.
+
+	OSProcess accessor unlockFile: fs.
+	result _ OSProcess accessor isLockableFile: fs.
+	self should: result.
+
+	fs close.
+	result _ OSProcess accessor isLockableFile: fs.
+	self shouldnt: result.
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:08 am (UTC)'!
+testLockFile
+
+	"(UnixProcessAccessorTestCase selector: #testLockFile) debug"
+
+	| fs result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	result _ OSProcess accessor lockFile: fs.
+	self should: (result isKindOf: OSFileLock).
+	fs close.
+	result _ OSProcess accessor lockFile: fs.
+	self should: (result == nil).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:17 am (UTC)'!
+testOSFileLockLock
+
+	"(UnixProcessAccessorTestCase selector: #testOSFileLockLock) debug"
+
+	| fs fileLock result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	fileLock _ OSFileLock onFile: fs exclusive: true.
+	result _ fileLock lock.
+	self should: (result == true).
+	result _ fileLock lock.
+	self should: (result == true).
+	fs close.
+	result _ fileLock lock.
+	self should: (result == false).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:24 am (UTC)'!
+testOSFileLockTest
+
+	"(UnixProcessAccessorTestCase selector: #testOSFileLockTest) debug"
+
+	| fs fileLock result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	fileLock _ OSFileLock onFile: fs exclusive: true.
+	result _ fileLock test.
+	self should: (result == true).
+	result _ fileLock lock.
+	self should: (result == true).
+	result _ fileLock test.
+	self should: (result == true).
+	result _ fileLock unlock.
+	self should: (result == true).
+	result _ fileLock test.
+	self should: (result == true).
+	fs close.
+	result _ fileLock test.
+	self should: (result == false).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:33 am (UTC)'!
+testOSFileLockUnlock
+
+	"(UnixProcessAccessorTestCase selector: #testOSFileLockUnlock) debug"
+
+	| fs fileLock result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	fileLock _ OSFileLock onFile: fs exclusive: true.
+	result _ fileLock unlock.
+	self should: (result == true).
+	result _ fileLock lock.
+	self should: (result == true).
+	result _ fileLock unlock.
+	self should: (result == true).
+	fs close.
+	result _ fileLock unlock.
+	self should: (result == false).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:41 am (UTC)'!
+testOSFileRegionLockLock
+
+	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockLock) debug"
+
+	| fs fileLock result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
+	result _ fileLock lock.
+	self should: (result == true).
+	result _ fileLock lock.
+	self should: (result == true).
+	fs close.
+	result _ fileLock lock.
+	self should: (result == false).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:49 am (UTC)'!
+testOSFileRegionLockTest
+
+	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockTest) debug"
+
+	| fs fileLock result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
+	result _ fileLock test.
+	self should: (result == true).
+	result _ fileLock lock.
+	self should: (result == true).
+	result _ fileLock test.
+	self should: (result == true).
+	result _ fileLock unlock.
+	self should: (result == true).
+	result _ fileLock test.
+	self should: (result == true).
+	fs close.
+	result _ fileLock test.
+	self should: (result == false).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:58:57 am (UTC)'!
+testOSFileRegionLockUnlock
+
+	"(UnixProcessAccessorTestCase selector: #testOSFileRegionLockUnlock) debug"
+
+	| fs fileLock result |
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[fs nextPutAll: 'ABCDEFG'.
+	fileLock _ OSFileRegionLock onFile: fs from: 2 to: 4 exclusive: true.
+	result _ fileLock unlock.
+	self should: (result == true).
+	result _ fileLock lock.
+	self should: (result == true).
+	result _ fileLock unlock.
+	self should: (result == true).
+	fs close.
+	result _ fileLock unlock.
+	self should: (result == false).
+	] ensure: [fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:59:17 am (UTC)'!
+testUnlockFileUnixCompatible
+
+	"(UnixProcessAccessorTestCase selector: #testUnlockFileUnixCompatible) debug"
+
+	| mode fs result |
+	mode _ OSProcess accessor emulateWin32FileLocking. "remember setting"
+
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[OSProcessAccessor emulateWin32FileLocking: false. "unix mode"
+	fs nextPutAll: 'ABCDEFG'.
+	result _ OSProcess accessor unlockFile: fs.
+	"On Unix, the fcntl call to unlock the file will succeed even if
+	the file is not locked."
+	self should: (result isKindOf: OSFileLock).
+
+	result _ OSProcess accessor lockFile: fs.
+	self should: (result isKindOf: OSFileLock).
+	result _ OSProcess accessor unlockFile: fs.
+	self should: (result isKindOf: OSFileLock).
+
+	fs close.
+	result _ OSProcess accessor unlockFile: fs.
+	self should: result == nil] ensure:
+		[OSProcessAccessor emulateWin32FileLocking: mode.
+		fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'file locking' stamp: 'dtl 16/Jan/2018, 1:59:24 am (UTC)'!
+testUnlockFileWin32Compatible
+
+	"(UnixProcessAccessorTestCase selector: #testUnlockFileWin32Compatible) debug"
+
+	| mode fs result |
+	mode _ OSProcess accessor emulateWin32FileLocking. "remember setting"
+
+	fs _ OSProcess fileNamed: 'junkfile'.
+	[OSProcessAccessor emulateWin32FileLocking: true. "win32 mode"
+	fs nextPutAll: 'ABCDEFG'.
+	result _ OSProcess accessor unlockFile: fs.
+	self should: result == nil.
+
+	result _ OSProcess accessor lockFile: fs.
+	self should: (result isKindOf: OSFileLock).
+	result _ OSProcess accessor unlockFile: fs.
+	self should: (result isKindOf: OSFileLock).
+
+	fs close.
+	result _ OSProcess accessor unlockFile: fs.
+	self should: result == nil] ensure:
+		[OSProcessAccessor emulateWin32FileLocking: mode.
+		fs close]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 11/Jul/2005, 11:00:00 pm (UTC)'!
+primFixPointersInArrayOfStrings: cStringArray withOffsets: offsetArray count: count
+	"This primitive call exists only for purposes of testing the
+	fixPointersInArrayOfStrings:withOffsets:count: method. I believe it to be
+	reasonably machine and compiler independent, but have no way of verifying
+	this on a variety of machines, so I'll leave this test method here in case
+	someone runs into problems on other hardware or compilers. -dtl"
+
+	"| a |
+	a _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: UnixProcess env.
+	UnixProcessAccessorTestCase new
+		primFixPointersInArrayOfStrings: (a at: 1)
+		withOffsets: (a at: 2)
+		count: (a at: 2) size"
+
+	<primitive: 'primitiveFixPointersInArrayOfStrings' module: 'UnixOSProcessPlugin'>
+	^ nil! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 18/Dec/2022, 2:56:00 pm (UTC)'!
+testArgsAsFlatArrayAndOffsets
+	"Test conversion of an array of strings into the form used to create a C **char
+	in UnixOSProcessPlugin."
+
+	"(UnixProcessAccessorTestCase selector: #testArgsAsFlatArrayAndOffsets) debug"
+
+	| a pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers |
+	pointerSize _ OSProcess accessor sizeOfPointer.
+	a _ { 'one' . 'two' . 'three' } collect: [ :e | e , (Character null) asString ].
+	stringsAndOffsets _ OSProcess thisOSProcess argsAsFlatArrayAndOffsets: a.
+	self assert: stringsAndOffsets size == 2.
+	self assert: stringsAndOffsets second size == 3.
+	lengthOfCStrings _ (a collect: [:e | e size]) sum.
+	totalLength _ 4 * pointerSize + lengthOfCStrings.
+	self assert: stringsAndOffsets first size == totalLength.
+	stringsAndOffsets second do: [:offset |
+		(stringsAndOffsets first at: offset) == (Character null)].
+
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: 4 * pointerSize.
+	s _  rs next: 3.
+	rs next.
+	self assert: s = 'one' asByteArray.
+	s _  rs next: 3.
+	rs next.
+	self assert: s = 'two' asByteArray.
+	s _  rs next: 5.
+	rs next.
+	self assert: s = 'three' asByteArray.
+
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: (stringsAndOffsets second at: 1).
+	s _  rs next: 3.
+	self assert: s = 'one' asByteArray.
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: (stringsAndOffsets second at: 2).
+	s _  rs next: 3.
+	self assert: s = 'two' asByteArray.
+	rs _ ReadStream on: stringsAndOffsets first.
+	rs next: (stringsAndOffsets second at: 3).
+	s _  rs next: 5.
+	self assert: s = 'three' asByteArray.
+
+	arrayWithMachineDependentPointers _ self
+		primFixPointersInArrayOfStrings: stringsAndOffsets first
+		withOffsets: stringsAndOffsets second
+		count: stringsAndOffsets second size.
+	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
+	rs _ ReadStream on: arrayWithMachineDependentPointers.
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
+	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - C string arrays' stamp: 'dtl 18/Dec/2022, 3:14:00 pm (UTC)'!
+testEnvAsFlatArrayAndOffsets
+	"Test conversion of a dictionary of key-value environment variables into the
+	form used to create a C **char in UnixOSProcessPlugin."
+
+	"(UnixProcessAccessorTestCase selector: #testEnvAsFlatArrayAndOffsets) debug"
+
+	| pointerSize lengthOfCStrings totalLength stringsAndOffsets rs s arrayWithMachineDependentPointers d |
+	pointerSize _ OSProcess accessor sizeOfPointer.
+	d _ Dictionary new.
+	d at: #ONE put: 'one'.
+	d at: #TWO put: 'two'.
+	d at: #THREE put: 'three'.
+	stringsAndOffsets _ OSProcess thisOSProcess envAsFlatArrayAndOffsets: d.
+	self assert: stringsAndOffsets size == 2.
+	self assert: stringsAndOffsets second size == 3.
+
+	lengthOfCStrings _ d keys
+		inject: 0
+		into: [:sum :e | sum + e size + '=' size + (d at: e) size + (String new: 1) size].
+
+	totalLength _ 4 * pointerSize + lengthOfCStrings.
+	self assert: stringsAndOffsets first size == totalLength.
+	stringsAndOffsets second do: [:offset |
+		(stringsAndOffsets first at: offset) == (Character null)].
+
+	arrayWithMachineDependentPointers _ self
+		primFixPointersInArrayOfStrings: stringsAndOffsets first
+		withOffsets: stringsAndOffsets second
+		count: stringsAndOffsets second size.
+	self assert: arrayWithMachineDependentPointers size == stringsAndOffsets first size.
+	rs _ ReadStream on: arrayWithMachineDependentPointers.
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s ~= (String new: pointerSize). "a C pointer"
+	s _ rs next: pointerSize.
+	self assert: s = (String new: pointerSize) asByteArray. "a NULL pointer"
+	self assert: rs upToEnd = (stringsAndOffsets first allButFirst: pointerSize * 4)
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 26/Dec/2023, 3:28:00 pm (UTC)'!
+testChDir
+
+	"(UnixProcessAccessorTestCase selector: #testChDir) run"
+
+	| cwd new |
+	cwd _ accessor primGetCurrentWorkingDirectory.
+	new _ '/usr/bin'.
+	"Note, do not use /tmp because OS X implements it as a sym link to private/tmp
+	and do not use /bin because some Linux implementations may link it to /usr/bin"
+	accessor chDir: new.
+	self should: [new = accessor primGetCurrentWorkingDirectory].
+	accessor chDir: cwd.
+	self should: [cwd = accessor primGetCurrentWorkingDirectory].
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 12:53:00 pm (UTC)'!
+testEnvironmentAt
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAt) run"
+
+	| path |
+	path _ accessor environmentAt: 'PATH'.
+	self should: [path notNil and: [path isEmpty not]]! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 24/Feb/2013, 2:26:00 pm (UTC)'!
+testEnvironmentAtPut
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut) run"
+
+	| oldPath newPath resetPath s |
+	oldPath _ accessor environmentAt: 'PATH'.
+	newPath _ 'this is a test string'.
+	accessor environmentAt: 'PATH' put: newPath.
+	resetPath _ accessor environmentAt: 'PATH'.
+	self should: [newPath = resetPath].
+	accessor environmentAt: 'PATH' put: oldPath.
+	resetPath _ accessor environmentAt: 'PATH'.
+	self should: [oldPath = resetPath].
+	s _ WriteStream on: String new.
+	10000 timesRepeat: [s nextPutAll: 'Do something to provoke garbage collection'].
+	resetPath _ accessor environmentAt: 'PATH'.
+	self should: [oldPath = resetPath].
+
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 7/Oct/2001, 3:47:00 pm (UTC)'!
+testEnvironmentAtPut1
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut1) run"
+
+	| oldVal newVal resetVal |
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
+	accessor environmentAt: 'AAAA' put: newVal.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal notNil and: [resetVal isEmpty not]].
+	self should: [newVal = resetVal].
+	accessor environmentAt: 'AAAA' put: oldVal.
+	self should: [oldVal = (accessor environmentAt: 'AAAA')]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 7/Oct/2001, 4:14:00 pm (UTC)'!
+testEnvironmentAtPut2
+	"This looks for a bug in which the enviroment is successfully, but later gets
+	invalidated by memory moves or reallocation."
+
+	"(UnixProcessAccessorTestCase selector: #testEnvironmentAtPut2) run"
+
+	| oldVal newVal resetVal count ws goodResults notFound totallyBogus |
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
+	accessor environmentAt: 'AAAA' put: newVal.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal notNil and: [resetVal isEmpty not]].
+	self should: [newVal = resetVal].
+
+	count _ 50000.
+	ws _ WriteStream on: Array new.
+	count timesRepeat: [ws nextPut: (accessor environmentAt: 'AAAA')].
+	goodResults _ ws contents select: [:e | e = newVal].
+	notFound _ ws contents select: [:e | e isNil].
+	totallyBogus _ ws contents select: [:e | e notNil and: [e ~= newVal]].
+
+	"Uncomment the following to see when the problem is happening"
+	"(Array with: goodResults with: notFound with: totallyBogus) inspect."
+
+	self should: [goodResults size == count].
+	self should: [notFound isEmpty].
+	self should: [totallyBogus isEmpty].
+
+	accessor environmentAt: 'AAAA' put: oldVal.
+	self should: [oldVal = (accessor environmentAt: 'AAAA')]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:36:00 pm (UTC)'!
+testGetStdErrHandle
+
+	"(UnixProcessAccessorTestCase selector: #testGetStdErrHandle) run"
+
+	| handle |
+	handle _ accessor primGetStdErrHandle.
+	self assert: handle notNil
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:36:00 pm (UTC)'!
+testGetStdInHandle
+
+	"(UnixProcessAccessorTestCase selector: #testGetStdInHandle) run"
+
+	| handle |
+	handle _ accessor primGetStdInHandle.
+	self assert: handle notNil
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:36:00 pm (UTC)'!
+testGetStdOutHandle
+
+	"(UnixProcessAccessorTestCase selector: #testGetStdOutHandle) run"
+
+	| handle |
+	handle _ accessor primGetStdOutHandle.
+	self assert: handle notNil
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:42:00 pm (UTC)'!
+testPrimArgumentAt
+
+	"(UnixProcessAccessorTestCase selector: #testPrimArgumentAt) run"
+
+	| progName |
+	progName _ accessor primArgumentAt: 1.
+	self should: [progName notNil and: [progName isEmpty not]]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:45:00 pm (UTC)'!
+testPrimErrorMessageAt
+
+	"(UnixProcessAccessorTestCase selector: #testPrimErrorMessageAt) run"
+
+	| msg |
+	msg _ accessor primErrorMessageAt: 1.
+	self should: [msg notNil and: [msg isEmpty not]].
+	msg _ accessor primErrorMessageAt: 0.
+	self should: [msg notNil and: [msg isEmpty not]]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 12:45:00 pm (UTC)'!
+testPrimGetCurrentWorkingDirectory
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetCurrentWorkingDirectory) run"
+
+	| cwd |
+	cwd _ accessor primGetCurrentWorkingDirectory.
+	self should: [cwd notNil and: [cwd isEmpty not]]! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:49:00 pm (UTC)'!
+testPrimGetEGid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetEGid) run"
+
+	| id |
+	id _ accessor primGetEGid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:49:00 pm (UTC)'!
+testPrimGetEUid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetEUid) run"
+
+	| id |
+	id _ accessor primGetEUid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:50:00 pm (UTC)'!
+testPrimGetGid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetGid) run"
+
+	| id |
+	id _ accessor primGetGid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:50:00 pm (UTC)'!
+testPrimGetPPid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetPPid) run"
+
+	| id |
+	id _ accessor primGetPPid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:50:00 pm (UTC)'!
+testPrimGetPid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetPid) run"
+
+	| id |
+	id _ accessor primGetPid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 19/Aug/2005, 10:32:00 am (UTC)'!
+testPrimGetSession
+	"As of OSPP version 4 and greater, the session ID should always be obtained from
+	the interpreter. Previously it was deduced by looking at the handle of an open file."
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetSession) run"
+
+	| id expectedSessionSize |
+	expectedSessionSize _ [OSProcess accessor sizeOfInt] on: Error do: [4].
+	id _ OSProcess accessor primGetSession.
+	self assert: (id isNil or: [id isKindOf: ByteArray]).
+	id _ OSProcess accessor getSessionIdentifier.
+	self assert: (id isKindOf: ByteArray).
+	self assert: (id size / expectedSessionSize) == 1
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 1:50:00 pm (UTC)'!
+testPrimGetUid
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetUid) run"
+
+	| id |
+	id _ accessor primGetUid.
+	self should: [id isKindOf: Integer]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 7/Oct/2001, 6:07:00 pm (UTC)'!
+testPrimUnsetEnv
+
+	"(UnixProcessAccessorTestCase selector: #testPrimUnsetEnv) run"
+
+	| oldVal newVal resetVal |
+	oldVal _ accessor environmentAt: 'AAAA'.
+	newVal _ 'this is a test string'.
+	accessor environmentAt: 'AAAA' put: newVal.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal notNil and: [resetVal isEmpty not]].
+	self should: [newVal = resetVal].
+
+	accessor primUnsetEnv: 'AAAA', (Character null) asString.
+	resetVal _ accessor environmentAt: 'AAAA'.
+	self should: [resetVal isNil].
+
+	accessor environmentAt: 'AAAA' put: oldVal.
+	self should: [oldVal = (accessor environmentAt: 'AAAA')]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - external process access' stamp: 'dtl 6/Oct/2001, 2:03:00 pm (UTC)'!
+testRealpath
+
+	"(UnixProcessAccessorTestCase selector: #testRealpath) run"
+
+	| p |
+	p _ accessor realpath: '/usr/bin'.
+	self should: [p notNil and: [p isEmpty not]].
+	p _ accessor realpath: '/bogus/path/name'.
+	self should: [p isNil]
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - fork and exec' stamp: 'dtl 11/Jun/2011, 4:25:00 pm (UTC)'!
+testPrimForkAndExec
+	"These methods can only be tested properly from UnixProcess, which knows how
+	to set up the parameters on the stack."
+
+	"(UnixProcessAccessorTestCase selector: #testPrimForkAndExec) run"
+
+	| p |
+	self shouldnt: [p _ UnixProcess command: 'ls /bin']
+		raise: Warning.
+	(Delay forMilliseconds: 500) wait.
+	self should: [p isComplete].
+	self should: [p exitStatus == 0]
+
+! !
+
+!UnixProcessAccessorTestCase methodsFor: 'tests - fork and exec' stamp: 'dtl 6/Oct/2001, 2:44:00 pm (UTC)'!
+testPrimGetChildExitStatus
+	"Cannot really test this here, because it needs to be wired into the interrupt
+	handler. Just make sure it returns nil when there is nothing to do."
+
+	"(UnixProcessAccessorTestCase selector: #testPrimGetChildExitStatus) run"
+
+	| stat |
+	stat _ accessor primGetChildExitStatus: -1.
+	self should: [stat isNil].
+	stat _ accessor primGetChildExitStatus: 1.
+	self should: [stat isNil]
+! !
+
+!UnixProcessFileLockTestCase methodsFor: 'asserting' stamp: 'jf 22/Feb/2004, 11:07:00 pm (UTC)'!
+assertLock: lock1 lock: lock2 conflicts: aBoolean
+	self assert: (lock1 conflictsWith: lock2) = aBoolean.
+	self assert: (lock2 conflictsWith: lock1) = aBoolean.! !
+
+!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'dtl 17/Dec/2016, 9:37:00 pm (UTC)'!
+entireExclusiveLock
+	^ OSFileLock onFile: fileStream exclusive: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'dtl 17/Dec/2016, 9:37:00 pm (UTC)'!
+entireSharedLock
+	^ OSFileLock onFile: fileStream exclusive: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'jf 22/Feb/2004, 11:22:00 pm (UTC)'!
+regionExclusiveLock
+	^ self regionLockFrom: 10 to: 20 exclusive: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'dtl 17/Dec/2016, 9:37:00 pm (UTC)'!
+regionLockFrom: from to: to exclusive: exclusive
+	^ OSFileRegionLock onFile: fileStream from: from to: to exclusive: exclusive! !
+
+!UnixProcessFileLockTestCase methodsFor: 'data' stamp: 'jf 22/Feb/2004, 11:22:00 pm (UTC)'!
+regionSharedLock
+	^ self regionLockFrom: 10 to: 20 exclusive: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'accessing' stamp: 'jf 21/Feb/2004, 10:14:00 pm (UTC)'!
+fileStream
+	^ fileStream! !
+
+!UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 16/Jan/2018, 2:18:35 am (UTC)'!
+setUp
+	OSProcess deleteFileNamed: 'junkfile'.
+	fileStream _ OSProcess fileNamed: 'junkfile'.! !
+
+!UnixProcessFileLockTestCase methodsFor: 'running' stamp: 'dtl 23/Jan/2013, 11:42:00 pm (UTC)'!
+tearDown
+	fileStream close.
+	OSProcess deleteFileNamed: fileStream fullName! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:27:00 pm (UTC)'!
+testDistinctExclusiveRegionWithExclusiveRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
+		lock: (self regionLockFrom: 30 to: 40 exclusive: true)
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:27:00 pm (UTC)'!
+testDistinctExclusiveRegionWithSharedRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
+		lock: (self regionLockFrom: 30 to: 40 exclusive: false)
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:27:00 pm (UTC)'!
+testDistinctSharedRegionWithExclusiveRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
+		lock: (self regionLockFrom: 30 to: 40 exclusive: true)
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:26:00 pm (UTC)'!
+testDistinctSharedRegionWithSharedRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
+		lock: (self regionLockFrom: 30 to: 40 exclusive: false)
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:12:00 pm (UTC)'!
+testEntireExclusiveWithEntireExclusive
+	self
+		assertLock: self entireExclusiveLock
+		lock: self entireExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:16:00 pm (UTC)'!
+testEntireExclusiveWithExclusiveRegion
+	self
+		assertLock: self entireExclusiveLock
+		lock: self regionExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:17:00 pm (UTC)'!
+testEntireExclusiveWithSharedRegion
+	self
+		assertLock: self entireExclusiveLock
+		lock: self regionSharedLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:12:00 pm (UTC)'!
+testEntireSharedWithEntireExclusive
+	self
+		assertLock: self entireSharedLock
+		lock: self entireExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:12:00 pm (UTC)'!
+testEntireSharedWithEntireShared
+	self
+		assertLock: self entireSharedLock
+		lock: self entireSharedLock
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:14:00 pm (UTC)'!
+testEntireSharedWithExclusiveRegion
+	self
+		assertLock: self entireSharedLock
+		lock: self regionExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:15:00 pm (UTC)'!
+testEntireSharedWithSharedRegion
+	self
+		assertLock: self entireSharedLock
+		lock: self regionSharedLock
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:18:00 pm (UTC)'!
+testExclusiveRegionWithExclusiveRegion
+	self
+		assertLock: self regionExclusiveLock
+		lock: self regionExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:25:00 pm (UTC)'!
+testIdenticalExclusiveRegionWithExclusiveRegion
+	self
+		assertLock: self regionExclusiveLock
+		lock: self regionExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:24:00 pm (UTC)'!
+testIdenticalSharedRegionWithExclusiveRegion
+	self
+		assertLock: self regionSharedLock
+		lock: self regionExclusiveLock
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:24:00 pm (UTC)'!
+testIdenticalSharedRegionWithSharedRegion
+	self
+		assertLock: self regionSharedLock
+		lock: self regionSharedLock
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:25:00 pm (UTC)'!
+testOverlappingExclusiveRegionWithExclusiveRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:26:00 pm (UTC)'!
+testOverlappingExclusiveRegionWithSharedRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: true)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:26:00 pm (UTC)'!
+testOverlappingSharedRegionWithExclusiveRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:26:00 pm (UTC)'!
+testOverlappingSharedRegionWithSharedRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 20 exclusive: false)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
+		conflicts: false! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:21:00 pm (UTC)'!
+testSupersetExclusiveRegionWithExclusiveRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 40 exclusive: true)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:23:00 pm (UTC)'!
+testSupersetExclusiveRegionWithSharedRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 40 exclusive: true)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:23:00 pm (UTC)'!
+testSupersetSharedRegionWithExclusiveRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 40 exclusive: false)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: true)
+		conflicts: true! !
+
+!UnixProcessFileLockTestCase methodsFor: 'tests' stamp: 'jf 22/Feb/2004, 11:24:00 pm (UTC)'!
+testSupersetSharedRegionWithSharedRegion
+	self
+		assertLock: (self regionLockFrom: 10 to: 40 exclusive: false)
+		lock: (self regionLockFrom: 20 to: 30 exclusive: false)
+		conflicts: false! !
+
+!UnixProcessTestCase methodsFor: 'failures' stamp: 'eem 27/Mar/2014, 3:29:00 pm (UTC)'!
+expectedFailures
+	^UnixOSProcessAccessor basicNew safeToForkSqueak
+		ifTrue: [#()]
+		ifFalse: [#(	testClassForkHeadlessSqueakAndDo
+					testClassForkHeadlessSqueakAndDoThenQuit
+					testClassForkSqueak
+					testClassForkSqueakAndDo
+					testClassForkSqueakAndDoThenQuit
+					testEightLeafSqueakTree
+					testForkHeadlessSqueakAndDo
+					testForkHeadlessSqueakAndDoThenQuit
+					testForkSqueak
+					testForkSqueakAndDo
+					testForkSqueakAndDoThenQuit
+					testHeadlessChild
+					testSpawnTenHeadlessChildren)]! !
+
+!UnixProcessTestCase methodsFor: 'private' stamp: 'dtl 9/Feb/2019, 3:03:00 am (UTC)'!
+numberOfOpenFiles
+	"Answer the number of files currently open for this OS process. This works
+	only on a system with a /proc filesystem and file descriptors located in a
+	directory called /proc/<pid>/fd. On other systems, just answer 0."
+
+	"UnixProcessTestCase new numberOfOpenFiles"
+
+	| path |
+	path _ '/proc/' , OSProcess thisOSProcess pid printString, '/fd'.
+	(OSProcess directoryExists: path) ifFalse: [ ^ 0].
+	^ OSProcess useFileMan
+		ifTrue: [((Smalltalk at: #DirectoryEntry) perform: #withPathName: with: path) children size]
+		ifFalse: [OSProcess useFileSystem
+			ifTrue: [ (path perform: #asFileReference) children size ]
+			ifFalse: [ ((Smalltalk at: #FileDirectory) on: path) entries size ]]
+! !
+
+!UnixProcessTestCase methodsFor: 'running' stamp: 'dtl 10/Mar/2002, 2:52:00 pm (UTC)'!
+runAll
+	"If you get intermittent failures, try doing a garbage collect. Some of these
+	tests can fail intermittently on the open file handle count checks"
+
+	"UnixProcessTestCase new runAll"
+
+	| result suite |
+	Smalltalk garbageCollect.
+	suite _ TestSuite new.
+	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueak).
+	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueakAndDo).
+	suite addTest: (UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit).
+	suite addTest: (UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDo).
+	suite addTest: (UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDoThenQuit).
+	suite addTest: (UnixProcessTestCase selector: #testForkSqueak).
+	suite addTest: (UnixProcessTestCase selector: #testForkSqueakAndDo).
+	suite addTest: (UnixProcessTestCase selector: #testForkSqueakAndDoThenQuit).
+	suite addTest: (UnixProcessTestCase selector: #testForkHeadlessSqueakAndDo).
+	suite addTest: (UnixProcessTestCase selector: #testForkHeadlessSqueakAndDoThenQuit).
+	suite addTest: (UnixProcessTestCase selector: #testHeadlessChild).
+	suite addTest: (UnixProcessTestCase selector: #testSpawnTenHeadlessChildren).
+	suite addTest: (UnixProcessTestCase selector: #testEightLeafSqueakTree).
+	suite addTest: (UnixProcessTestCase selector: #testCatAFile).
+	suite addTest: (UnixProcessTestCase selector: #testCatFromFileToFiles).
+	suite addTest: (UnixProcessTestCase selector: #testRunCommand).
+	suite addTest: (UnixProcessTestCase selector: #testPipe).
+	suite addTest: (UnixProcessTestCase selector: #testPipeLine).
+
+	result _ suite run.
+	self should: [result defects size == 0].
+	^ result
+! !
+
+!UnixProcessTestCase methodsFor: 'running' stamp: 'dtl 30/Jul/2010, 8:47:00 pm (UTC)'!
+setUp
+
+	(self respondsTo: #timeout: ) "Recent Squeak images with test case timeout"
+		ifTrue: [self perform: #timeout: with: 60].
+	thisOSProcess _ OSProcess thisOSProcess
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 11/Jun/2011, 4:26:00 pm (UTC)'!
+testCatAFile
+
+	"(UnixProcessTestCase selector: #testCatAFile) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ UnixProcess catAFile]
+		raise: Warning.
+	self assert: p notNil.
+	self should: [p isRunning].
+	[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+	self should: [p isComplete].
+	self should: [p exitStatus == 0].
+	self should: [p initialStdIn closed]. "Used a file for input, should be closed"
+	self shouldnt: [p initialStdOut closed]. "Shared stdout with the VM, should be open"
+	self shouldnt: [p initialStdErr closed]. "Shared stderr with the VM, should be open"
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 16/Jan/2018, 2:14:01 am (UTC)'!
+testCatFromFileToFiles
+
+	"(UnixProcessTestCase selector: #testCatFromFileToFiles) run"
+
+	| p f openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	OSProcess deleteFileNamed: '/tmp/deleteMe.out'.
+	OSProcess deleteFileNamed: '/tmp/deleteMe.err'.
+	self shouldnt: [p _ UnixProcess catFromFileToFiles]
+		raise: Warning.
+	self assert: p notNil.
+	self should: [p isRunning].
+	[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+	self should: [p isComplete].
+	self should: [p exitStatus == 0].
+	self should: [p initialStdIn closed].
+	self should: [p initialStdOut closed].
+	self should: [p initialStdErr closed].
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.out'.
+	self shouldnt: [f upToEnd isEmpty].
+	f close.
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.err'.
+	self should: [f upToEnd isEmpty].
+	f close.
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 10/Jun/2011, 7:55:00 pm (UTC)'!
+testEightLeafSqueakTree
+
+	"(UnixProcessTestCase selector: #testEightLeafSqueakTree) run"
+
+	| a openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [a _ UnixProcess eightLeafSqueakTree]
+		raise: Warning.
+	self assert: (a isKindOf: Array).
+	self assert: a size == 3.
+	(a includes: 0)
+		ifTrue:
+			[Smalltalk quitPrimitive].
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'ct 20/Apr/2026, 2:40:00 am (UTC)'!
+testExitCode 
+
+	"The exit code you expect in POSIX systems. "
+
+	|out|
+	out _ OSProcess waitForCommand: ' sh -c "exit 33" '. 
+	self assert: (out exitCode = 33). 
+
+
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 29/Jun/2005, 6:32:00 pm (UTC)'!
+testHeadlessChild
+
+	"(UnixProcessTestCase selector: #testHeadlessChild) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ UnixProcess headlessChild]
+		raise: Warning. "Catch warning if fork fails"
+	[p isComplete] whileFalse: [(Delay forMilliseconds: 100) wait].
+	self assert: p isComplete.
+	self assert: p exitStatus == 0.
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 12/Oct/2001, 12:32:00 pm (UTC)'!
+testPipe
+
+	"(UnixProcessTestCase selector: #testPipe) run"
+
+	| openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self should: [UnixProcess testPipe = 'this is some text to write into the pipe'].
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 12/Oct/2001, 12:32:00 pm (UTC)'!
+testPipeLine
+
+	"(UnixProcessTestCase selector: #testPipeLine) run"
+
+	| openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self should: ['This is the text to write*' match: UnixProcess testPipeLine].
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 16/Jan/2018, 2:14:16 am (UTC)'!
+testRunCommand
+
+	"(UnixProcessTestCase selector: #testRunCommand) run"
+
+	| p f openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	OSProcess deleteFileNamed: '/tmp/deleteMe.out'.
+	OSProcess deleteFileNamed: '/tmp/deleteMe.err'.
+	self shouldnt: [p _ UnixProcess testRunCommand]
+		raise: Warning.
+	self assert: p notNil.
+	self should: [p isRunning].
+	[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+	self should: [p isComplete].
+	self should: [p exitStatus > 0].	"Forced an error exit status"
+	"stdin was shared with the Squeak VM, so it should not have been closed."
+	self shouldnt: [p initialStdIn closed].
+	"but the output and error streams should have been closed."
+	self should: [p initialStdOut closed].
+	self should: [p initialStdErr closed].
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.out'.
+	self shouldnt: [f upToEnd isEmpty].
+	f close.
+	f _ OSProcess oldFileNamed: '/tmp/deleteMe.err'.
+	self shouldnt: [f upToEnd isEmpty].
+	f close.
+	self assert: self numberOfOpenFiles == openFileCount
+
+
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class examples' stamp: 'dtl 29/Jun/2005, 6:33:00 pm (UTC)'!
+testSpawnTenHeadlessChildren
+
+	"(UnixProcessTestCase selector: #testSpawnTenHeadlessChildren) run"
+
+	| a openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [a _ UnixProcess spawnTenHeadlessChildren]
+		raise: Warning. "Catch warning if fork fails"
+	[(a detect: [:p | p isComplete not] ifNone: []) notNil]
+		whileTrue: [(Delay forMilliseconds: 100) wait].
+	self should: [(a select: [:p | p isComplete not]) isEmpty].
+	self assert: self numberOfOpenFiles == openFileCount
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 29/Jun/2005, 6:24:00 pm (UTC)'!
+testClassForkHeadlessSqueakAndDo
+
+	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDo) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+		[p _ UnixProcess forkHeadlessSqueakAndDo:
+			[(Delay forMilliseconds: 100) wait.
+			OSProcess snapshot: false andQuit: true]]
+		raise: Warning. "Catch warning if fork fails"
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 29/Jun/2005, 6:26:00 pm (UTC)'!
+testClassForkHeadlessSqueakAndDoThenQuit
+
+	"(UnixProcessTestCase selector: #testClassForkHeadlessSqueakAndDoThenQuit) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+		[p _ UnixProcess forkHeadlessSqueakAndDoThenQuit:
+			[(Delay forMilliseconds: 100) wait]]
+		raise: Warning. "Catch warning if fork fails"
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 10/Jun/2011, 7:38:00 pm (UTC)'!
+testClassForkSqueak
+
+	"(UnixProcessTestCase selector: #testClassForkSqueak) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ UnixProcess forkSqueak]
+		raise: Warning.
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifTrue:
+			["Child Squeak"
+			p inspect.
+			(Delay forMilliseconds: 100) wait.
+			OSProcess snapshot: false andQuit: true]
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 10/Jun/2011, 7:43:00 pm (UTC)'!
+testClassForkSqueakAndDo
+
+	"(UnixProcessTestCase selector: #testClassForkSqueakAndDo) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+			[p _ UnixProcess forkSqueakAndDo:
+					[(Delay forMilliseconds: 100) wait.
+					OSProcess snapshot: false andQuit: true]]
+		raise: Warning.
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - class side methods' stamp: 'dtl 10/Jun/2011, 7:43:00 pm (UTC)'!
+testClassForkSqueakAndDoThenQuit
+
+	"(UnixProcessTestCase selector: #testClassForkSqueakAndDoThenQuit) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+			[p _ UnixProcess forkSqueakAndDoThenQuit:
+					[(Delay forMilliseconds: 100) wait]]
+		raise: Warning.
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 10/Jun/2011, 7:47:00 pm (UTC)'!
+testForkHeadlessSqueakAndDo
+
+	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDo) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+			[p _ thisOSProcess forkHeadlessSqueakAndDo:
+					[(Delay forMilliseconds: 100) wait.
+					OSProcess snapshot: false andQuit: true]]
+		raise: Warning. "Catch warning if fork fails"
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 10/Jun/2011, 7:47:00 pm (UTC)'!
+testForkHeadlessSqueakAndDoThenQuit
+
+	"(UnixProcessTestCase selector: #testForkHeadlessSqueakAndDoThenQuit) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+			[p _ thisOSProcess forkHeadlessSqueakAndDoThenQuit:
+					[(Delay forMilliseconds: 100) wait]]
+		raise: Warning. "Catch warning if fork fails"
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 29/Jun/2005, 6:30:00 pm (UTC)'!
+testForkSqueak
+
+	"(UnixProcessTestCase selector: #testForkSqueak) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt: [p _ thisOSProcess forkSqueak]
+		raise: Warning. "Catch warning if fork fails"
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifTrue:
+			["Child Squeak"
+			p inspect.
+			(Delay forMilliseconds: 100) wait.
+			OSProcess snapshot: false andQuit: true]
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 10/Jun/2011, 7:45:00 pm (UTC)'!
+testForkSqueakAndDo
+
+	"(UnixProcessTestCase selector: #testForkSqueakAndDo) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+			[p _ thisOSProcess forkSqueakAndDo:
+					[(Delay forMilliseconds: 100) wait.
+					OSProcess snapshot: false andQuit: true]]
+		raise: Warning.
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 10/Jun/2011, 7:46:00 pm (UTC)'!
+testForkSqueakAndDoThenQuit
+
+	"(UnixProcessTestCase selector: #testForkSqueakAndDoThenQuit) run"
+
+	| p openFileCount |
+	openFileCount _ self numberOfOpenFiles.
+	self shouldnt:
+			[p _ thisOSProcess forkSqueakAndDoThenQuit:
+					[(Delay forMilliseconds: 100) wait]]
+		raise: Warning.
+	self assert: p notNil.
+	(p == thisOSProcess)
+		ifFalse:
+			["Parent Squeak process"
+			self should: [p isRunning].
+			[p isRunning] whileTrue: [(Delay forMilliseconds: 100) wait].
+			self should: [p isComplete].
+			self should: [p exitStatus == 0].
+			self assert: self numberOfOpenFiles == openFileCount]
+! !
+
+!UnixProcessTestCase methodsFor: 'tests - child process creation' stamp: 'dtl 5/Dec/2020, 3:33:00 pm (UTC)'!
+testIsExternalProcess
+	self deny: ThisOSProcess thisOSProcess isExternalProcess.
+	self deny: OSProcess thisOSProcess isExternalProcess.
+	self assert: ExternalOSProcess new isExternalProcess.
+	self assert: (ExternalOSProcess command: 'pwd') isExternalProcess.! !
+
+!UnixProcessTestCase class methodsFor: 'failures' stamp: 'eem 27/Mar/2014, 3:20:00 pm (UTC)'!
+expectedFailures
+	^UnixOSProcessAccessor basicNew safeToForkSqueak
+		ifTrue: [#()]
+		ifFalse: [#(	testClassForkHeadlessSqueakAndDo
+					testClassForkHeadlessSqueakAndDoThenQuit
+					testClassForkSqueak
+					testClassForkSqueakAndDo
+					testClassForkSqueakAndDoThenQuit
+					testForkHeadlessSqueakAndDo
+					testForkHeadlessSqueakAndDoThenQuit
+					testForkSqueak
+					testForkSqueakAndDo
+					testForkSqueakAndDoThenQuit
+					testHeadlessChild
+					testSpawnTenHeadlessChildren)]! !
+
+!StandardFileStream methodsFor: '*OSProcess-Base' stamp: 'dtl 5/Jun/2006, 10:59:00 am (UTC)'!
 atEndOfFile
 	"Answer whether the receiver is at its end based on the result of
 	the last read operation. This uses feof() to test the underlying file
@@ -15202,7 +15207,7 @@ atEndOfFile
 	^ fileID isNil or: [OSProcess accessor isAtEndOfFile: fileID]
 ! !
 
-!StandardFileStream methodsFor: '*OSProcess-Base' stamp: 'dtl 1/13/2007 16:44'!
+!StandardFileStream methodsFor: '*OSProcess-Base' stamp: 'dtl 13/Jan/2007, 8:44:00 pm (UTC)'!
 fileID
 	"The contents of fileID can and will change after calling this method.
 	The sender should copy the result rather than depending on the result
@@ -15210,12 +15215,12 @@ fileID
 
 	^ fileID! !
 
-!StandardFileStream methodsFor: '*OSProcess-Base' stamp: 'dtl 6/5/2006 07:18'!
+!StandardFileStream methodsFor: '*OSProcess-Base' stamp: 'dtl 5/Jun/2006, 11:18:00 am (UTC)'!
 isPipe
 
 	^ false
 ! !
-OSProcessAccessor initialize!
 AttachableFileStream initialize!
+OSProcessAccessor initialize!
 OSProcess initialize!
 ThisOSProcess initialize!
