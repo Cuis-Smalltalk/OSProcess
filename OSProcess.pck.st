@@ -1,8 +1,8 @@
 'From Cuis7.9 [latest update: #8206] on 28 September 2026 at 8:34:20 am'!
 'Description OSProcess provides access to operating system functions, including pipes, child process creation, and control of the Squeak VM process.'!
-!provides: 'OSProcess' 1 37!
-!requires: 'Network-Kernel' 1 1 nil!
-!requires: 'SqueakCompatibility' 1 4 nil!
+!provides: 'OSProcess' '1.37.0'!
+!requires: 'Network-Kernel' '1.1.0' '1.*.*'!
+!requires: 'SqueakCompatibility' '1.4.0' '1.*.*'!
 SystemOrganization addCategory: #'OSProcess-Base'!
 SystemOrganization addCategory: #'OSProcess-Mac'!
 SystemOrganization addCategory: #'OSProcess-OS2'!
